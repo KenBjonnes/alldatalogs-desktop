@@ -78,6 +78,27 @@ const visible = (page, sel, timeout = 30000) => page.waitForSelector(`${sel}:not
     check(!lic || !lic.token, 'sign out clears the token');
     await second.page.screenshot({ path: join(OUT, 'license-2-signed-out.png') });
     await second.app.close();
+  } else if (mode === 'layouts-save') {
+    // M3: a layout saved here must reach viewer_layouts (check with SQL afterwards).
+    await visible(page, '#screen-home');
+    await page.waitForTimeout(1500);
+    const saved = await page.evaluate(() => window.DATAVIEWER.layouts.save({ kind: 'view', smoke: 'cloud' }, 'Cloud Smoke Layout'));
+    check(saved === true, 'provider.save with a name saves without prompting');
+    await page.waitForTimeout(2500); // let the push land
+    const listed = await page.evaluate(() => window.DATAVIEWER.layouts.list().map((l) => l.name));
+    check(listed.includes('Cloud Smoke Layout'), `listed locally (${listed.join(', ')})`);
+    await app.close();
+  } else if (mode === 'layouts-list') {
+    // M3: rows inserted on the server (as the website would) must appear after sign-in.
+    await visible(page, '#screen-home');
+    await page.waitForTimeout(3000); // pull + reloadViewerLayouts
+    const listed = await page.evaluate(() => window.DATAVIEWER.layouts.list().map((l) => l.name));
+    console.log('   listed:', listed.join(', '));
+    check(listed.includes('From Web Smoke'), 'server-side layout row appears in the app');
+    const removed = await page.evaluate(() => { const l = window.DATAVIEWER.layouts.list().find((x) => x.name === 'From Web Smoke'); if (!l) return false; window.DATAVIEWER.layouts.remove(l.id); return true; });
+    check(removed, 'provider.remove on the cloud row');
+    await page.waitForTimeout(2500);
+    await app.close();
   } else {
     await visible(page, '#screen-gate');
     const text = await page.textContent('#gateText');

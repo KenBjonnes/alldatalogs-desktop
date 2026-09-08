@@ -350,9 +350,23 @@
     app_outdated: { text: () => "This version of BigData is too old to verify your membership. Please update.", bad: true },
     storage_unavailable: { text: () => "Windows could not protect your sign-in on this PC, so you will be asked to sign in each time." }
   };
+  var pulledFor = null;
+  function maybePullLayouts(s) {
+    if (s.pro !== true || !s.email || pulledFor === s.email) return;
+    pulledFor = s.email;
+    api.layouts.pull().then((r) => {
+      if (r && r.ok && Array.isArray(r.rows) && r.rows.length) {
+        mergeCloudRows(r.rows);
+        return window.reloadViewerLayouts?.();
+      }
+      return void 0;
+    }).catch(() => {
+    });
+  }
   function applyLicense(s) {
     license = s;
     window.setViewerPro?.(s.pro === true);
+    maybePullLayouts(s);
     $("checking").hidden = s.reason !== "checking";
     if (s.reason === "checking") {
       if (["screen-signin", "screen-gate", "screen-home"].every((id) => $(id).hidden)) showScreen("signin");
@@ -463,14 +477,6 @@
     applyLicense(await api.license.get());
     api.license.onChange(applyLicense);
     window.addEventListener("online", () => api.license.online());
-    api.layouts.pull().then((r) => {
-      if (r && r.ok && Array.isArray(r.rows) && r.rows.length) {
-        mergeCloudRows(r.rows);
-        return window.reloadViewerLayouts?.();
-      }
-      return void 0;
-    }).catch(() => {
-    });
     void refreshRecents();
     api.files.onOpen((s) => {
       void openStaged(s);

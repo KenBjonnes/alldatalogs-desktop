@@ -56,6 +56,7 @@ contextBridge.exposeInMainWorld('bigdata', {
 
   updates: {
     check: () => ipcRenderer.invoke('updates:check'),
+    get: () => ipcRenderer.invoke('updates:get'),
     restart: () => ipcRenderer.invoke('updates:restart'),
     onStatus: (cb) => subscribe('updates:status', cb),
   },

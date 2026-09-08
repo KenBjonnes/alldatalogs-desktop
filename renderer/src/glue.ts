@@ -337,9 +337,22 @@ const BANNERS: Record<string, { text: (s: LicenseState) => string; bad?: boolean
   storage_unavailable: { text: () => 'Windows could not protect your sign-in on this PC, so you will be asked to sign in each time.' },
 };
 
+// Pull cloud layouts once per signed-in Pro account (at boot for a persisted session, or right after
+// sign-in), then let the engine re-list. Mirrors OpenLog.tsx: pullCloudLayouts → reloadViewerLayouts.
+let pulledFor: string | null = null;
+function maybePullLayouts(s: LicenseState) {
+  if (s.pro !== true || !s.email || pulledFor === s.email) return;
+  pulledFor = s.email;
+  api.layouts.pull().then((r) => {
+    if (r && r.ok && Array.isArray(r.rows) && r.rows.length) { mergeCloudRows(r.rows); return window.reloadViewerLayouts?.(); }
+    return undefined;
+  }).catch(() => {});
+}
+
 function applyLicense(s: LicenseState) {
   license = s;
   window.setViewerPro?.(s.pro === true);
+  maybePullLayouts(s);
   $('checking').hidden = s.reason !== 'checking';
   if (s.reason === 'checking') {
     // Keep whatever screen is up (sign-in on first run, home on a relaunch) under the overlay.
@@ -438,12 +451,6 @@ async function boot() {
   applyLicense(await api.license.get());
   api.license.onChange(applyLicense);
   window.addEventListener('online', () => api.license.online());
-
-  // Cloud layouts (M3): best effort, then let the engine re-list.
-  api.layouts.pull().then((r) => {
-    if (r && r.ok && Array.isArray(r.rows) && r.rows.length) { mergeCloudRows(r.rows); return window.reloadViewerLayouts?.(); }
-    return undefined;
-  }).catch(() => {});
 
   void refreshRecents();
   api.files.onOpen((s) => { void openStaged(s); });

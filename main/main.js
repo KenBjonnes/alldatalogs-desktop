@@ -24,8 +24,9 @@ const EXTERNAL_HOSTS = new Set(['alldatalogs.com', 'www.alldatalogs.com', 'billi
 
 protocolMod.registerScheme();
 
-// Dev/test only: isolate all state (session, licence, recents, storage) in another folder.
-if (DEV && process.env.BIGDATA_USER_DATA) app.setPath('userData', process.env.BIGDATA_USER_DATA);
+// Test hook: keep all state (session, licence, recents, storage) in another folder. Only changes
+// where files live, so it is honoured in packaged builds too (the packaged smoke relies on it).
+if (process.env.BIGDATA_USER_DATA) app.setPath('userData', process.env.BIGDATA_USER_DATA);
 
 if (!app.requestSingleInstanceLock()) {
   app.quit();
@@ -156,10 +157,11 @@ function main() {
     event.returnValue = { version: app.getVersion(), dev: DEV, devPro: license.devPro(), platform: process.platform };
   });
   ipcMain.handle('shell:openExternal', (_event, url) => openExternal(url));
-  // Cloud layout sync arrives in M3; until then the renderer's best-effort calls resolve quietly.
-  ipcMain.handle('layouts:pull', async () => ({ ok: false, reason: 'not_enabled', rows: [] }));
-  ipcMain.handle('layouts:push', async () => ({ ok: false, reason: 'not_enabled' }));
-  ipcMain.handle('layouts:remove', async () => ({ ok: false, reason: 'not_enabled' }));
+  // Cloud layouts (viewer_layouts, same rows the website syncs). Best effort: the renderer's local
+  // store is the source of truth on this PC; failures never block a save.
+  ipcMain.handle('layouts:pull', () => supabase.pullLayouts());
+  ipcMain.handle('layouts:push', (_event, entry) => supabase.pushLayout(entry));
+  ipcMain.handle('layouts:remove', (_event, id) => supabase.removeLayout(id));
 
   buildMenu();
   createWindow();

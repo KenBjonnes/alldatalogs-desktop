@@ -78,15 +78,20 @@ function stage(p) {
 }
 
 // --- delivery to the renderer ---------------------------------------------------------------------
-function deliver(s) {
+// A file stays queued until the renderer is up AND the licence allows opening (a double-clicked log
+// that launched the app while signed out opens right after sign-in instead of being dropped).
+function canDeliver() {
   const w = getWindow();
-  if (!rendererReady || !w || w.isDestroyed()) { queue.push(s); return; }
-  w.webContents.send('files:open', s);
+  return rendererReady && w && !w.isDestroyed() && !gate();
+}
+function deliver(s) {
+  queue.push(s);
+  flush();
 }
 function flush() {
+  if (!canDeliver()) return;
   const w = getWindow();
-  if (!rendererReady || !w || w.isDestroyed()) return;
-  while (queue.length) w.webContents.send('files:open', queue.shift());
+  while (queue.length && canDeliver()) w.webContents.send('files:open', queue.shift());
 }
 function pushPath(p) {
   const s = stage(p);
@@ -158,4 +163,4 @@ function install(opts) {
   });
 }
 
-module.exports = { install, queueArgv, rendererReset, openViaMenu, MAX_BYTES, ACCEPT };
+module.exports = { install, queueArgv, rendererReset, openViaMenu, flush, MAX_BYTES, ACCEPT };

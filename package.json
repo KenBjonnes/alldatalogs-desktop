@@ -14,6 +14,9 @@
     "payload:check": "node scripts/build-payload.mjs --check",
     "test": "node --test \"test/**/*.test.js\"",
     "smoke": "node scripts/smoke.mjs",
+    "smoke:license": "node scripts/smoke-license.mjs pro",
+    "smoke:packaged": "node scripts/smoke-packaged.mjs",
+    "e2e:token": "node scripts/e2e-token.mjs",
     "icon": "node scripts/make-icon.mjs",
     "dist": "electron-builder --win --x64",
     "release": "electron-builder --win --x64 --publish always"

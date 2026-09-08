@@ -147,6 +147,8 @@ function openBlockedReason() {
 function broadcast() {
   const w = getWindow();
   if (w && !w.isDestroyed()) w.webContents.send('license:changed', state);
+  // Files queued while opening was not allowed (launched by double-click before sign-in) go now.
+  try { require('./files').flush(); } catch { /* not installed yet */ }
 }
 
 async function verifyStored(now) {
