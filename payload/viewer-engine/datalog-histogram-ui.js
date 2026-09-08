@@ -707,11 +707,14 @@
         global.Library.open({ kind: 'histogram', onUse: function (item) {
           var pl = item && item.payload;
           if (!pl || !pl.def) { toast('That histogram is empty.'); return; }
-          importPackage({ kind: H().PACKAGE_KIND, histograms: [pl.def], mathChannels: Array.isArray(pl.mathChannels) ? pl.mathChannels : [] }, 'library item');
+          // Stamp the def with where it came from so "Share to library" can offer to update that entry.
+          var def = Object.assign({}, pl.def, { libraryId: item.id, vehicle: global.Library.vehicleOf ? global.Library.vehicleOf(item) : null });
+          importPackage({ kind: H().PACKAGE_KIND, histograms: [def], mathChannels: Array.isArray(pl.mathChannels) ? pl.mathChannels : [] }, 'library item');
         } });
       }
       // Share one table: its def plus every math channel it depends on (transitively), and a
-      // thumbnail painted from the LIVE table when this def is the one on screen.
+      // thumbnail painted from the LIVE table when this def is the one on screen. A def that came
+      // from the library (or was shared before) carries libraryId, so the dialog offers Update.
       function shareToLibrary(def) {
         if (!libraryAvailable()) { toast('The library is not available here.'); return; }
         var list = (glue.mathChannels && typeof glue.mathChannels.list === 'function') ? (glue.mathChannels.list() || []) : [];
@@ -719,10 +722,20 @@
         var live = def.id === S.activeId && S.view && S.statTable && S.scale;
         var svg = null;
         try { svg = live ? thumbnailSvg(def, S.view, S.statTable, S.scale) : thumbnailSvg(def, null, null, null); } catch (e) { svg = null; }
+        var packed = JSON.parse(JSON.stringify(def));
+        delete packed.libraryId;   // the item id is the library's business, not part of the shared def
         global.Library.share({
           kind: 'histogram', name: def.name || 'Histogram', description: def.description || '',
-          payload: { kind: 'histogram', def: H().cloneDef ? JSON.parse(JSON.stringify(def)) : def, mathChannels: deps },
-          thumbSvg: svg
+          payload: { kind: 'histogram', def: packed, mathChannels: deps },
+          thumbSvg: svg,
+          vehicle: def.vehicle || null,
+          libraryId: def.libraryId || null,
+          onDone: function (item) {
+            if (!item) return;
+            def.libraryId = item.id;
+            def.vehicle = global.Library.vehicleOf ? global.Library.vehicleOf(item) : null;
+            changed();
+          }
         });
       }
       // Import a package object ({histograms, mathChannels?}): packaged math channels merge into the

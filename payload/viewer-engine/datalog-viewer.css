@@ -1162,6 +1162,9 @@ table.dlv-channel-table tbody tr.dlv-row-selected{background:rgba(209,19,46,0.06
      API doesn't exist (iOS Safari on non-video elements) rather than sitting there doing nothing. */
   .dlv-mobile.dlv-fs-on #dlvFullscreenBtn,
   .dlv-mobile.dlv-fs-unsupported #dlvFullscreenBtn{display:none;}
+  /* Native host (BigData phone apps): the fullscreen slot holds the close button instead -- the
+     header X is hidden on phones and an app has no browser back gesture to fall back on. */
+  .dlv-mobile #dlvHostCloseBtn{width:38px;height:26px;font-size:14px;border-radius:6px;}
   /* One graph means "which graph?" has no answer -- the U/L/M assignment column is noise, and the
      Gauge column refers to a cluster that isn't rendered. The checkbox alone decides membership
      (channelsForSlot folds every assignment into the only visible panel). */

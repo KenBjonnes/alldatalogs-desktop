@@ -265,7 +265,11 @@
       dataRange: partial.dataRange == null ? 'entire' : partial.dataRange,
       orientation: partial.orientation == null ? 'normal' : partial.orientation,
       distribution: wantDist ? mergeInto(clone(isObj(partial.distribution) ? partial.distribution : {}), defaultDistribution()) : null,
-      display: isObj(partial.display) ? clone(partial.display) : {}
+      display: isObj(partial.display) ? clone(partial.display) : {},
+      // The shared-library item this def was published to / pulled from (so "Share to library"
+      // can offer to update it rather than duplicate it). Null for a def that has never been shared.
+      libraryId: typeof partial.libraryId === 'string' && partial.libraryId ? partial.libraryId : null,
+      vehicle: isObj(partial.vehicle) ? clone(partial.vehicle) : null
     };
   }
 
@@ -584,6 +588,34 @@
     }
     return s > e ? null : { startIdx: s, endIdx: e };
   }
+  // ---- load ratio / percent detection (shared with resolveAxis; exported for the editor) -------
+  var LOAD_RATIO_MAX = 3;   // same threshold as datalog-presets normalizeLoadScale
+  var LOAD_NAME = /\bload\b/i;
+  var LOAD_EXCLUDE = /\b(alt|alternator|trans|transmission|injector|fuel|battery|electrical|cpu|a\/?c)\b/i;
+  function isLoadName(s) { return !!s && LOAD_NAME.test(String(s)) && !LOAD_EXCLUDE.test(String(s)); }
+  function isLoadParam(axisDef, param) {
+    var p = axisDef && axisDef.parameter;
+    if (p && (p.role === 'actual_load' || p.role === 'desired_load')) return true;
+    return isLoadName(p && p.channel) || isLoadName(p && p.label) || isLoadName(param && param.channel) || isLoadName(param && param.label);
+  }
+  function finiteMax(values) {
+    var m = -Infinity, n = values && values.length ? values.length : 0;
+    for (var i = 0; i < n; i++) { var v = values[i]; if (typeof v === 'number' && v === v && v !== Infinity && v > m) m = v; }
+    return m;
+  }
+  /**
+   * loadScaleFor(axisDef, param, bps) -> { factor:100|0.01, from, to, bpMax, dataMax } | null
+   * Non-null when the axis is a load parameter and its breakpoints are on the other scale than the
+   * data (ratio vs percent). Pure; unit-tested.
+   */
+  function loadScaleFor(axisDef, param, bps) {
+    if (!isLoadParam(axisDef, param) || !bps || !bps.length || !param || !param.values) return null;
+    var bpMax = finiteMax(bps), dataMax = finiteMax(param.values);
+    if (!isFin(bpMax) || !isFin(dataMax) || bpMax <= 0 || dataMax <= 0) return null;
+    if (bpMax <= LOAD_RATIO_MAX && dataMax > LOAD_RATIO_MAX) return { factor: 100, from: 'ratio', to: 'percent', bpMax: bpMax, dataMax: dataMax };
+    if (bpMax > LOAD_RATIO_MAX && dataMax <= LOAD_RATIO_MAX) return { factor: 0.01, from: 'percent', to: 'ratio', bpMax: bpMax, dataMax: dataMax };
+    return null;
+  }
   /**
    * Resolve one axis against the live parameter: unit conversion of the BREAKPOINTS into the log's
    * unit (when def unit != live unit and ctx.convertValue exists), or a categorical level map.
@@ -637,6 +669,21 @@
     } else if (defUnit && !liveUnit) {
       unverified = true;
       warnings.push(slot + ' axis unit "' + defUnit + '" cannot be verified: channel has no unit; binning as-is');
+    }
+    // Load arrives as a RATIO (1.2 = 120%) in some logs and as a PERCENT (120) in others, and the
+    // viewer normalises the data to percent at load (datalog-presets normalizeLoadScale) -- but a
+    // breakpoint list pasted from an HP Tuners Ford table is in ratio (0.1 ... 1.2), so every sample
+    // used to land in the top cell. The two populations never overlap (a ratio never exceeds ~3, a
+    // percent is never below it), so the mismatch is unambiguous and is corrected here, both ways
+    // (Ken, 2026-09-08: "smart enough to adjust on its own").
+    var loadScale = loadScaleFor(axisDef, param, bps);
+    if (loadScale) {
+      var scaledBps = [];
+      for (i = 0; i < bps.length; i++) scaledBps.push(isFin(bps[i]) ? Number((bps[i] * loadScale.factor).toPrecision(6)) : bps[i]);
+      bps = scaledBps; keep = scaledBps;
+      converted = { from: loadScale.from, to: loadScale.to, load: true };
+      warnings.push(slot + ' axis: load breakpoints are in ' + loadScale.from + ' (max ' + fmtNum(loadScale.bpMax) + ') but this log\'s load is in ' + loadScale.to +
+        ' (max ' + fmtNum(loadScale.dataMax) + '); breakpoints scaled ' + (loadScale.factor === 100 ? '×100' : '÷100') + ' to match');
     }
     var axis = prepareAxis(bps);
     if (!axis) return null;
@@ -1116,6 +1163,7 @@
     cloneDef: cloneDef, invertDef: invertDef, exportDef: exportDef, importDef: importDef, exportDefs: exportDefs, importDefs: importDefs,
     // math-channel references + packaging
     mathChannelByRef: mathChannelByRef, remapMathChannelIds: remapMathChannelIds, normChannelName: normChannelName,
+    loadScaleFor: loadScaleFor, isLoadName: isLoadName,
     mathChannelDeps: mathChannelDeps, mergeMathChannels: mergeMathChannels, packMathChannel: packMathChannel,
     // breakpoints
     parseBreakpoints: parseBreakpoints, sortBreakpoints: sortBreakpoints, reverseBreakpoints: reverseBreakpoints,

@@ -166,6 +166,7 @@ function main() {
   ipcMain.handle('library:list', (_event, q) => supabase.libraryList(q));
   ipcMain.handle('library:get', (_event, id) => supabase.libraryGet(id));
   ipcMain.handle('library:publish', (_event, input) => supabase.libraryPublish(input));
+  ipcMain.handle('library:update', (_event, args) => supabase.libraryUpdate(args && args.id, args && args.input));
   ipcMain.handle('library:remove', (_event, id) => supabase.libraryRemove(id));
   ipcMain.handle('library:pull', (_event, id) => supabase.libraryPull(id));
   ipcMain.handle('library:me', () => supabase.libraryMe());

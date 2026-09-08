@@ -58,6 +58,7 @@ contextBridge.exposeInMainWorld('bigdata', {
     list: (q) => ipcRenderer.invoke('library:list', q),
     get: (id) => ipcRenderer.invoke('library:get', id),
     publish: (input) => ipcRenderer.invoke('library:publish', input),
+    update: (id, input) => ipcRenderer.invoke('library:update', { id, input }),
     remove: (id) => ipcRenderer.invoke('library:remove', id),
     pull: (id) => ipcRenderer.invoke('library:pull', id),
     me: () => ipcRenderer.invoke('library:me'),

@@ -1187,13 +1187,23 @@ var CHANNEL_SHORT_RULES = [
 // say 213 where a tuner expects 213, instead of a correctly-scaled bar next to the number 2.13.
 var LOAD_ROLES = ['desired_load', 'actual_load'];
 var LOAD_RATIO_MAX = 3;   // above this it must already be a percentage
+// Beyond the two roles, any OTHER engine-load channel by name -- "Load Maximum Achievable (Current
+// Conditions)" sat next to a normalised Air Load at 0.08-2.13 while Air Load read 8-213, so a math
+// channel or histogram mixing the two was off by 100x (Ken, 2026-09-08: "smart enough to adjust on
+// its own"). Only channels whose unit is blank or % qualify; a load in lb, N or g is a different
+// quantity, and alternator / transmission / injector "load" are not engine load at all.
+var LOAD_NAME_RE = /\bload\b/i;
+var LOAD_NAME_EXCLUDE_RE = /\b(alt|alternator|trans|transmission|injector|fuel|battery|electrical|cpu|a\/?c)\b/i;
+function isEngineLoadName(name){
+  return !!name && LOAD_NAME_RE.test(String(name)) && !LOAD_NAME_EXCLUDE_RE.test(String(name));
+}
 
 function normalizeLoadScale(data, resolvedRoles){
   if(!data || !data.series) return [];
-  var scaled = [];
-  LOAD_ROLES.forEach(function(role){
-    var ch = resolvedRoles && resolvedRoles[role];
-    if(!ch) return;
+  var scaled = [], done = {};
+  function scaleChannel(ch){
+    if(!ch || done[ch]) return;
+    done[ch] = true;
     var vals = data.series[ch];
     if(!vals || !vals.length) return;
     var max = -Infinity;
@@ -1208,6 +1218,13 @@ function normalizeLoadScale(data, resolvedRoles){
     var idx = data.channels.indexOf(ch);
     if(idx !== -1 && data.units) data.units[idx] = '%';
     scaled.push(ch);
+  }
+  LOAD_ROLES.forEach(function(role){ scaleChannel(resolvedRoles && resolvedRoles[role]); });
+  (data.channels || []).forEach(function(ch, idx){
+    if(!isEngineLoadName(ch)) return;
+    var unit = data.units && data.units[idx] != null ? normalizeForMatch(String(data.units[idx])) : '';
+    if(unit !== '' && unit !== '%') return;
+    scaleChannel(ch);
   });
   return scaled;
 }

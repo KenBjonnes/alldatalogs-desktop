@@ -228,18 +228,42 @@
     data.channels.forEach(function (c, i) { out[c] = (data.units && data.units[i]) ? data.units[i] : ''; });
     return out;
   }
+  // Channel lookup is FORGIVING here, exactly as it is when the histogram computes (HistogramUI's
+  // resolver.lookup): exact name, then case/space-insensitive, then `fallback` (a named math channel).
+  // The editor used to be exact-only, so "[Long Term Fuel Trim 1 ]" or a doubled space showed
+  // "not in this log" and blocked the save while the table itself would have resolved it (Ken,
+  // 2026-09-08). DatalogExpr.seriesResolver is the single implementation of that rule.
   function exprCtx(data, fallback) {
     data = data || {};
     var series = data.series || {}, levels = data.textLevels || {};
-    return {
-      resolve: function (name) {
-        var v = series[name];
-        if (!v) return typeof fallback === 'function' ? fallback(name) : null;
-        return { values: v, levels: levels[name] || null };
-      },
-      time: data.time || null,
-      n: data.time ? data.time.length : 0
+    var resolve = X() && X().seriesResolver ? X().seriesResolver(series, levels, fallback) : function (name) {
+      var v = series[name];
+      if (!v) return typeof fallback === 'function' ? fallback(name) : null;
+      return { values: v, levels: levels[name] || null };
     };
+    return { resolve: resolve, time: data.time || null, n: data.time ? data.time.length : 0 };
+  }
+  // Every name an expression may reference by [Name]: the log's channels plus the named math channels.
+  function knownExprNames(ed) {
+    var names = ((ed && ed.data && ed.data.channels) || []).slice();
+    var list = ed && ed.opts && ed.opts.mathChannels && typeof ed.opts.mathChannels.list === 'function' ? ed.opts.mathChannels.list() : (ed && ed.mathNames) || null;
+    if (Array.isArray(list)) list.forEach(function (m) { var nm = m && (typeof m === 'string' ? m : m.name); if (nm) names.push(nm); });
+    return names;
+  }
+  // A channel name typed without brackets ("Short Term Fuel Trim 1 + Long Term Fuel Trim 1") is a
+  // parse error, and on 2026-09-08 it cost Ken the second term of a fuel-trim channel. When a box is
+  // committed with a source that does not parse but WOULD after DatalogExpr.autoBracket, the rewrite
+  // is applied to the box and the model, and the user is told what changed. Returns the (possibly
+  // rewritten) source.
+  function autoBracketField(ed, ta) {
+    if (!ta || !X() || !X().autoBracket) return ta ? ta.value : '';
+    var src = ta.value;
+    if (!trim(src) || X().parse(src).ok) return src;
+    var ab = X().autoBracket(src, knownExprNames(ed));
+    if (!ab.changed.length || !X().parse(ab.src).ok) return src;
+    ta.value = ab.src;
+    if (ed && typeof ed.toast === 'function') ed.toast('Added brackets around ' + ab.changed.map(function (c) { return c.to; }).join(', '));
+    return ab.src;
   }
   // Id first, then case-insensitive name (mirrors Histogram.mathChannelByRef; kept local so the editor
   // never depends on load order for a lookup it performs on every render).
@@ -385,8 +409,11 @@
       return;
     }
     if (ctx && ctx.data && ctx.data.series) {
+      // Same forgiving lookup the compile uses; a named math channel is a legal reference too.
+      var chanFor = X().seriesResolver ? X().seriesResolver(ctx.data.series, ctx.data.textLevels || {}).channelFor : function (r) { return ctx.data.series[r] ? r : null; };
+      var mathOk = function (ref) { return !!(ctx.resolver && typeof ctx.resolver.mathChannel === 'function' && ctx.resolver.mathChannel(ref)); };
       p.references.forEach(function (ref) {
-        if (!ctx.data.series[ref]) warnings.push({ path: path, message: label + ' references [' + ref + '], which is not in this log' });
+        if (!chanFor(ref) && !mathOk(ref)) warnings.push({ path: path, message: label + ' references [' + ref + '], which is not in this log' });
       });
     }
     if (wantBoolean) {
@@ -723,7 +750,9 @@
     document.body.appendChild(ovl);
     // The shim: mathPanel/liveExpr/updateMathPreview/insertIntoExpr only ever touch these five fields,
     // keyed by pPath -- 'current' here always means "the math channel selected in the list".
-    var ed = { work: { current: null }, data: data, units: unitByChannel, ctx: { resolvedRoles: opts.resolvedRoles || {} }, body: ovl, esc: escapeHtml, pendingConv: {}, timers: {} };
+    var ed = { work: { current: null }, data: data, units: unitByChannel, ctx: { resolvedRoles: opts.resolvedRoles || {} }, body: ovl, esc: escapeHtml, pendingConv: {}, timers: {}, toast: toast,
+      // knownExprNames() reads this: the other named channels are legal [Name] references here too
+      get mathNames() { return S.list.map(function (m) { return m.name; }); } };
 
     function rowHtml(m) {
       return '<div class="dlv-hg-mm-row' + (m.id === S.activeId ? ' active' : '') + '" data-mm-pick="' + escapeHtml(m.id) + '">' +
@@ -807,7 +836,7 @@
       var t = e.target;
       if (t.getAttribute('data-mm-field') === 'name') { var a = active(); if (a) { a.name = t.value; persist(); var rowName = ovl.querySelector('.dlv-hg-mm-row.active .dlv-hg-mm-row-name'); if (rowName) rowName.textContent = 'ƒ ' + (t.value || '(unnamed)'); } return; }
       if (t.getAttribute('data-mm-field') === 'unit') { var a2 = active(); if (a2) { a2.unit = t.value || null; persist(); } return; }
-      if (t.getAttribute('data-expr') === 'current') { commitExpr(t); liveExpr(ed, t); return; }
+      if (t.getAttribute('data-expr') === 'current') { autoBracketField(ed, t); commitExpr(t); liveExpr(ed, t); return; }
       if (t.getAttribute('data-insert-ch') === 'current') { if (t.value) { insertIntoExpr(ed, 'current', '[' + t.value + ']'); syncFromShim(); } t.value = ''; return; }
     });
     ovl.addEventListener('input', function (e) {
@@ -963,6 +992,7 @@
     function commitPathField(t) {
       var path = t && t.getAttribute && t.getAttribute('data-path');
       if (!path) return false;
+      if (t.getAttribute('data-expr')) autoBracketField(ed, t);
       var type = t.getAttribute('data-type') || 'str', val;
       if (type === 'bool') val = !!t.checked;
       else if (type === 'num') { val = parseFloat(t.value); if (!isFin(val)) val = 0; }
@@ -1397,11 +1427,21 @@
     if (!trim(src)) { st.innerHTML = '<span class="dlv-hg-faint">Empty expression' + (pPath === 'filter' ? ' — every sample passes' : '') + '</span>'; }
     else if (!p.ok) {
       var pos = p.error.pos, before = src.slice(Math.max(0, pos - 24), pos), at = src.slice(pos, pos + 24);
+      // Unbracketed channel names are the common cause; say so, and that leaving the box fixes it.
+      var fixable = X().autoBracket ? X().autoBracket(src, knownExprNames(ed)) : null;
+      var hint = fixable && fixable.changed.length && X().parse(fixable.src).ok
+        ? '<div class="dlv-hg-note">Channel names go in brackets — ' + ed.esc(fixable.changed.map(function (c) { return c.to; }).join(', ')) + ' will be added when you leave this box.</div>' : '';
       st.innerHTML = '<span class="dlv-hg-err">✗ ' + ed.esc(p.error.message) + '</span> <button type="button" class="dlv-hg-link" data-act="expr-jump" data-ppath="' + ed.esc(pPath) + '" data-pos="' + pos + '">at position ' + (pos + 1) + '</button>' +
-        '<div class="dlv-hg-caret mono">' + ed.esc(before) + '<span class="dlv-hg-caret-mark">' + (at ? ed.esc(at.charAt(0)) : '⏎') + '</span>' + ed.esc(at.slice(1)) + '<br>' + new Array(before.length + 1).join(' ') + '^</div>';
+        '<div class="dlv-hg-caret mono">' + ed.esc(before) + '<span class="dlv-hg-caret-mark">' + (at ? ed.esc(at.charAt(0)) : '⏎') + '</span>' + ed.esc(at.slice(1)) + '<br>' + new Array(before.length + 1).join(' ') + '^</div>' + hint;
     } else {
       var missing = [];
-      if (ed.data && ed.data.series) p.references.forEach(function (r) { if (!ed.data.series[r]) missing.push(r); });
+      if (ed.data && ed.data.series) {
+        // Same forgiving lookup the compile uses (exprCtx), so the status never contradicts the preview.
+        var chanFor = X().seriesResolver ? X().seriesResolver(ed.data.series, ed.data.textLevels || {}).channelFor : function (r) { return ed.data.series[r] ? r : null; };
+        var mathNames = {};
+        knownExprNames(ed).forEach(function (nm) { mathNames[X().normName ? X().normName(nm) : String(nm).toLowerCase()] = 1; });
+        p.references.forEach(function (r) { if (!chanFor(r) && !mathNames[X().normName ? X().normName(r) : String(r).toLowerCase()]) missing.push(r); });
+      }
       st.innerHTML = '<span class="dlv-hg-ok">✓ valid</span> <span class="dlv-hg-faint">' + p.references.length + ' channel' + (p.references.length === 1 ? '' : 's') + (p.functions.length ? ' · ' + p.functions.join(', ') : '') + '</span>' +
         (missing.length ? ' <span class="dlv-hg-warn">not in this log: ' + ed.esc(missing.join(', ')) + '</span>' : '');
     }

@@ -965,13 +965,116 @@
   // ================================================================================================
   // 9. Public API namespace (consumed by the viewer's Histograms view + dev/expr-test.js)
   // ================================================================================================
+  // ================================================================================================
+  // 8b. Forgiving channel lookup + auto-bracketing (Ken, 2026-09-08: a stray space in a formula
+  //     made "[Long Term Fuel Trim 1]" fail to resolve and the editor refused to save the term)
+  // ================================================================================================
+  /** Case-, underscore- and whitespace-insensitive key: "Long  Term_Fuel Trim 1 " -> "long term fuel trim 1". */
+  function normName(s) { return String(s == null ? '' : s).toLowerCase().replace(/_/g, ' ').replace(/\s+/g, ' ').trim(); }
+
+  /**
+   * seriesResolver(series, levels, fallback) -> resolve(name)
+   * The `resolve` a compile ctx wants, built over a {name: values} map: exact name first, then the
+   * normalised name (so a double space, different case or trailing blank still hits), then
+   * `fallback(name)` (e.g. a named math channel) when nothing in the log matches.
+   */
+  function seriesResolver(series, levels, fallback) {
+    series = series || {}; levels = levels || {};
+    var byNorm = null;
+    function loose(name) {
+      if (!byNorm) {
+        byNorm = {};
+        for (var k in series) { if (Object.prototype.hasOwnProperty.call(series, k)) { var nk = normName(k); if (byNorm[nk] === undefined) byNorm[nk] = k; } }
+      }
+      var hit = byNorm[normName(name)];
+      return hit === undefined ? null : hit;
+    }
+    var resolve = function (name) {
+      var key = Object.prototype.hasOwnProperty.call(series, name) && series[name] ? name : loose(name);
+      if (key && series[key]) { return { values: series[key], levels: levels[key] || null }; }
+      return typeof fallback === 'function' ? fallback(name) : null;
+    };
+    resolve.channelFor = function (name) { return Object.prototype.hasOwnProperty.call(series, name) && series[name] ? name : loose(name); };
+    return resolve;
+  }
+
+  /**
+   * autoBracket(src, names) -> { src, changed:[{from,to}] }
+   * A channel name typed WITHOUT brackets ("Short Term Fuel Trim 1 + Long Term Fuel Trim 1") is a
+   * parse error, because a name with spaces is several identifiers. Rewrites every maximal run of
+   * bare words/numbers that spells a known name (case/space-insensitively) as [Name], leaving
+   * existing [..] / ".." references, string literals, numbers, operators and function names alone.
+   * Never throws; a source it cannot improve comes back unchanged.
+   */
+  function autoBracket(src, names) {
+    src = String(src == null ? '' : src);
+    var out = { src: src, changed: [] };
+    if (!Array.isArray(names) || !names.length) { return out; }
+    var byNorm = {}, maxWords = 1;
+    names.forEach(function (n) {
+      var k = normName(n);
+      if (!k || byNorm[k] !== undefined) { return; }
+      byNorm[k] = n;
+      var w = k.split(' ').length;
+      if (w > maxWords) { maxWords = w; }
+    });
+    // Split into protected spans ([..], "..", '..') and free text.
+    var parts = [], i = 0, n = src.length, buf = '';
+    while (i < n) {
+      var ch = src.charAt(i), close = ch === '[' ? ']' : ch === '"' ? '"' : ch === "'" ? "'" : null;
+      if (close) {
+        var end = src.indexOf(close, i + 1);
+        if (end < 0) { end = n - 1; }
+        if (buf) { parts.push({ free: true, text: buf }); buf = ''; }
+        parts.push({ free: false, text: src.slice(i, end + 1) });
+        i = end + 1; continue;
+      }
+      buf += ch; i++;
+    }
+    if (buf) { parts.push({ free: true, text: buf }); }
+    var WORD = /[A-Za-z_][A-Za-z0-9_]*|\d+(?:\.\d+)?/g;
+    parts.forEach(function (p) {
+      if (!p.free) { return; }
+      var words = [], m;
+      WORD.lastIndex = 0;
+      while ((m = WORD.exec(p.text))) { words.push({ text: m[0], start: m.index, end: m.index + m[0].length }); }
+      if (!words.length) { return; }
+      // Greedy longest-match over word runs joined by single spaces (only whitespace may sit between).
+      var res = '', pos = 0, w = 0;
+      while (w < words.length) {
+        var best = null;
+        for (var len = Math.min(maxWords, words.length - w); len >= 1; len--) {
+          var contiguous = true;
+          for (var q = w; q < w + len - 1; q++) { if (!/^\s+$/.test(p.text.slice(words[q].end, words[q + 1].start))) { contiguous = false; break; } }
+          if (!contiguous) { continue; }
+          var key = normName(p.text.slice(words[w].start, words[w + len - 1].end));
+          if (byNorm[key] !== undefined) { best = { len: len, name: byNorm[key] }; break; }
+        }
+        if (best) {
+          var from = p.text.slice(words[w].start, words[w + best.len - 1].end);
+          res += p.text.slice(pos, words[w].start) + '[' + best.name + ']';
+          out.changed.push({ from: from, to: '[' + best.name + ']' });
+          pos = words[w + best.len - 1].end;
+          w += best.len;
+        } else { w++; }
+      }
+      res += p.text.slice(pos);
+      p.text = res;
+    });
+    if (out.changed.length) { out.src = parts.map(function (p) { return p.text; }).join(''); }
+    return out;
+  }
+
   var DatalogExpr = {
     VERSION: VERSION,
     parse: parse,
     compile: compile,
     buildSimpleFilter: buildSimpleFilter,
     parseSimpleFilter: parseSimpleFilter,
-    listFunctions: listFunctions
+    listFunctions: listFunctions,
+    normName: normName,
+    seriesResolver: seriesResolver,
+    autoBracket: autoBracket
   };
   global.DatalogExpr = DatalogExpr;
 })(typeof window !== 'undefined' ? window : globalThis);

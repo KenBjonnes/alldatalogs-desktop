@@ -175,8 +175,19 @@ async function removeLayout(id) {
 }
 
 // ---- shared library (library_items; browse is open to anyone, publish/remove need a session) -------
-const LIB_COLS = 'id,kind,name,description,owner_id,author_name,is_official,status,thumb_svg,vehicle,tags,pulls,created_at,updated_at';
+const LIB_COLS = 'id,kind,name,description,owner_id,author_name,is_official,status,thumb_svg,vehicle,vehicle_year,vehicle_make,vehicle_model,tags,pulls,created_at,updated_at';
 function likeTerm(q) { return String(q || '').replace(/[,()%\\]/g, ' ').trim().slice(0, 60); }
+// The structured car link (official Year / Make / Model from the engine's picker) + its display string.
+function vehicleCols(v) {
+  v = v || {};
+  const year = typeof v.vehicle_year === 'number' && isFinite(v.vehicle_year) ? Math.round(v.vehicle_year) : null;
+  return {
+    vehicle: String(v.vehicle || '').trim().slice(0, 120),
+    vehicle_year: year && year >= 1900 && year <= 2100 ? year : null,
+    vehicle_make: String(v.vehicle_make || '').trim().slice(0, 60),
+    vehicle_model: String(v.vehicle_model || '').trim().slice(0, 60),
+  };
+}
 async function libraryList(q) {
   if (!client) return { items: [], hasMore: false };
   q = q || {};
@@ -186,7 +197,9 @@ async function libraryList(q) {
     .order('is_official', { ascending: false }).order('pulls', { ascending: false }).order('updated_at', { ascending: false })
     .range(from, from + size);
   if (q.kind) req = req.eq('kind', q.kind);
-  if (q.official) req = req.eq('is_official', true);
+  const source = q.source || (q.official ? 'official' : 'all');
+  if (source === 'official') req = req.eq('is_official', true);
+  else if (source === 'user') req = req.eq('is_official', false);
   if (q.mine) {
     const s = await getSession();
     if (!s) return { items: [], hasMore: false };
@@ -220,12 +233,34 @@ async function libraryPublish(input) {
     author_name: author,
     payload: input.payload && typeof input.payload === 'object' ? input.payload : {},
     thumb_svg: typeof input.thumb_svg === 'string' ? input.thumb_svg.slice(0, 60000) : null,
-    vehicle: String(input.vehicle || '').trim().slice(0, 120),
+    ...vehicleCols(input),
     tags: Array.isArray(input.tags) ? input.tags.map((t) => String(t).trim().toLowerCase()).filter(Boolean).slice(0, 12) : [],
   };
   if (!row.name) return { ok: false, error: 'Give it a name first.' };
   const { data, error } = await client.from('library_items').insert(row).select(LIB_COLS).single();
   if (error) return { ok: false, error: error.message };
+  // Ours are System from the first moment they are visible (Ken, 2026-09-08); the guard trigger
+  // keeps clients from setting the flag directly, so it goes through the admin function.
+  if (await libraryIsAdmin()) {
+    const r = await libraryAdmin('library_official', { itemId: data.id, value: true });
+    if (r && r.ok) data.is_official = true;
+  }
+  return { ok: true, item: data };
+}
+/** Replace the content / details of one of the caller's own items in place. */
+async function libraryUpdate(id, input) {
+  if (!client || !id || !input) return { ok: false, error: 'Not ready.' };
+  const s = await getSession();
+  if (!s) return { ok: false, error: 'Sign in to update library items.' };
+  const patch = {};
+  if (typeof input.name === 'string') { patch.name = input.name.trim().slice(0, 120); if (!patch.name) return { ok: false, error: 'Give it a name first.' }; }
+  if (typeof input.description === 'string') patch.description = input.description.trim().slice(0, 2000);
+  if (input.payload && typeof input.payload === 'object') patch.payload = input.payload;
+  if (input.thumb_svg !== undefined) patch.thumb_svg = typeof input.thumb_svg === 'string' ? input.thumb_svg.slice(0, 60000) : null;
+  if (input.vehicle !== undefined || input.vehicle_make !== undefined || input.vehicle_model !== undefined || input.vehicle_year !== undefined) Object.assign(patch, vehicleCols(input));
+  const { data, error } = await client.from('library_items').update(patch).eq('id', String(id)).eq('owner_id', s.user.id).select(LIB_COLS).maybeSingle();
+  if (error) return { ok: false, error: error.message };
+  if (!data) return { ok: false, error: 'That item is not yours or no longer exists.' };
   return { ok: true, item: data };
 }
 async function libraryRemove(id) {
@@ -262,4 +297,4 @@ async function libraryIsAdmin() {
 }
 
 module.exports = { init, isEncryptionAvailable, getSession, signIn, signOut, fetchEntitlementToken, pullLayouts, pushLayout, removeLayout,
-  libraryList, libraryGet, libraryPublish, libraryRemove, libraryPull, libraryMe, libraryIsAdmin, libraryAdmin };
+  libraryList, libraryGet, libraryPublish, libraryUpdate, libraryRemove, libraryPull, libraryMe, libraryIsAdmin, libraryAdmin };

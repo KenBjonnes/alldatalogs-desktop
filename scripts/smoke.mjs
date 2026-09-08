@@ -22,6 +22,10 @@ const PKG_VERSION = JSON.parse(readFileSync(join(ROOT, 'package.json'), 'utf8'))
 
 const LOG = resolve(process.argv[2] || 'C:/Users/kenbj/Code/mile (1).hpl');
 if (!existsSync(LOG)) { console.error(`Log not found: ${LOG}`); process.exit(2); }
+// Own userData folder: keeps the smoke away from the real profile AND from the single-instance lock of
+// an installed BigData that happens to be running (which otherwise makes this instance quit at once).
+const USER_DATA = join(OUT, 'userData');
+mkdirSync(USER_DATA, { recursive: true });
 
 const failures = [];
 const check = (ok, what) => { console.log(`${ok ? 'PASS' : 'FAIL'}  ${what}`); if (!ok) failures.push(what); };
@@ -31,7 +35,7 @@ async function launch(args) {
     executablePath: electronPath,
     args: ['.', ...args],
     cwd: ROOT,
-    env: { ...process.env, BIGDATA_DEV_PRO: '1' },
+    env: { ...process.env, BIGDATA_DEV_PRO: '1', BIGDATA_USER_DATA: USER_DATA },
   });
   const page = await app.firstWindow();
   const consoleErrors = [];

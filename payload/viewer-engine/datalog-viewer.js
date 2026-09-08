@@ -2436,7 +2436,7 @@ function renderViewerBody(){
     // to do except close the tab (Ken, 2026-07-21).
     container.innerHTML =
       '<div class="dlv-rotate">' +
-        '<button type="button" class="dlv-rotate-back" id="dlvRotateBackBtn">&#8592; Back to site</button>' +
+        '<button type="button" class="dlv-rotate-back" id="dlvRotateBackBtn">&#8592; ' + (viewerHost() ? 'Back' : 'Back to site') + '</button>' +
         '<div class="dlv-rotate-icon">&#128241;</div>' +
         '<div class="dlv-rotate-title">Rotate your phone</div>' +
         '<div class="dlv-rotate-sub">The datalog viewer needs landscape.</div>' +
@@ -2500,7 +2500,13 @@ function renderViewerBody(){
           '<div class="dlv-scrubber-controls">' +
             '<button type="button" class="dlv-icon-btn" id="dlvZoomOutBtn" title="Zoom out">&minus;</button>' +
             '<button type="button" class="dlv-icon-btn" id="dlvZoomInBtn" title="Zoom in">&plus;</button>' +
-            '<button type="button" class="dlv-icon-btn" id="dlvFullscreenBtn" title="Fullscreen">&#9974;</button>' +
+            // A native host (the BigData phone apps) is already edge-to-edge and has no address bar,
+            // so the fullscreen button has nothing to do there. Its slot becomes the way OUT instead:
+            // the phone layout hides the header (and its X), and an app has no back gesture / history
+            // to fall back on the way the website does. See hostHandlesFullscreen().
+            (hostHandlesFullscreen()
+              ? '<button type="button" class="dlv-icon-btn dlv-host-close" id="dlvHostCloseBtn" title="Close log">&#10005;</button>'
+              : '<button type="button" class="dlv-icon-btn" id="dlvFullscreenBtn" title="Fullscreen">&#9974;</button>') +
           '</div>' +
         '</div>' +
       '</div>' +
@@ -3586,13 +3592,19 @@ function openLibrary(kind, opts){
       if(!viewerIsPro()) return;
       applyGaugesConfig({ kind: 'gauges', gauges: gauges }, { kind: 'library', id: item.id, name: item.name, readOnly: true },
         { edit: !!opts.edit, dirty: !!opts.edit, toast: 'Loaded "' + item.name + '" from the library.' });
+      if(VIEWER_CURRENT_GAUGES){
+        VIEWER_CURRENT_GAUGES.libraryId = item.id;
+        VIEWER_CURRENT_GAUGES.vehicle = (typeof Library !== 'undefined' && Library.vehicleOf) ? Library.vehicleOf(item) : null;
+      }
       return;
     }
     if(item.kind === 'histogram'){
       if(!pl.def){ if(window.showToast) showToast('That histogram is empty.'); return; }
       enterHistograms();
       if(VIEWER_HIST_CTL && typeof VIEWER_HIST_CTL.importPackage === 'function'){
-        VIEWER_HIST_CTL.importPackage({ kind: 'datalog-histograms', histograms: [pl.def], mathChannels: Array.isArray(pl.mathChannels) ? pl.mathChannels : [] }, 'library item');
+        // Stamp the def with where it came from so "Share to library" can offer to update that entry.
+        var def = Object.assign({}, pl.def, { libraryId: item.id, vehicle: (typeof Library !== 'undefined' && Library.vehicleOf) ? Library.vehicleOf(item) : null });
+        VIEWER_HIST_CTL.importPackage({ kind: 'datalog-histograms', histograms: [def], mathChannels: Array.isArray(pl.mathChannels) ? pl.mathChannels : [] }, 'library item');
       }
     }
   } });
@@ -3604,11 +3616,20 @@ function shareDashToLibrary(){
   var gauges = currentGaugesList().filter(function(g){ return g && g.type !== 'scorecard'; });
   if(!gauges.length){ if(window.showToast) showToast('Add a gauge before sharing.'); return; }
   var cur = VIEWER_CURRENT_GAUGES || {};
+  // A dash that came from the library (pulled, or shared earlier this session) remembers its item,
+  // so the dialog can offer "Update" instead of a duplicate (Ken, 2026-09-08).
+  var libraryId = cur.libraryId || (cur.kind === 'library' ? cur.id : null);
   Library.share({
-    kind: 'gauges', name: cur.name && cur.kind !== 'library' ? cur.name : 'My Gauges',
+    kind: 'gauges', name: cur.name || 'My Gauges',
     payload: { kind: 'gauges', gauges: gauges },
     thumbSvg: (typeof gaugesThumbnailSvg === 'function') ? gaugesThumbnailSvg(gauges) : null,
-    vehicle: ''
+    vehicle: cur.vehicle || null,
+    libraryId: libraryId,
+    onDone: function(item){
+      if(!item || !VIEWER_CURRENT_GAUGES) return;
+      VIEWER_CURRENT_GAUGES.libraryId = item.id;
+      VIEWER_CURRENT_GAUGES.vehicle = (typeof Library !== 'undefined' && Library.vehicleOf) ? Library.vehicleOf(item) : null;
+    }
   });
 }
 
@@ -6280,4 +6301,21 @@ function wireScrubberEvents(){
     if(document.fullscreenElement){ document.exitFullscreen(); }
     else if(overlay.requestFullscreen){ overlay.requestFullscreen().catch(function(){}); }
   });
+  // Same exit as the header X and the rotate screen's Back, so the host is left in the state it expects.
+  var hostCloseBtn = document.getElementById('dlvHostCloseBtn');
+  if(hostCloseBtn) hostCloseBtn.addEventListener('click', closeViewer);
+}
+
+// ---- Native host hook ----------------------------------------------------------------------------
+// The BigData phone/tablet apps (Capacitor) load this same engine and declare themselves before it
+// renders:  window.ADL_HOST = { kind:'capacitor', platform:'android'|'ios', handlesFullscreen:true }.
+// Everything else about the phone layout is unchanged; a host only changes what the engine cannot
+// know on its own -- that there is no address bar to hide and no site to go back to.
+function viewerHost(){
+  var h = window.ADL_HOST;
+  return h && typeof h === 'object' ? h : null;
+}
+function hostHandlesFullscreen(){
+  var h = viewerHost();
+  return !!(h && h.handlesFullscreen);
 }
