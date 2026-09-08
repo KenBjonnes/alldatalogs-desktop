@@ -20,6 +20,7 @@ interface LicenseState {
   status: string | null;
   daysLeft: number | null;
   email: string | null;
+  storageUnavailable?: boolean;
 }
 interface Staged { token?: string; name: string; size?: number; path?: string; error?: string }
 interface ReadResult { name: string; path: string; size: number; data: Uint8Array; error?: string }
@@ -42,6 +43,7 @@ interface BigdataApi {
   license: {
     get(): Promise<LicenseState>;
     refresh(): Promise<LicenseState>;
+    online(): void;
     onChange(cb: (s: LicenseState) => void): () => void;
   };
   auth: {
@@ -338,7 +340,11 @@ const BANNERS: Record<string, { text: (s: LicenseState) => string; bad?: boolean
 function applyLicense(s: LicenseState) {
   license = s;
   window.setViewerPro?.(s.pro === true);
-  if (s.reason === 'not_pro' || s.reason === 'wrong_account') {
+  $('checking').hidden = s.reason !== 'checking';
+  if (s.reason === 'checking') {
+    // Keep whatever screen is up (sign-in on first run, home on a relaunch) under the overlay.
+    if (['screen-signin', 'screen-gate', 'screen-home'].every((id) => $(id).hidden)) showScreen('signin');
+  } else if (s.reason === 'not_pro' || s.reason === 'wrong_account') {
     $('gateText').textContent = s.email
       ? `${s.email} does not have an active AllDataLogs Pro membership.`
       : 'This account does not have an active AllDataLogs Pro membership.';
@@ -351,7 +357,7 @@ function applyLicense(s: LicenseState) {
   } else {
     showScreen('home');
   }
-  const b = BANNERS[s.reason];
+  const b = BANNERS[s.reason] || (s.storageUnavailable ? BANNERS.storage_unavailable : undefined);
   const banner = $('banner');
   if (b) { banner.textContent = b.text(s); banner.classList.toggle('bad', !!b.bad); banner.hidden = false; }
   else banner.hidden = true;
@@ -431,6 +437,7 @@ async function boot() {
 
   applyLicense(await api.license.get());
   api.license.onChange(applyLicense);
+  window.addEventListener('online', () => api.license.online());
 
   // Cloud layouts (M3): best effort, then let the engine re-list.
   api.layouts.pull().then((r) => {

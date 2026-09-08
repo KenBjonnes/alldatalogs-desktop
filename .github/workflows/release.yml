@@ -1,0 +1,42 @@
+# release.yml — build the Windows installer and publish it to GitHub Releases on a version tag.
+# The published release is the auto-update feed (electron-builder.yml `publish`), so:
+#   * the tag must equal package.json's version (v0.1.0 ↔ "0.1.0"), or installed apps would never see it;
+#   * releaseType is 'release', not draft — electron-updater cannot see drafts;
+#   * latest.yml, the Setup exe and its .blockmap must land in the same release (electron-builder does this).
+name: release
+on:
+  push:
+    tags: ['v*']
+
+permissions:
+  contents: write
+
+jobs:
+  windows:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+      - run: npm ci
+      - name: Ensure the Electron binary is present
+        run: node node_modules/electron/install.js
+      - run: node scripts/build-payload.mjs --check
+      - run: npm test
+      - name: Tag must match package.json version
+        shell: pwsh
+        run: |
+          $v = (Get-Content package.json -Raw | ConvertFrom-Json).version
+          if ("v$v" -ne "${{ github.ref_name }}") { throw "Tag ${{ github.ref_name }} does not match package.json version v$v" }
+      - name: Build and publish installer
+        run: npx electron-builder --win --x64 --publish always
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - uses: actions/upload-artifact@v4
+        with:
+          name: BigData-Setup
+          path: |
+            dist/*.exe
+            dist/latest.yml

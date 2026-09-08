@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" width="256" height="256">
+  <!-- BigData app icon: the red pulse from the BigData wordmark on the viewer's near-black ground. -->
+  <rect x="8" y="8" width="240" height="240" rx="54" fill="#0b0b0e"/>
+  <rect x="10" y="10" width="236" height="236" rx="52" fill="none" stroke="#2c2c34" stroke-width="4"/>
+  <polyline points="30,196 226,196" fill="none" stroke="#f4f4f6" stroke-opacity=".28" stroke-width="8" stroke-linecap="round"/>
+  <polyline points="30,150 72,150 94,106 116,186 140,64 162,172 182,150 226,150" fill="none" stroke="#ee2325" stroke-width="20" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>

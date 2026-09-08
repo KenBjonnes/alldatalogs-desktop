@@ -16,12 +16,16 @@ const protocolMod = require('./protocol');
 const files = require('./files');
 const prompt = require('./prompt');
 const license = require('./license');
+const supabase = require('./supabase');
 const updater = require('./updater');
 
 const DEV = !app.isPackaged;
 const EXTERNAL_HOSTS = new Set(['alldatalogs.com', 'www.alldatalogs.com', 'billing.stripe.com', 'checkout.stripe.com', 'github.com']);
 
 protocolMod.registerScheme();
+
+// Dev/test only: isolate all state (session, licence, recents, storage) in another folder.
+if (DEV && process.env.BIGDATA_USER_DATA) app.setPath('userData', process.env.BIGDATA_USER_DATA);
 
 if (!app.requestSingleInstanceLock()) {
   app.quit();
@@ -83,6 +87,7 @@ function createWindow() {
   // A reload (dev) or navigation means queued file opens must wait for the new page's renderer:ready.
   mainWindow.webContents.on('did-start-navigation', (details) => { if (details.isMainFrame) files.rendererReset(); });
   mainWindow.on('closed', () => { mainWindow = null; });
+  mainWindow.on('focus', () => license.onWindowFocus());
   mainWindow.loadURL(`${protocolMod.ORIGIN}/index.html`);
 }
 
@@ -142,7 +147,8 @@ function buildMenu() {
 function main() {
   protocolMod.installHandler();
   prompt.install();
-  license.install({ getWindow: () => mainWindow });
+  supabase.init();
+  license.install({ getWindow: () => mainWindow, supabase });
   files.install({ getWindow: () => mainWindow, gate: () => license.openBlockedReason() });
   updater.install({ getWindow: () => mainWindow });
 

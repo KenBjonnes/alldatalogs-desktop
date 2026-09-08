@@ -353,7 +353,10 @@
   function applyLicense(s) {
     license = s;
     window.setViewerPro?.(s.pro === true);
-    if (s.reason === "not_pro" || s.reason === "wrong_account") {
+    $("checking").hidden = s.reason !== "checking";
+    if (s.reason === "checking") {
+      if (["screen-signin", "screen-gate", "screen-home"].every((id) => $(id).hidden)) showScreen("signin");
+    } else if (s.reason === "not_pro" || s.reason === "wrong_account") {
       $("gateText").textContent = s.email ? `${s.email} does not have an active AllDataLogs Pro membership.` : "This account does not have an active AllDataLogs Pro membership.";
       showScreen("gate");
     } else if (s.pro !== true && (s.reason === "signed_out" || s.reason === "activate_offline")) {
@@ -362,7 +365,7 @@
     } else {
       showScreen("home");
     }
-    const b = BANNERS[s.reason];
+    const b = BANNERS[s.reason] || (s.storageUnavailable ? BANNERS.storage_unavailable : void 0);
     const banner = $("banner");
     if (b) {
       banner.textContent = b.text(s);
@@ -459,6 +462,7 @@
     wireSignIn();
     applyLicense(await api.license.get());
     api.license.onChange(applyLicense);
+    window.addEventListener("online", () => api.license.online());
     api.layouts.pull().then((r) => {
       if (r && r.ok && Array.isArray(r.rows) && r.rows.length) {
         mergeCloudRows(r.rows);

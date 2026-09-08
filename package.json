@@ -12,7 +12,9 @@
     "start": "electron .",
     "payload": "node scripts/build-payload.mjs",
     "payload:check": "node scripts/build-payload.mjs --check",
-    "test": "node --test test/",
+    "test": "node --test \"test/**/*.test.js\"",
+    "smoke": "node scripts/smoke.mjs",
+    "icon": "node scripts/make-icon.mjs",
     "dist": "electron-builder --win --x64",
     "release": "electron-builder --win --x64 --publish always"
   },

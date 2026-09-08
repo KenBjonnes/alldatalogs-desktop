@@ -39,6 +39,7 @@ contextBridge.exposeInMainWorld('bigdata', {
   license: {
     get: () => ipcRenderer.invoke('license:get'),
     refresh: () => ipcRenderer.invoke('license:refresh'),
+    online: () => ipcRenderer.send('license:online'),
     onChange: (cb) => subscribe('license:changed', cb),
   },
 

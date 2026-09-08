@@ -1,9 +1,9 @@
 {
-  "builtAt": "2026-09-08T00:12:33.039Z",
+  "builtAt": "2026-09-08T00:34:12.354Z",
   "sources": {
     "releaseDir": "C:/Users/kenbj/Code/datalog viewer",
     "siteRepo": "C:/websites/Alldatalogs",
-    "siteCommit": "26a4e0b"
+    "siteCommit": "60cafef"
   },
   "files": {
     "viewer-engine/datalog-viewer.css": {
@@ -112,9 +112,19 @@
       "from": "C:/websites/Alldatalogs/packages/datalog-core/browser/entry.ts (esbuild)"
     },
     "glue.js": {
-      "sha256": "10537c04bc94b9d4ad7444e6948ffc78aa3a78691ac856cee7f58fa81d640665",
-      "bytes": 16291,
+      "sha256": "ba0055e72e998a56ab09e99ec218c488a08e0dfa1a3ebd4b4241f74c33fa0052",
+      "bytes": 16626,
       "from": "C:/Users/kenbj/Code/alldatalogs-desktop/renderer/src/glue.ts (esbuild)"
+    },
+    "main/jws.js": {
+      "sha256": "1ceb9589e384886a8959bd259848d594be0c7ac2f8e64500d4d5f732a36a51de",
+      "bytes": 4417,
+      "from": "C:/websites/Alldatalogs/supabase/functions/_shared/jws.ts (esbuild)"
+    },
+    "main/entitlement.js": {
+      "sha256": "fcff3c05f2d0a96e45a9044c2baa646f09ef5c384e64fac2d4c7520cbe782ee0",
+      "bytes": 2481,
+      "from": "C:/websites/Alldatalogs/supabase/functions/_shared/entitlement.ts (esbuild)"
     }
   }
 }
