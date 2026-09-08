@@ -14,7 +14,10 @@ param(
   [switch] $Smoke,
   [switch] $NoPush
 )
-$ErrorActionPreference = 'Stop'
+# Not 'Stop': under Windows PowerShell 5.1 a native command that merely WRITES to stderr (git push's
+# "To https://…" progress lines) becomes a terminating error, which aborted the runbook after a
+# successful push. Failures are detected by exit code in Run() instead.
+$ErrorActionPreference = 'Continue'
 Set-Location (Join-Path $PSScriptRoot '..')
 
 function Step($msg) { Write-Host "`n== $msg" -ForegroundColor Cyan }
