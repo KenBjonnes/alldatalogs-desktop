@@ -4471,12 +4471,35 @@ function applyViewConfig(cfg, meta){
   // A layout that carries histogram definitions restores them (migrated to the current schema); one
   // that doesn't leaves the session's set alone, so switching between plain layouts never wipes a
   // tuner's tables.
+  // Math channels first: ids are minted per creation, so the layout's copy of a channel that also
+  // exists here (same name, different id) is reconciled onto the LIVE id before anything references
+  // it. Otherwise loading a layout could orphan every histogram built since -- their mathChannelId
+  // pointing at an id that no longer exists while a channel of that name sits in the list (Ken,
+  // 2026-09-08: "missing or deleted, but it's right there").
+  var mathIdMap = {};
+  var incomingMath = null;
+  if(Array.isArray(cfg.mathChannels) && cfg.mathChannels.length){
+    ensureMath();
+    incomingMath = cfg.mathChannels.map(function(d){ return JSON.parse(JSON.stringify(d)); });
+    var normName = (typeof Histogram !== 'undefined' && Histogram.normChannelName) ? Histogram.normChannelName
+      : function(s){ return String(s == null ? '' : s).toLowerCase().replace(/_/g, ' ').replace(/\s+/g, ' ').trim(); };
+    var liveByName = {};
+    VIEWER_MATH.defs.forEach(function(d){ if(d && d.name) liveByName[normName(d.name)] = d; });
+    incomingMath.forEach(function(d){
+      if(!d || !d.name) return;
+      var live = liveByName[normName(d.name)];
+      if(live && live.id && d.id !== live.id){ mathIdMap[d.id] = live.id; d.id = live.id; }
+    });
+  }
   if(Array.isArray(cfg.histograms) && cfg.histograms.length){
     var incoming = cfg.histograms.map(function(d){
       var c = JSON.parse(JSON.stringify(d));
       if(typeof Histogram !== 'undefined' && Histogram.migrateDef){ try { Histogram.migrateDef(c); } catch(err){} }
       return c;
     });
+    if(Object.keys(mathIdMap).length && typeof Histogram !== 'undefined' && Histogram.remapMathChannelIds){
+      incoming = Histogram.remapMathChannelIds(incoming, mathIdMap);
+    }
     // A PBD vehicle config or built-in auto-applied on log open must never clobber the tuner's own
     // tables: it seeds the session only when the set is empty and never touches the local mirror.
     // Loading one's OWN saved layout is a choice -- its tables become the session set and the mirror
@@ -4494,8 +4517,7 @@ function applyViewConfig(cfg, meta){
   // Same store, same clobber hazard, same fix -- see mergeNamedDefsOnLoad. Math channels are the
   // reusable building block a histogram's cell/axis parameter can reference by id (mathChannelId), so
   // losing one silently would leave every histogram that used it showing "missing parameter".
-  if(Array.isArray(cfg.mathChannels) && cfg.mathChannels.length){
-    var incomingMath = cfg.mathChannels.map(function(d){ return JSON.parse(JSON.stringify(d)); });
+  if(incomingMath){
     var mathReadOnly = !meta || !!meta.readOnly || meta.kind !== 'saved';
     if(mathReadOnly){
       if(!ensureMath().defs.length) VIEWER_MATH.defs = incomingMath;

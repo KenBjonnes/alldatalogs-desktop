@@ -288,11 +288,35 @@
       if (p.channel && byNorm[normName(p.channel)] && has(byNorm[normName(p.channel)])) return byNorm[normName(p.channel)];
       return null;
     }
+    // Math channels currently being compiled, by id: a channel whose expression references itself
+    // (directly, or A -> B -> A) resolves to null instead of recursing forever.
+    var compilingMath = {};
+    function mathList() {
+      if (typeof mathChannelsList !== 'function') return [];
+      try { return mathChannelsList() || []; } catch (e) { return []; }
+    }
+    // Compile a NAMED math channel, honouring the cycle guard. null when it can't be evaluated here.
+    function mathChannelValues(mc) {
+      if (!mc || !mc.expression || compilingMath[mc.id]) return null;
+      compilingMath[mc.id] = true;
+      var cm;
+      try { cm = compileMath(mc.expression); } finally { delete compilingMath[mc.id]; }
+      return cm && cm.values ? cm : null;
+    }
     function lookup(name) {
       if (has(name)) return entry(name, name, 'channel');
       var loose = byNorm[normName(name)];
       if (loose && has(loose)) return entry(loose, loose, 'channel');
       if (roles[name] && has(roles[name])) return entry(roles[name], roles[name], 'role');
+      // A math channel referenced BY NAME from another expression (nested channels). The graphs
+      // already allow this -- injected math channels are ordinary columns of the display set -- but
+      // the histogram set is the full-resolution data where no injection happens, so resolve it here
+      // (Ken, 2026-09-08: histogram of a nested math channel showed "missing parameter").
+      var mc = H().mathChannelByRef(mathList(), name);
+      if (mc) {
+        var cm = mathChannelValues(mc);
+        if (cm) return { values: cm.values, unit: mc.unit || null, levels: null, label: mc.name || name, channel: null, source: 'mathChannel' };
+      }
       return null;
     }
     function compileMath(expr) {
@@ -306,25 +330,22 @@
       mathCache[expr] = c;
       return c;
     }
-    function getMathChannel(id) {
-      if (typeof mathChannelsList !== 'function' || !id) return null;
-      var list;
-      try { list = mathChannelsList() || []; } catch (e) { return null; }
-      for (var i = 0; i < list.length; i++) if (list[i] && list[i].id === id) return list[i];
-      return null;
-    }
+    // By id, then by name -- see Histogram.mathChannelByRef for why a stale id must still resolve.
+    function getMathChannel(ref) { return H().mathChannelByRef(mathList(), ref); }
     function resolver(param) {
       if (!param) return null;
       var name = resolveName(param);
       // a label makeParam auto-filled from the ROLE id ("engine_rpm") is not a display name; use the channel's
       if (name) return entry(name, (param.label && param.label !== param.role) ? param.label : name, (param.role && roles[param.role] === name) ? 'role' : 'channel');
       if (param.mathChannelId) {
-        var mc = getMathChannel(param.mathChannelId);
+        // Id, then the id as a name, then the param's LABEL (the picker stores the channel's name
+        // there): an orphaned id from a reloaded layout still lands on the live channel of that name.
+        var mc = getMathChannel(param.mathChannelId) || (param.label ? getMathChannel(param.label) : null);
         // Deleted or renamed-away-from math channel: fall through to null (missing_parameter), never
         // a stale copy of an expression that no longer exists.
         if (!mc || !mc.expression) return null;
-        var cm = compileMath(mc.expression);
-        if (!cm.values) return null;
+        var cm = mathChannelValues(mc);
+        if (!cm) return null;
         return { values: cm.values, unit: (param.unit || mc.unit) || null, levels: null, label: param.label || mc.name || mc.expression, channel: null, source: 'mathChannel' };
       }
       if (param.math) {

@@ -10,7 +10,7 @@
  */
 import { _electron as electron } from 'playwright';
 import electronPath from 'electron';
-import { mkdirSync, existsSync } from 'node:fs';
+import { mkdirSync, existsSync, readFileSync } from 'node:fs';
 import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
@@ -18,6 +18,7 @@ const here = dirname(fileURLToPath(import.meta.url));
 const ROOT = join(here, '..');
 const OUT = join(here, '.smoke');
 mkdirSync(OUT, { recursive: true });
+const PKG_VERSION = JSON.parse(readFileSync(join(ROOT, 'package.json'), 'utf8')).version;
 
 const LOG = resolve(process.argv[2] || 'C:/Users/kenbj/Code/mile (1).hpl');
 if (!existsSync(LOG)) { console.error(`Log not found: ${LOG}`); process.exit(2); }
@@ -68,7 +69,7 @@ const viewerOpen = (page) => page.waitForFunction(() => {
     promptShimmed: String(window.prompt).includes('promptSync'),
   }));
   console.log('   viewer info:', JSON.stringify(info));
-  check(info.version === '0.1.0', `VIEWER_VERSION stamped from app version (got ${info.version})`);
+  check(info.version === PKG_VERSION, `VIEWER_VERSION stamped from app version (got ${info.version}, package ${PKG_VERSION})`);
   check(info.channels > 5, `channels parsed (${info.channels})`);
   check(info.full > 1000, `full-resolution set present (${info.full} rows)`);
   check(info.canvases > 0, `charts rendered (${info.canvases} canvases)`);

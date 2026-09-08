@@ -177,6 +177,48 @@
   // viewer glue) instead of copying its expression inline -- the engine never evaluates a param itself
   // (that's always ctx.getParam), so accepting this shape here is just "this def names a parameter."
   function isParam(p) { return isObj(p) && (!!p.channel || !!p.role || !!p.math || !!p.mathChannelId); }
+  // ---- Math-channel references -----------------------------------------------------------------
+  // A param carries a math channel's ID, but ids are minted per creation: a saved layout carries its
+  // own copy of the channel list with the ids current at save time, and loading it (or building the
+  // same channel again on another host) leaves earlier histograms pointing at an id that no longer
+  // exists while a channel of the same NAME sits right there (Ken, 2026-09-08: "missing or deleted,
+  // but it's right there"). So every lookup resolves by id first, then by name, and a load remaps
+  // stale ids onto the live ones. Names compare case-insensitively with underscores/spacing folded.
+  function normChannelName(s) { return String(s == null ? '' : s).toLowerCase().replace(/_/g, ' ').replace(/\s+/g, ' ').trim(); }
+  function mathChannelByRef(list, ref) {
+    if (!Array.isArray(list) || !ref) return null;
+    var i;
+    for (i = 0; i < list.length; i++) if (list[i] && list[i].id === ref) return list[i];
+    var want = normChannelName(ref);
+    if (!want) return null;
+    for (i = 0; i < list.length; i++) if (list[i] && normChannelName(list[i].name) === want) return list[i];
+    return null;
+  }
+  // Rewrite every mathChannelId in a def list through idMap (old id -> live id). Returns deep copies;
+  // defs and params without a mapped id come back unchanged.
+  function remapMathChannelIds(defs, idMap) {
+    if (!Array.isArray(defs)) return [];
+    var map = isObj(idMap) ? idMap : {};
+    var touch = function (p) { if (isObj(p) && p.mathChannelId && map[p.mathChannelId]) p.mathChannelId = map[p.mathChannelId]; };
+    var walkClauses = function (clauses) {
+      if (!Array.isArray(clauses)) return;
+      clauses.forEach(function (c) {
+        if (Array.isArray(c)) { walkClauses(c); return; }
+        if (!isObj(c)) return;
+        if (Array.isArray(c.group)) { walkClauses(c.group); return; }
+        touch(c.param);
+      });
+    };
+    return defs.map(function (d) {
+      var copy = clone(d);
+      if (!isObj(copy)) return copy;
+      touch(copy.cellParameter);
+      if (isObj(copy.columnAxis)) touch(copy.columnAxis.parameter);
+      if (isObj(copy.rowAxis)) touch(copy.rowAxis.parameter);
+      if (isObj(copy.filter)) walkClauses(copy.filter.clauses);
+      return copy;
+    });
+  }
   function makeAxis(a) {
     if (a == null) return null;
     if (Array.isArray(a) || typeof a === 'string') a = { breakpoints: a };
@@ -1012,6 +1054,8 @@
     // definitions
     makeDef: makeDef, makeParam: makeParam, makeAxis: makeAxis, validateDef: validateDef, migrateDef: migrateDef,
     cloneDef: cloneDef, invertDef: invertDef, exportDef: exportDef, importDef: importDef, exportDefs: exportDefs, importDefs: importDefs,
+    // math-channel references
+    mathChannelByRef: mathChannelByRef, remapMathChannelIds: remapMathChannelIds, normChannelName: normChannelName,
     // breakpoints
     parseBreakpoints: parseBreakpoints, sortBreakpoints: sortBreakpoints, reverseBreakpoints: reverseBreakpoints,
     formatBreakpoints: formatBreakpoints, formatNumber: fmtNum,

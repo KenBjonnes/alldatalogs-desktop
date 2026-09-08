@@ -169,34 +169,46 @@
     data = data || {};
     var series = data.series || {}, levels = data.textLevels || {}, roles = resolvedRoles || {};
     var units = unitByChannel || unitsFromData(data);
-    var mathCache = {};
+    var mathCache = {}, compilingMath = {};
     function chanRec(ch, label) {
       var vals = series[ch];
       if (!vals || vals.length === undefined) return null;
       return { values: vals, unit: units[ch] || null, levels: levels[ch] || null, label: label || ch, channel: ch };
     }
+    function mathList() {
+      if (typeof mathChannelsList !== 'function') return [];
+      try { return mathChannelsList() || []; } catch (e) { return []; }
+    }
+    // Nested math channels: an expression may reference another NAMED channel that is not a column of
+    // this data set. Same cycle guard as the histogram resolver (a self-referencing chain is null).
+    function mathByName(name) {
+      var mc = findMathChannel(name);
+      if (!mc || !mc.expression || compilingMath[mc.id]) return null;
+      compilingMath[mc.id] = true;
+      var cm;
+      try { cm = compileExpr(mc.expression); } finally { delete compilingMath[mc.id]; }
+      return cm && cm.values ? { values: cm.values, levels: null } : null;
+    }
     function compileExpr(key) {
       var c = mathCache[key];
       if (!c) {
-        var comp = X() ? X().compile(key, exprCtx(data)) : { ok: false, missing: [] };
+        var comp = X() ? X().compile(key, exprCtx(data, mathByName)) : { ok: false, missing: [] };
         c = mathCache[key] = comp.ok && !comp.missing.length ? { values: comp.evaluateAll(), missing: comp.missing } : { values: null, missing: comp.missing || [], error: comp.error };
       }
       return c;
     }
-    function findMathChannel(id) {
-      if (typeof mathChannelsList !== 'function' || !id) return null;
-      var list; try { list = mathChannelsList() || []; } catch (e) { return null; }
-      for (var i = 0; i < list.length; i++) if (list[i] && list[i].id === id) return list[i];
-      return null;
-    }
+    // By id, then by name: a stale id from a reloaded layout must still find the live channel.
+    function findMathChannel(ref) { return mathChannelByRef(mathList(), ref); }
     var fn = function (param) {
       if (!isObj(param)) return null;
       if (param.channel && series[param.channel]) return chanRec(param.channel, param.label);
       if (param.role && roles[param.role] && series[roles[param.role]]) return chanRec(roles[param.role], param.label);
       if (param.mathChannelId) {
-        var mc = findMathChannel(param.mathChannelId);
-        if (!mc || !mc.expression) return null;
-        var cm = compileExpr(mc.expression);
+        var mc = findMathChannel(param.mathChannelId) || (param.label ? findMathChannel(param.label) : null);
+        if (!mc || !mc.expression || compilingMath[mc.id]) return null;
+        compilingMath[mc.id] = true;
+        var cm;
+        try { cm = compileExpr(mc.expression); } finally { delete compilingMath[mc.id]; }
         if (!cm.values) return null;
         return { values: cm.values, unit: (param.unit || mc.unit) || null, levels: null, label: param.label || mc.name || mc.expression };
       }
@@ -216,18 +228,30 @@
     data.channels.forEach(function (c, i) { out[c] = (data.units && data.units[i]) ? data.units[i] : ''; });
     return out;
   }
-  function exprCtx(data) {
+  function exprCtx(data, fallback) {
     data = data || {};
     var series = data.series || {}, levels = data.textLevels || {};
     return {
       resolve: function (name) {
         var v = series[name];
-        if (!v) return null;
+        if (!v) return typeof fallback === 'function' ? fallback(name) : null;
         return { values: v, levels: levels[name] || null };
       },
       time: data.time || null,
       n: data.time ? data.time.length : 0
     };
+  }
+  // Id first, then case-insensitive name (mirrors Histogram.mathChannelByRef; kept local so the editor
+  // never depends on load order for a lookup it performs on every render).
+  function normChannelName(s) { return String(s == null ? '' : s).toLowerCase().replace(/_/g, ' ').replace(/\s+/g, ' ').trim(); }
+  function mathChannelByRef(list, ref) {
+    if (!Array.isArray(list) || !ref) return null;
+    var i;
+    for (i = 0; i < list.length; i++) if (list[i] && list[i].id === ref) return list[i];
+    var want = normChannelName(ref);
+    if (!want) return null;
+    for (i = 0; i < list.length; i++) if (list[i] && normChannelName(list[i].name) === want) return list[i];
+    return null;
   }
 
   // ================================================================================================
@@ -519,9 +543,14 @@
   function mathChannelById(ed, id) {
     if (!id) return null;
     var list = ed && ed.opts && ed.opts.mathChannels && typeof ed.opts.mathChannels.list === 'function' ? ed.opts.mathChannels.list() : null;
-    if (!list) return null;
-    for (var i = 0; i < list.length; i++) if (list[i] && list[i].id === id) return list[i];
-    return null;
+    return list ? mathChannelByRef(list, id) : null;
+  }
+  // A param whose mathChannelId is stale (the channel was re-created / reloaded under a new id) but
+  // whose NAME still matches a live channel is repaired in place, so the next save stores the live id.
+  function healMathRef(ed, param) {
+    if (!isObj(param) || !param.mathChannelId) return;
+    var mc = mathChannelById(ed, param.mathChannelId) || (param.label ? mathChannelById(ed, param.label) : null);
+    if (mc && mc.id !== param.mathChannelId) param.mathChannelId = mc.id;
   }
   function fuzzyChannels(name, channels, limit) {
     var toks = trim(name).toLowerCase().split(/[^a-z0-9]+/).filter(function (t) { return t.length > 1; });
@@ -1081,6 +1110,7 @@
   function slotHeader(ed, param, slot, pPath) {
     var tag = '<div data-slot-for="' + ed.esc(pPath) + '" data-slot="' + ed.esc(slot) + '" class="dlv-hg-slot ';
     if (!isObj(param) || !(param.channel || param.role || param.math || param.mathChannelId)) return tag + 'dlv-hg-faint">' + (isObj(param) && param.math === '' ? 'Write a math expression below.' : 'No parameter picked yet.') + '</div>';
+    healMathRef(ed, param);
     var rec = null;
     try { rec = ed.resolver(param, slot); } catch (e) { rec = null; }
     var isCalc = (param.math && !param.channel) || (param.mathChannelId && !param.channel);
@@ -1104,6 +1134,7 @@
       '</div>';
   }
   function paramButton(ed, param, pPath, slot) {
+    healMathRef(ed, param);
     var has = isObj(param) && (param.channel || param.role || param.math || param.mathChannelId);
     var isCalc = has && !param.channel && (param.math || param.mathChannelId);
     var lbl = has ? (isCalc ? 'ƒ ' + (param.label || (param.mathChannelId && mathChannelName(ed, param.mathChannelId)) || param.math || '(empty expression)') : paramLabel(param)) : 'Pick a parameter…';
@@ -1113,6 +1144,7 @@
   }
   function mathPanel(ed, param, pPath) {
     if (!isObj(param) || param.channel) return '';
+    healMathRef(ed, param);
     if (param.mathChannelId) {
       // A NAMED, reusable channel is read-only here by design: editing the expression inline would
       // fork it silently for this one histogram, defeating the entire point of a shared definition.
