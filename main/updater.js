@@ -65,7 +65,7 @@ async function checkInteractive() {
       type: 'info', title: 'Update ready', message: `BigData ${status.version} is ready to install.`,
       detail: 'Restart now to finish the update?', buttons: ['Restart now', 'Later'], defaultId: 0, cancelId: 1,
     });
-    if (r.response === 0) autoUpdater.quitAndInstall(false, true);
+    if (r.response === 0) autoUpdater.quitAndInstall(true, true);
     return;
   }
   await check();
@@ -83,7 +83,7 @@ function install(opts) {
   ipcMain.handle('updates:get', () => status);
   ipcMain.handle('updates:restart', async () => {
     if (!autoUpdater || status.state !== 'ready') return { ok: false };
-    setImmediate(() => autoUpdater.quitAndInstall(false, true));
+    setImmediate(() => autoUpdater.quitAndInstall(true, true));
     return { ok: true };
   });
   if (autoUpdater) {
