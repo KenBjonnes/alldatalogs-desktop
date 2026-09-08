@@ -78,6 +78,8 @@ function listRecent() {
 // --- staging -------------------------------------------------------------------------------------
 function validate(p) {
   const ext = path.extname(p).toLowerCase();
+  // Haltech's own log container is encrypted ("HEPS" header); NSP's CSV export is the way in.
+  if (ext === '.hlg' || ext === '.hlgzip') return { error: 'Haltech .hlg logs are encrypted by NSP. Export the log as CSV in NSP (File > Export) and open that.' };
   if (!ACCEPT.has(ext)) return { error: `BigData opens .hpl, .csv, .ld and .dl logs (this is ${ext ? '"' + ext + '"' : 'a file with no extension'}).` };
   let st;
   try { st = fs.statSync(p); } catch { return { error: 'That file could not be found.' }; }
