@@ -1,0 +1,10 @@
+node_modules/
+dist/
+scripts/.smoke/
+*.log
+.DS_Store
+Thumbs.db
+# Never commit signing material. The private entitlement key lives only in Supabase secrets.
+*.pem
+*.pfx
+keys/

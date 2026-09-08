@@ -1,0 +1,29 @@
+{
+  "name": "bigdata-desktop",
+  "productName": "BigData",
+  "version": "0.1.0",
+  "description": "BigData datalog viewer for Windows, by AllDataLogs",
+  "author": "AllDataLogs",
+  "homepage": "https://alldatalogs.com",
+  "main": "main/main.js",
+  "private": true,
+  "license": "UNLICENSED",
+  "scripts": {
+    "start": "electron .",
+    "payload": "node scripts/build-payload.mjs",
+    "payload:check": "node scripts/build-payload.mjs --check",
+    "test": "node --test test/",
+    "dist": "electron-builder --win --x64",
+    "release": "electron-builder --win --x64 --publish always"
+  },
+  "dependencies": {
+    "@supabase/supabase-js": "2.116.0",
+    "electron-updater": "6.8.9"
+  },
+  "devDependencies": {
+    "electron": "44.2.0",
+    "electron-builder": "26.15.3",
+    "esbuild": "0.28.2",
+    "playwright": "^1.63.0"
+  }
+}

@@ -1,0 +1,124 @@
+/* app.css — the desktop shell around the viewer engine (sign-in, gate, home). The engine's own CSS
+   (datalog-viewer.css etc.) styles #viewerOverlay; this file supplies the host palette tokens the
+   engine prefers (same values as alldatalogs.com's globals.css) and the shell screens. */
+
+:root {
+  color-scheme: dark;
+  --bg: #0a0a0d;
+  --bg-elev: #141418;
+  --card: #111116;
+  --card-border: #26262c;
+  --text: #f4f4f6;
+  --text-dim: #9a9aa2;
+  --text-faint: #6a6a72;
+  --red: #e5322d;
+  --green: #22c55e;
+  --amber: #f5a623;
+  --accent: #e5322d;
+}
+
+html, body { margin: 0; height: 100%; }
+body {
+  background: var(--dlv-bg-grad, var(--bg));
+  color: var(--text);
+  font: 14px/1.45 system-ui, "Segoe UI", Roboto, sans-serif;
+  overflow: hidden;
+  -webkit-user-select: none;
+  user-select: none;
+}
+#app { height: 100%; display: flex; flex-direction: column; }
+.screen { height: 100%; display: flex; flex-direction: column; }
+.screen[hidden] { display: none; }
+.screen-center { align-items: center; justify-content: center; }
+
+.muted { color: var(--text-dim); }
+.small { font-size: 12px; }
+.grow { flex: 1; }
+
+/* Brand */
+.brand { display: flex; align-items: baseline; gap: 10px; }
+.brand-mark { font-weight: 900; letter-spacing: 1px; font-size: 20px; color: var(--text); }
+.brand-mark b { color: var(--red); }
+.brand-sub { font-size: 10px; font-weight: 700; letter-spacing: 1.6px; color: var(--text-dim); text-transform: uppercase; }
+
+/* Buttons */
+.btn {
+  appearance: none; border: 1px solid var(--card-border); background: var(--bg-elev); color: var(--text);
+  font: inherit; font-weight: 600; padding: 9px 18px; border-radius: 8px; cursor: pointer;
+  transition: background .12s, border-color .12s;
+}
+.btn:hover { background: #1c1c22; border-color: #3a3a42; }
+.btn:focus-visible { outline: 2px solid var(--amber); outline-offset: 2px; }
+.btn-primary { background: var(--amber); border-color: var(--amber); color: #111; }
+.btn-primary:hover { background: #ffb63a; border-color: #ffb63a; }
+.btn:disabled { opacity: .55; cursor: default; }
+.link { appearance: none; background: none; border: 0; color: var(--text-dim); font: inherit; cursor: pointer; padding: 4px 6px; }
+.link:hover { color: var(--text); text-decoration: underline; }
+
+/* Card (sign-in, gate) */
+.card {
+  width: min(420px, 90vw); background: var(--card); border: 1px solid var(--card-border); border-radius: 14px;
+  padding: 28px 30px 24px; box-shadow: 0 24px 60px rgba(0,0,0,.45); display: flex; flex-direction: column; gap: 12px;
+}
+.card h1 { margin: 6px 0 0; font-size: 22px; }
+.card form { display: flex; flex-direction: column; gap: 12px; margin-top: 4px; }
+.card label { display: flex; flex-direction: column; gap: 5px; font-size: 12px; font-weight: 700; color: var(--text-dim); text-transform: uppercase; letter-spacing: .6px; }
+.card input {
+  font: 14px system-ui, "Segoe UI", sans-serif; padding: 9px 11px; border-radius: 7px; border: 1px solid var(--card-border);
+  background: var(--bg); color: var(--text); outline: none; -webkit-user-select: text; user-select: text;
+}
+.card input:focus { border-color: var(--amber); box-shadow: 0 0 0 2px rgba(245,166,35,.22); }
+.card .links { display: flex; justify-content: space-between; margin-top: 4px; }
+.stack { display: flex; flex-direction: column; gap: 8px; margin-top: 6px; }
+.form-error { color: #ff7b72; font-size: 13px; }
+.form-error[hidden] { display: none; }
+
+/* Home */
+.home-top { display: flex; align-items: center; gap: 18px; padding: 16px 22px 0; }
+.banner {
+  flex: 1; padding: 8px 12px; border-radius: 8px; font-size: 13px;
+  background: rgba(245,166,35,.12); border: 1px solid rgba(245,166,35,.35); color: #ffd48a;
+}
+.banner.bad { background: rgba(229,50,45,.12); border-color: rgba(229,50,45,.4); color: #ff9a94; }
+.banner[hidden] { display: none; }
+.home-main { flex: 1; min-height: 0; display: grid; grid-template-columns: 1fr 300px; gap: 22px; padding: 22px; }
+.dropzone {
+  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 10px; text-align: center;
+  border: 2px dashed #2e2e36; border-radius: 16px; background: rgba(255,255,255,.015); padding: 30px; transition: border-color .12s, background .12s;
+}
+.dropzone.over { border-color: var(--amber); background: rgba(245,166,35,.06); }
+.dz-glyph { color: var(--red); }
+.dropzone h1 { margin: 6px 0 0; font-size: 26px; font-weight: 800; }
+.dropzone p b { color: var(--text); }
+.dz-actions { display: flex; gap: 10px; margin-top: 12px; }
+.recent { display: flex; flex-direction: column; min-height: 0; background: var(--card); border: 1px solid var(--card-border); border-radius: 14px; padding: 14px 14px 10px; }
+.recent h2 { margin: 0 0 8px; font-size: 11px; font-weight: 800; letter-spacing: 1.2px; text-transform: uppercase; color: var(--text-dim); }
+.recent ul { list-style: none; margin: 0; padding: 0; overflow: auto; flex: 1; }
+.recent li { padding: 8px 8px; border-radius: 8px; cursor: pointer; display: flex; flex-direction: column; gap: 2px; }
+.recent li:hover { background: var(--bg-elev); }
+.recent .rname { font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.recent .rmeta { font-size: 11.5px; color: var(--text-faint); }
+.home-foot {
+  display: flex; align-items: center; gap: 14px; padding: 8px 22px 10px; font-size: 12px; color: var(--text-dim);
+  border-top: 1px solid #1c1c22;
+}
+#footPro.pro { color: var(--green); font-weight: 700; }
+#footPro.warn { color: var(--amber); font-weight: 700; }
+
+/* Loader */
+.loader {
+  position: fixed; inset: 0; z-index: 950; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 16px;
+  background: rgba(8,8,10,.92);
+}
+.loader[hidden] { display: none; }
+.loader-name { font-weight: 600; color: var(--text-dim); }
+@keyframes dv-spin { to { transform: rotate(360deg); } }
+.dv-spinner { width: 46px; height: 46px; border-radius: 50%; border: 4px solid #2a2a32; border-top-color: var(--red); animation: dv-spin .8s linear infinite; }
+
+/* Toast (engine calls window.showToast) */
+.toast {
+  position: fixed; left: 50%; bottom: 26px; transform: translateX(-50%); z-index: 1200;
+  background: #1c1c22; border: 1px solid #34343c; color: var(--text); padding: 9px 16px; border-radius: 9px;
+  font-size: 13px; box-shadow: 0 10px 30px rgba(0,0,0,.5); pointer-events: none;
+}
+.toast[hidden] { display: none; }

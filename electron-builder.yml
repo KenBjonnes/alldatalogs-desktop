@@ -1,0 +1,70 @@
+# electron-builder.yml — BigData for Windows packaging.
+#
+# NSIS x64, per-user install (HKCU, no UAC prompt), assisted installer so people see where it goes.
+# File associations register BigData as a handler for .hpl / .ld / .dl; Windows 10/11 will NOT steal an
+# existing default (VCM Scanner, i2, Holley EFI) — users choose "Open with → Always". .csv is deliberately
+# not associated (it belongs to Excel on most PCs).
+#
+# publish: GitHub Releases on the public repo is the auto-update feed. releaseType must be 'release':
+# electron-updater cannot see draft releases, and electron-builder creates drafts by default.
+appId: com.alldatalogs.bigdata
+productName: BigData
+copyright: Copyright © 2026 AllDataLogs
+artifactName: ${productName}-Setup-${version}.${ext}
+
+directories:
+  output: dist
+  buildResources: build
+
+files:
+  - main/**
+  - preload/**
+  - renderer/**
+  - "!renderer/src/**"
+  - payload/**
+  - package.json
+  - "!**/*.map"
+  - "!scripts/**"
+  - "!test/**"
+
+asar: true
+
+win:
+  target:
+    - target: nsis
+      arch: [x64]
+  icon: build/icon.ico
+  executableName: BigData
+  fileAssociations:
+    - ext: hpl
+      name: HP Tuners Datalog
+      description: HP Tuners VCM Scanner datalog
+      role: Viewer
+    - ext: ld
+      name: MoTeC Datalog
+      description: MoTeC i2 datalog
+      role: Viewer
+    - ext: dl
+      name: Holley Datalog
+      description: Holley EFI datalog
+      role: Viewer
+  # Code signing: add `signtoolOptions` or `azureSignOptions` here once a certificate exists. Once a
+  # signed build has shipped, never publish an unsigned one again (the updater will refuse it).
+
+nsis:
+  oneClick: false
+  perMachine: false
+  allowToChangeInstallationDirectory: true
+  createDesktopShortcut: true
+  createStartMenuShortcut: true
+  shortcutName: BigData
+  runAfterFinish: true
+  deleteAppDataOnUninstall: false
+  installerIcon: build/icon.ico
+  uninstallerIcon: build/icon.ico
+
+publish:
+  provider: github
+  owner: KenBjonnes
+  repo: alldatalogs-desktop
+  releaseType: release
