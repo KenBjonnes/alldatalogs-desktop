@@ -52,7 +52,17 @@ if (expectCurrent) check(last && last.state === 'current', 'installed app report
 else check(last && last.state === 'ready' && last.version && last.version !== version, `update downloaded and ready (${last && last.version})`);
 const foot = await page.textContent('#banner').catch(() => '');
 console.log('banner:', (foot || '').trim());
-await app.close();
+
+if (process.argv.includes('--install') && last && last.state === 'ready') {
+  // Hand over to the updater: the app quits, the NSIS updater runs silently and relaunches the new
+  // version outside Playwright's control. The caller checks the exe version on disk afterwards.
+  const exited = new Promise((resolve) => app.process().once('exit', resolve));
+  await page.evaluate(() => window.bigdata.updates.restart());
+  const code = await Promise.race([exited, new Promise((r) => setTimeout(() => r('timeout'), 60_000))]);
+  check(code !== 'timeout', `app quit to install the update (exit ${code})`);
+} else {
+  await app.close();
+}
 
 console.log(failures.length ? `\n${failures.length} FAILURE(S)` : '\nALL PASS');
 process.exit(failures.length ? 1 : 0);
