@@ -41,9 +41,15 @@ node scripts/build-payload.mjs        # needs the RELEASE viewer folder + the Al
 set BIGDATA_DEV_PRO=1 && npm start    # Pro forced on, no backend needed (ignored in packaged builds)
 npm test                               # unit tests
 npm run smoke                          # launches the app with a log and checks 18 things
+npm run smoke:license                  # real sign-in with the test account, isolated user-data folder
+npm run dist && npm run smoke:packaged # drives dist/win-unpacked/BigData.exe like a customer would
 ```
 
-Open a log from the command line while developing: `npx electron . "C:\path\to\log.hpl"`.
+Open a log from the command line while developing: `npx electron . "C:\path\to\log.hpl"`. Set
+`BIGDATA_USER_DATA=<folder>` to keep session/licence/recents away from your real install.
+
+The repo is byte-exact (`.gitattributes` `* -text`): the payload and the built licensing modules are hashed, so no
+line-ending conversion is allowed on any checkout.
 
 ### Licence
 

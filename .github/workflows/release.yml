@@ -30,10 +30,29 @@ jobs:
         run: |
           $v = (Get-Content package.json -Raw | ConvertFrom-Json).version
           if ("v$v" -ne "${{ github.ref_name }}") { throw "Tag ${{ github.ref_name }} does not match package.json version v$v" }
-      - name: Build and publish installer
-        run: npx electron-builder --win --x64 --publish always
+      - name: Build installer
+        run: npx electron-builder --win --x64 --publish never
+      # electron-builder's own GitHub publisher uploads assets in parallel and, on a fresh tag, both
+      # uploads raced to create the release; the 113 MB exe was lost while the step still exited 0
+      # (v0.1.0, run 34174361361). gh uploads sequentially and fails loudly, so it publishes instead.
+      - name: Publish release assets
+        shell: pwsh
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          $tag = "${{ github.ref_name }}"
+          $exe = Get-ChildItem dist/*.exe | Select-Object -First 1
+          if (-not $exe) { throw "No installer in dist/" }
+          $files = @($exe.FullName, "$($exe.FullName).blockmap", (Resolve-Path dist/latest.yml).Path)
+          foreach ($f in $files) { if (-not (Test-Path $f)) { throw "Missing $f" } }
+          gh release view $tag *> $null
+          if ($LASTEXITCODE -ne 0) {
+            gh release create $tag --title "BigData $tag" --notes "BigData for Windows $tag. Download BigData-Setup-*.exe; see the README for the SmartScreen note." --latest
+            if ($LASTEXITCODE -ne 0) { throw "gh release create failed" }
+          }
+          gh release upload $tag @files --clobber
+          if ($LASTEXITCODE -ne 0) { throw "gh release upload failed" }
+          gh release view $tag --json assets --jq '.assets[].name'
       - uses: actions/upload-artifact@v4
         with:
           name: BigData-Setup

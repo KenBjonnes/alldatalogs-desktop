@@ -31,8 +31,9 @@ const page = await app.firstWindow();
 
 const version = await page.evaluate(() => window.bigdata.app.version);
 console.log(`installed app version: ${version}`);
-const signin = await page.$('#screen-signin:not([hidden])');
-if (signin) {
+// Wait for the renderer to settle on a screen (sign-in on a fresh folder, home when a session persisted).
+await page.waitForSelector('#screen-signin:not([hidden]), #screen-home:not([hidden])', { timeout: 30000, state: 'visible' });
+if (await page.$('#screen-signin:not([hidden])')) {
   await page.fill('#signinEmail', acct.email);
   await page.fill('#signinPassword', acct.password);
   await page.click('#signinBtn');
