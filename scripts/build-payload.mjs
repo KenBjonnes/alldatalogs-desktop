@@ -48,6 +48,8 @@ const ENGINE = [
   'datalog-histogram-ui.js',
   'datalog-histogram-editor.js',
   'datalog-hpt.js',
+  'datalog-library.js',
+  'datalog-library.css',
   'datalog-viewer.js',
 ];
 
@@ -98,6 +100,7 @@ export const SCRIPT_ORDER = [
   '/viewer-engine/datalog-histogram-ui.js',
   '/viewer-engine/datalog-histogram-editor.js',
   '/viewer-engine/datalog-hpt.js',
+  '/viewer-engine/datalog-library.js',
   '/viewer-engine/datalog-viewer.js',
   '/glue.js',
 ];

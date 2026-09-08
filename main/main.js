@@ -162,6 +162,15 @@ function main() {
   ipcMain.handle('layouts:pull', () => supabase.pullLayouts());
   ipcMain.handle('layouts:push', (_event, entry) => supabase.pushLayout(entry));
   ipcMain.handle('layouts:remove', (_event, id) => supabase.removeLayout(id));
+  // Shared library: browse is open; publishing/removing needs the signed-in session (RLS enforces).
+  ipcMain.handle('library:list', (_event, q) => supabase.libraryList(q));
+  ipcMain.handle('library:get', (_event, id) => supabase.libraryGet(id));
+  ipcMain.handle('library:publish', (_event, input) => supabase.libraryPublish(input));
+  ipcMain.handle('library:remove', (_event, id) => supabase.libraryRemove(id));
+  ipcMain.handle('library:pull', (_event, id) => supabase.libraryPull(id));
+  ipcMain.handle('library:me', () => supabase.libraryMe());
+  ipcMain.handle('library:isAdmin', () => supabase.libraryIsAdmin());
+  ipcMain.handle('library:admin', (_event, args) => supabase.libraryAdmin(args && args.action, args && args.body));
 
   buildMenu();
   createWindow();

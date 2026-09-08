@@ -54,6 +54,21 @@ contextBridge.exposeInMainWorld('bigdata', {
     remove: (id) => ipcRenderer.invoke('layouts:remove', id),
   },
 
+  library: {
+    list: (q) => ipcRenderer.invoke('library:list', q),
+    get: (id) => ipcRenderer.invoke('library:get', id),
+    publish: (input) => ipcRenderer.invoke('library:publish', input),
+    remove: (id) => ipcRenderer.invoke('library:remove', id),
+    pull: (id) => ipcRenderer.invoke('library:pull', id),
+    me: () => ipcRenderer.invoke('library:me'),
+    isAdmin: () => ipcRenderer.invoke('library:isAdmin'),
+    admin: {
+      setOfficial: (id, value) => ipcRenderer.invoke('library:admin', { action: 'library_official', body: { itemId: id, value } }),
+      hide: (id, value) => ipcRenderer.invoke('library:admin', { action: 'library_hide', body: { itemId: id, value } }),
+      remove: (id) => ipcRenderer.invoke('library:admin', { action: 'library_delete', body: { itemId: id } }),
+    },
+  },
+
   updates: {
     check: () => ipcRenderer.invoke('updates:check'),
     get: () => ipcRenderer.invoke('updates:get'),

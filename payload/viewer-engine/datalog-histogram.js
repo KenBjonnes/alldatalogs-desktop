@@ -358,9 +358,48 @@
     return c;
   }
   function exportDef(def) { return JSON.stringify(def, null, 2); }
-  function exportDefs(defs) {
-    return JSON.stringify({ version: HISTOGRAM_SCHEMA_VERSION, kind: PACKAGE_KIND, exportedAt: new Date().toISOString(),
-      histograms: (Array.isArray(defs) ? defs : [defs]).filter(isObj) }, null, 2);
+  // A math channel as it travels inside a package: the four fields and nothing else.
+  function packMathChannel(m) {
+    if (!isObj(m) || !m.name || !m.expression) return null;
+    return { id: String(m.id || ''), name: String(m.name), expression: String(m.expression), unit: m.unit == null ? null : String(m.unit) };
+  }
+  // The math channels a def list depends on: those referenced by id (or by a name in the param label)
+  // plus, transitively, every channel an included expression references by [Name]. A package or a
+  // shared library item that carries these imports whole; one that doesn't imports as "missing
+  // parameter" (Ken, 2026-09-08).
+  function mathChannelDeps(defs, list) {
+    var out = [], seen = {};
+    if (!Array.isArray(list) || !list.length) return out;
+    var add = function (mc) {
+      if (!mc || seen[mc.id]) return;
+      seen[mc.id] = true; out.push(mc);
+      String(mc.expression || '').replace(/\[([^\]]+)\]/g, function (_, ref) { add(mathChannelByRef(list, ref)); return _; });
+    };
+    var fromParam = function (p) { if (isObj(p) && p.mathChannelId) add(mathChannelByRef(list, p.mathChannelId) || (p.label ? mathChannelByRef(list, p.label) : null)); };
+    var walkClauses = function (clauses) {
+      if (!Array.isArray(clauses)) return;
+      clauses.forEach(function (c) {
+        if (Array.isArray(c)) { walkClauses(c); return; }
+        if (!isObj(c)) return;
+        if (Array.isArray(c.group)) { walkClauses(c.group); return; }
+        fromParam(c.param);
+      });
+    };
+    (Array.isArray(defs) ? defs : [defs]).forEach(function (d) {
+      if (!isObj(d)) return;
+      fromParam(d.cellParameter);
+      if (isObj(d.columnAxis)) fromParam(d.columnAxis.parameter);
+      if (isObj(d.rowAxis)) fromParam(d.rowAxis.parameter);
+      if (isObj(d.filter)) walkClauses(d.filter.clauses);
+    });
+    return out;
+  }
+  function exportDefs(defs, mathChannels) {
+    var pkg = { version: HISTOGRAM_SCHEMA_VERSION, kind: PACKAGE_KIND, exportedAt: new Date().toISOString(),
+      histograms: (Array.isArray(defs) ? defs : [defs]).filter(isObj) };
+    var mcs = Array.isArray(mathChannels) ? mathChannels.map(packMathChannel).filter(Boolean) : [];
+    if (mcs.length) pkg.mathChannels = mcs;
+    return JSON.stringify(pkg, null, 2);
   }
   function parseInput(input, warnings) {
     if (typeof input === 'string') {
@@ -387,23 +426,44 @@
     return { def: def, warnings: warnings };
   }
   function importDefs(input) {
-    var warnings = [], defs = [];
+    var warnings = [], defs = [], mathChannels = [];
     var obj = parseInput(input, warnings);
-    if (obj === null || obj === undefined) { if (!warnings.length) warnings.push('nothing to import'); return { defs: defs, warnings: warnings }; }
+    if (obj === null || obj === undefined) { if (!warnings.length) warnings.push('nothing to import'); return { defs: defs, mathChannels: mathChannels, warnings: warnings }; }
     var list;
     if (Array.isArray(obj)) list = obj;
     else if (isObj(obj) && Array.isArray(obj.histograms)) {
       if (obj.kind && obj.kind !== PACKAGE_KIND) warnings.push('package kind "' + obj.kind + '" is not ' + PACKAGE_KIND);
       if (isFin(obj.version) && obj.version > HISTOGRAM_SCHEMA_VERSION) warnings.push('package schema version ' + obj.version + ' is newer than this viewer supports (' + HISTOGRAM_SCHEMA_VERSION + ')');
       list = obj.histograms;
+      if (Array.isArray(obj.mathChannels)) mathChannels = obj.mathChannels.map(packMathChannel).filter(Boolean);
     } else if (looksLikeDef(obj)) list = [obj];
-    else { warnings.push('input is not a histogram package'); return { defs: defs, warnings: warnings }; }
+    else { warnings.push('input is not a histogram package'); return { defs: defs, mathChannels: mathChannels, warnings: warnings }; }
     list.forEach(function (item, i) {
       var r = importDef(item);
       if (r.def) defs.push(r.def); else warnings.push('histogram #' + (i + 1) + ' skipped');
       r.warnings.forEach(function (w) { warnings.push('#' + (i + 1) + ': ' + w); });
     });
-    return { defs: defs, warnings: warnings };
+    return { defs: defs, mathChannels: mathChannels, warnings: warnings };
+  }
+  // Merge packaged math channels into a live list BY NAME: a same-named live channel wins (its id
+  // is kept, so nothing already referencing it moves), a new one is added under a fresh id when its
+  // packaged id collides. Returns { list, idMap } -- idMap rewrites the package's ids onto the live
+  // ones for remapMathChannelIds.
+  function mergeMathChannels(live, incoming, mintId) {
+    var list = (Array.isArray(live) ? live : []).slice(), idMap = {}, added = [];
+    var byName = {}, byId = {};
+    list.forEach(function (m) { if (m && m.name) byName[normChannelName(m.name)] = m; if (m && m.id) byId[m.id] = m; });
+    (Array.isArray(incoming) ? incoming : []).forEach(function (raw) {
+      var m = packMathChannel(raw);
+      if (!m) return;
+      var have = byName[normChannelName(m.name)];
+      if (have) { if (m.id && m.id !== have.id) idMap[m.id] = have.id; return; }
+      var id = m.id && !byId[m.id] ? m.id : (typeof mintId === 'function' ? mintId(m) : 'mc_' + Date.now().toString(36) + Math.floor(Math.random() * 1e6).toString(36));
+      if (m.id && id !== m.id) idMap[m.id] = id;
+      var copy = { id: id, name: m.name, expression: m.expression, unit: m.unit };
+      list.push(copy); added.push(copy); byName[normChannelName(m.name)] = copy; byId[id] = copy;
+    });
+    return { list: list, idMap: idMap, added: added };
   }
 
   // ================================================================================================
@@ -1054,8 +1114,9 @@
     // definitions
     makeDef: makeDef, makeParam: makeParam, makeAxis: makeAxis, validateDef: validateDef, migrateDef: migrateDef,
     cloneDef: cloneDef, invertDef: invertDef, exportDef: exportDef, importDef: importDef, exportDefs: exportDefs, importDefs: importDefs,
-    // math-channel references
+    // math-channel references + packaging
     mathChannelByRef: mathChannelByRef, remapMathChannelIds: remapMathChannelIds, normChannelName: normChannelName,
+    mathChannelDeps: mathChannelDeps, mergeMathChannels: mergeMathChannels, packMathChannel: packMathChannel,
     // breakpoints
     parseBreakpoints: parseBreakpoints, sortBreakpoints: sortBreakpoints, reverseBreakpoints: reverseBreakpoints,
     formatBreakpoints: formatBreakpoints, formatNumber: fmtNum,

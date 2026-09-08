@@ -2965,10 +2965,22 @@ function dashMakeCombo(x, y){
   var g = { id: 'dash-' + (DASH_ID++), type: 'combo', color: VIEWER_DASH_COLOR, scale: DASH_SCALES.combo || 1.5, x: x, y: y };
   dashSeedComboMain(g, rpm);
   g.channelOverride = rpm || null;
+  dashStampRole(g, rpm);
   var sp = dashSpeedChannel();
   if(!sp){ var nums = dashNumericChannels(); for(var i = 0; i < nums.length; i++){ if(nums[i] !== rpm){ sp = nums[i]; break; } } }
   dashSeedComboSub(g, sp);
+  dashStampRole(g.sub, sp);
   return g;
+}
+// A custom-dash gauge binds to a literal channel name (channelOverride). Remember which ROLE that
+// channel satisfies on this log too, so the same dashboard shared to another car (whose log calls
+// RPM "Engine RPM (SAE)") still finds its channels by meaning -- see resolveGaugeChannel's
+// roleFallback. Any channel with no role keeps override-only behaviour, exactly as before.
+function dashStampRole(g, ch){
+  if(!g) return;
+  var role = (typeof roleForChannel === 'function') ? roleForChannel(ch, VIEWER_RESOLVED_ROLES) : null;
+  if(role){ g.role = role; g.roleFallback = true; }
+  else { delete g.role; delete g.roleFallback; }
 }
 function dashMakeGauge(ptype, x, y){
   if(ptype === 'scorecard'){ return (scorecardEnabled() && typeof Scorecard !== 'undefined') ? Scorecard.makeDef(x, y) : null; }
@@ -2984,6 +2996,7 @@ function dashMakeGauge(ptype, x, y){
     channelOverride: ch || null,
     x: x, y: y
   };
+  dashStampRole(g, ch);
   if(dashIsFreeSize(type)){ var sz = DASH_BAR_SIZES[type]; g.w = sz.w; g.h = sz.h; g.parked = 'auto'; }
   else g.scale = DASH_SCALES[ptype] || 1;
   // A Tach reads like a real automotive tach (Ken): ticks divided by 1000 (1, 2, 3 …) with a "× 1000"
@@ -3539,7 +3552,8 @@ function openDashLoadGaugesMenu(anchor){
   m.addEventListener('click', function(e){ e.stopPropagation(); });
   m.innerHTML = '<h4>Load saved gauges</h4>' + (gauges.length
     ? gauges.map(function(r){ return '<div class="dlv-vrow"><button type="button" class="act clear dlv-vrow-pick" data-loadg="' + escapeHtml(String(r.id)) + '">' + escapeHtml(r.name) + '</button></div>'; }).join('')
-    : '<div class="dlv-gmenu-hint">No saved gauge dashes yet.</div>');
+    : '<div class="dlv-gmenu-hint">No saved gauge dashes yet.</div>') +
+    (libraryAvailable() ? '<div class="dlv-menu-sep"></div><div class="dlv-vrow"><button type="button" class="act clear dlv-vrow-pick" data-library="gauges">Browse the library…</button></div>' : '');
   document.body.appendChild(m);
   var r = anchor.getBoundingClientRect(), pad = 8;
   m.style.top = (r.bottom + 6) + 'px';
@@ -3547,6 +3561,54 @@ function openDashLoadGaugesMenu(anchor){
   VIEWER_HDR_MENU = m;
   m.querySelectorAll('[data-loadg]').forEach(function(btn){
     btn.addEventListener('click', function(){ closeHdrMenu(); loadGaugesIntoDash(btn.getAttribute('data-loadg')); });
+  });
+  m.querySelectorAll('[data-library]').forEach(function(btn){
+    btn.addEventListener('click', function(){ closeHdrMenu(); openLibrary('gauges', { edit: true }); });
+  });
+}
+
+// ---- Shared library (datalog-library.js + a host provider on DATAVIEWER.library) -------------------
+function libraryAvailable(){ return typeof Library !== 'undefined' && !!Library.available && Library.available(); }
+// Browse and, on "Use", load the item. A gauge dashboard lands like a PBD vehicle config: read-only
+// meta (so nothing is marked dirty and the next Save prompts for the user's OWN name -- pulling never
+// overwrites one of their saved sets), finalized unless the caller was authoring (the dash "Load
+// gauges" menu, where the loaded set is the starting point for more editing). A histogram is handed
+// to the tables' own importer, which merges the math channels it depends on.
+function openLibrary(kind, opts){
+  if(!libraryAvailable()) return;
+  opts = opts || {};
+  Library.open({ kind: kind, onUse: function(item){
+    if(!item || !item.payload) return;
+    var pl = item.payload;
+    if(item.kind === 'gauges'){
+      var gauges = Array.isArray(pl.gauges) ? pl.gauges : [];
+      if(!gauges.length){ if(window.showToast) showToast('That dashboard is empty.'); return; }
+      if(!viewerIsPro()) return;
+      applyGaugesConfig({ kind: 'gauges', gauges: gauges }, { kind: 'library', id: item.id, name: item.name, readOnly: true },
+        { edit: !!opts.edit, dirty: !!opts.edit, toast: 'Loaded "' + item.name + '" from the library.' });
+      return;
+    }
+    if(item.kind === 'histogram'){
+      if(!pl.def){ if(window.showToast) showToast('That histogram is empty.'); return; }
+      enterHistograms();
+      if(VIEWER_HIST_CTL && typeof VIEWER_HIST_CTL.importPackage === 'function'){
+        VIEWER_HIST_CTL.importPackage({ kind: 'datalog-histograms', histograms: [pl.def], mathChannels: Array.isArray(pl.mathChannels) ? pl.mathChannels : [] }, 'library item');
+      }
+    }
+  } });
+}
+// Share the dash on screen as a whole dashboard: its gauge defs (roles stamped by dashStampRole so
+// it binds by meaning on another car; scorecards stripped -- staff-only) + a schematic thumbnail.
+function shareDashToLibrary(){
+  if(!libraryAvailable()) return;
+  var gauges = currentGaugesList().filter(function(g){ return g && g.type !== 'scorecard'; });
+  if(!gauges.length){ if(window.showToast) showToast('Add a gauge before sharing.'); return; }
+  var cur = VIEWER_CURRENT_GAUGES || {};
+  Library.share({
+    kind: 'gauges', name: cur.name && cur.kind !== 'library' ? cur.name : 'My Gauges',
+    payload: { kind: 'gauges', gauges: gauges },
+    thumbSvg: (typeof gaugesThumbnailSvg === 'function') ? gaugesThumbnailSvg(gauges) : null,
+    vehicle: ''
   });
 }
 
@@ -3564,9 +3626,10 @@ function openDashCtrlMenu(anchor){
   // Raw glyphs (✓ ✎ 🗑) rather than HTML entities: hdrItem runs escapeHtml on the label, so a &#..;
   // would show literally. The file is served UTF-8 and released with Copy-Item, so the bytes survive.
   var del = hdrItem('dashdelete', '🗑 Delete dash', false);
+  var share = libraryAvailable() ? hdrItem('dashshare', '⇪ Share to library…', !viewerIsPro()) : '';
   m.innerHTML = VIEWER_DASH_EDIT
-    ? hdrItem('dashfinalize', '✓ Finalize dash', false) + del
-    : hdrItem('dashedit',     '✎ Edit dash',     false) + del;
+    ? hdrItem('dashfinalize', '✓ Finalize dash', false) + share + del
+    : hdrItem('dashedit',     '✎ Edit dash',     false) + share + del;
   document.body.appendChild(m);
   var r = anchor.getBoundingClientRect(), pad = 8;
   m.style.top = (r.bottom + 6) + 'px';
@@ -3578,6 +3641,7 @@ function openDashCtrlMenu(anchor){
       closeHdrMenu();
       if(act === 'dashfinalize') return dashFinalize();
       if(act === 'dashedit'){ if(viewerIsPro()){ VIEWER_DASH_EDIT = true; renderViewerBody(); } return; }
+      if(act === 'dashshare'){ if(viewerIsPro()) shareDashToLibrary(); return; }
       if(act === 'dashdelete') return dashDeleteCurrent();
     });
   });
@@ -4070,6 +4134,7 @@ function dashAssignMenu(e, g){
   var subCh = m.querySelector('.dlv-dash-sub-ch');
   if(subCh) subCh.addEventListener('change', function(){
     dashSeedComboSub(g, subCh.value || null);
+    dashStampRole(g.sub, subCh.value || null);
     var lbl = m.querySelector('[data-sub="label"]'); if(lbl) lbl.value = g.sub.label || '';
     var mn = m.querySelector('[data-sub="min"]'); if(mn) mn.value = g.sub.min;
     var mx = m.querySelector('[data-sub="max"]'); if(mx) mx.value = g.sub.max;
@@ -4130,8 +4195,9 @@ function dashRebuildAll(){
 }
 function dashAssign(g, ch){
   // Combo: the left channel list assigns the PRIMARY (RPM) dial; re-seed its tach scale + redline.
-  if(g.type === 'combo'){ dashSeedComboMain(g, ch); g.channelOverride = ch; dashRebuildGauge(g); return; }
+  if(g.type === 'combo'){ dashSeedComboMain(g, ch); g.channelOverride = ch; dashStampRole(g, ch); dashRebuildGauge(g); return; }
   g.channelOverride = ch;
+  dashStampRole(g, ch);
   g.label = (typeof shortChannelName === 'function') ? shortChannelName(ch) : ch;
   g.unit = (VIEWER_DATA && VIEWER_DATA.units) ? (VIEWER_DATA.units[ch] || '') : '';
   var rng = dashRangeFor(ch);
@@ -4713,6 +4779,7 @@ function openViewPicker(anchor, which){
     html += g.length ? g.map(function(r){ return viewPickRowHtml(r, 'gauges'); }).join('') : '<div class="dlv-gmenu-hint">No saved custom gauges yet.</div>';
     html += '<div class="dlv-menu-sep"></div>';
     html += '<div class="dlv-vrow"><button type="button" class="act clear dlv-vrow-pick' + (viewerIsPro() ? '' : ' dlv-pro-locked') + '" data-newdash="1">+ Build custom gauges</button></div>';
+    if(libraryAvailable()) html += '<div class="dlv-vrow"><button type="button" class="act clear dlv-vrow-pick" data-library="gauges">Browse the library…</button></div>';
   }
   m.innerHTML = html;
   document.body.appendChild(m);
@@ -4731,6 +4798,9 @@ function openViewPicker(anchor, which){
   });
   m.querySelectorAll('[data-newdash]').forEach(function(btn){
     btn.addEventListener('click', function(){ closeHdrMenu(); if(viewerIsPro()) enterCustomGauges(); });
+  });
+  m.querySelectorAll('[data-library]').forEach(function(btn){
+    btn.addEventListener('click', function(){ closeHdrMenu(); openLibrary(btn.getAttribute('data-library')); });
   });
   m.querySelectorAll('[data-del]').forEach(function(btn){
     btn.addEventListener('click', function(e){

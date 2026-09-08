@@ -676,6 +676,7 @@
           'sep',
           { label: 'Export JSON', action: function () { downloadText(safeFile(def.name) + '.histogram.json', H().exportDef(def)); } },
           { label: 'Import JSON…', action: function () { D.file.click(); } },
+          { label: 'Share to library…', disabled: !libraryAvailable(), action: function () { shareToLibrary(def); } },
           'sep',
           { label: 'Delete', danger: true, action: function () { deleteDef(def); } }
         ];
@@ -684,6 +685,7 @@
         return [
           { label: 'Add histogram', action: function () { addDef(); } },
           { label: 'Load example set', action: function () { loadExamples(); } },
+          { label: 'Browse the library…', disabled: !libraryAvailable(), action: function () { openLibrary(); } },
           'sep',
           // The picker inside the def editor offers named math channels and its own "Manage…" link;
           // this is the entry point for getting in there WITHOUT opening a histogram first (Ken's ask,
@@ -698,6 +700,45 @@
         ];
       }
       function mathManagerAvailable() { return typeof glue.openMathManager === 'function'; }
+      // ---- shared library (datalog-library.js + a host provider) ------------------------------------
+      function libraryAvailable() { return typeof global.Library !== 'undefined' && !!global.Library.available && global.Library.available(); }
+      function openLibrary() {
+        if (!libraryAvailable()) { toast('The library is not available here.'); return; }
+        global.Library.open({ kind: 'histogram', onUse: function (item) {
+          var pl = item && item.payload;
+          if (!pl || !pl.def) { toast('That histogram is empty.'); return; }
+          importPackage({ kind: H().PACKAGE_KIND, histograms: [pl.def], mathChannels: Array.isArray(pl.mathChannels) ? pl.mathChannels : [] }, 'library item');
+        } });
+      }
+      // Share one table: its def plus every math channel it depends on (transitively), and a
+      // thumbnail painted from the LIVE table when this def is the one on screen.
+      function shareToLibrary(def) {
+        if (!libraryAvailable()) { toast('The library is not available here.'); return; }
+        var list = (glue.mathChannels && typeof glue.mathChannels.list === 'function') ? (glue.mathChannels.list() || []) : [];
+        var deps = H().mathChannelDeps([def], list);
+        var live = def.id === S.activeId && S.view && S.statTable && S.scale;
+        var svg = null;
+        try { svg = live ? thumbnailSvg(def, S.view, S.statTable, S.scale) : thumbnailSvg(def, null, null, null); } catch (e) { svg = null; }
+        global.Library.share({
+          kind: 'histogram', name: def.name || 'Histogram', description: def.description || '',
+          payload: { kind: 'histogram', def: H().cloneDef ? JSON.parse(JSON.stringify(def)) : def, mathChannels: deps },
+          thumbSvg: svg
+        });
+      }
+      // Import a package object ({histograms, mathChannels?}): packaged math channels merge into the
+      // live list BY NAME (a same-named channel of ours keeps its id; new ones are added), the incoming
+      // defs are remapped onto those ids, then adopted. Used by the file importer and the library.
+      function importPackage(obj, what) {
+        var r = H().importDefs(obj);
+        var defs = r.defs;
+        if (r.mathChannels && r.mathChannels.length && glue.mathChannels && typeof glue.mathChannels.list === 'function') {
+          var m = H().mergeMathChannels(glue.mathChannels.list() || [], r.mathChannels);
+          if (m.added.length && typeof glue.mathChannels.save === 'function') glue.mathChannels.save(m.list);
+          defs = H().remapMathChannelIds(defs, m.idMap);
+          if (m.added.length) toast('Added ' + m.added.length + ' math channel' + (m.added.length === 1 ? '' : 's'));
+        }
+        adoptImported(defs, r.warnings, what || 'histogram');
+      }
       function openMathManagerFromList() {
         if (!mathManagerAvailable()) { toast('Math channel management is not available here.'); return; }
         var data = ensureData();
@@ -772,8 +813,7 @@
             }
             return;
           }
-          var r = H().importDefs(text);
-          adoptImported(r.defs, r.warnings, 'histogram');
+          importPackage(text, 'histogram');
         };
         reader.readAsText(file);
       }
@@ -859,7 +899,8 @@
           statePanel('dlv-hist-empty-state', S.defs.length ? 'Select a histogram' : 'No histograms yet',
             S.defs.length ? '' : 'Build a table of any channel by RPM, load, MAF frequency… the way VCM Scanner histograms do.',
             '<button type="button" class="dlv-hist-btn primary" data-a="add">Add histogram</button>' +
-            '<button type="button" class="dlv-hist-btn" data-a="examples">Load example set</button>');
+            '<button type="button" class="dlv-hist-btn" data-a="examples">Load example set</button>' +
+            (libraryAvailable() ? '<button type="button" class="dlv-hist-btn" data-a="library">Browse the library</button>' : ''));
           syncToolbar(); return;
         }
         if (!def.enabled) {
@@ -1390,6 +1431,7 @@
           var a = b.getAttribute('data-a'), def = activeDef();
           if (a === 'add') addDef();
           else if (a === 'examples') loadExamples();
+        else if (a === 'library') openLibrary();
           else if (a === 'listmenu') { var rc = b.getBoundingClientRect(); openMenu(rc.left, rc.bottom + 4, listMenuItems()); e.stopPropagation(); }
           else if (a === 'collapse') setCollapsed(true);
           else if (a === 'expand') setCollapsed(false);
@@ -1546,6 +1588,8 @@
         getActive: function () { return S.activeId; },
         recompute: function () { var d = activeDef(); if (d) { markDirty(d.id); renderActive('recompute'); } },
         refresh: function () { S.entries = {}; S.filterCache = {}; S.resolver = null; renderList(); renderActive('refresh'); },
+        importPackage: importPackage,
+        openLibrary: openLibrary,
         setStatistic: setStatistic,
         setRangeMode: setRangeMode,
         // dataX is a TIME value (or null = latest), in the same coordinate space the host's other
@@ -1581,7 +1625,41 @@
   // ================================================================================================
   // 9. Public API namespace
   // ================================================================================================
+  // thumbnailSvg(def, view, table, scale) -> SVG string for the shared library. With a computed view,
+  // its stat table and colour scale it paints the REAL cell colours (call it at publish time from the
+  // live table); without a log it draws a schematic grid of the def's shape with a canned gradient.
+  function thumbnailSvg(def, view, table, scale) {
+    var esc = function (s) { return String(s == null ? '' : s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;'); };
+    var R, C, colorAt;
+    if (view && view.shape && table && scale) {
+      R = view.shape.rows; C = view.shape.cols;
+      colorAt = function (r, c) { return colorFor(table[r * C + c], scale) || '#16161a'; };
+    } else {
+      var cb = def && def.columnAxis && Array.isArray(def.columnAxis.breakpoints) ? def.columnAxis.breakpoints.length : 0;
+      var rb = def && def.rowAxis && Array.isArray(def.rowAxis.breakpoints) ? def.rowAxis.breakpoints.length : 0;
+      C = Math.max(4, Math.min(24, cb || 12)); R = rb ? Math.max(2, Math.min(16, rb)) : 4;
+      var sc = { kind: 'sequential', min: 0, max: 1, higherIsWorse: true };
+      colorAt = function (r, c) { var v = (c / Math.max(1, C - 1)) * 0.7 + (r / Math.max(1, R - 1)) * 0.3; return colorFor(v * v, sc) || '#16161a'; };
+    }
+    var W = 320, Hh = 180, pad = 8, top = 28, left = 30, bottom = 16;
+    var cw = (W - left - pad) / C, ch = (Hh - top - bottom) / R;
+    var out = ['<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ' + W + ' ' + Hh + '" preserveAspectRatio="xMidYMid meet">', '<rect width="100%" height="100%" rx="10" fill="#0d0d11"/>'];
+    out.push('<text x="' + pad + '" y="17" font-family="system-ui,sans-serif" font-size="12" font-weight="700" fill="#e6e6ea">' + esc(String((def && def.name) || 'Histogram').slice(0, 40)) + '</text>');
+    for (var r = 0; r < R; r++) for (var c = 0; c < C; c++) {
+      out.push('<rect x="' + (left + c * cw).toFixed(1) + '" y="' + (top + r * ch).toFixed(1) + '" width="' + Math.max(0.5, cw - 1).toFixed(1) + '" height="' + Math.max(0.5, ch - 1).toFixed(1) + '" fill="' + colorAt(r, c) + '"/>');
+    }
+    var labels = (view && view.labels) || {};
+    var pl = function (p) { return p ? (p.label || p.channel || p.role || '') : ''; };
+    var colLbl = labels.column || (def && def.columnAxis ? pl(def.columnAxis.parameter) : '');
+    var rowLbl = labels.row || (def && def.rowAxis ? pl(def.rowAxis.parameter) : '');
+    if (colLbl) out.push('<text x="' + (left + (W - left - pad) / 2).toFixed(1) + '" y="' + (Hh - 4) + '" text-anchor="middle" font-family="system-ui,sans-serif" font-size="9" fill="#8a8a94">' + esc(String(colLbl).slice(0, 32)) + '</text>');
+    if (rowLbl) out.push('<text transform="translate(10 ' + (top + (Hh - top - bottom) / 2).toFixed(1) + ') rotate(-90)" text-anchor="middle" font-family="system-ui,sans-serif" font-size="9" fill="#8a8a94">' + esc(String(rowLbl).slice(0, 26)) + '</text>');
+    out.push('</svg>');
+    return out.join('');
+  }
+
   var HistogramUI = {
+    thumbnailSvg: thumbnailSvg,
     VERSION: 1,
     // pure helpers
     colorFor: colorFor, makeScale: makeScale, legendGradient: legendGradient, decimalsFor: decimalsFor, formatValue: formatValue,

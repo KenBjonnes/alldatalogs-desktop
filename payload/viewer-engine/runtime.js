@@ -51,6 +51,9 @@
       vehicleMetaProvider: cfg.vehicleMetaProvider || cur.vehicleMetaProvider || null,
       // Optional host layout provider (list/save/apply/remove) for saved viewer layouts.
       layouts: cfg.layouts !== undefined ? cfg.layouts : (cur.layouts || null),
+      // Optional host provider for the shared gauge/histogram library (async list/get/publish/
+      // remove/pull + admin). Carried across a reconfigure for the same reason as isPro below.
+      library: cfg.library !== undefined ? cfg.library : (cur.library || null),
       // Pro entitlement must SURVIVE a reconfigure. This rebuilds DATAVIEWER wholesale, so without
       // carrying isPro across, any host calling configureViewer() after setViewerPro() would revert
       // to the unlocked default -- fail-open, so nothing looks broken while the gate quietly stops

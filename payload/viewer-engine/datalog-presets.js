@@ -553,14 +553,26 @@ function applyDerivedChannels(data, resolvedRoles){
 function resolveGaugeChannel(def, resolvedRoles, channelNames, textLevels){
   if(!def) return null;
   var isText = function(ch){ return !!(textLevels && textLevels[ch]); };
+  var byRole = (resolvedRoles && def.role && resolvedRoles[def.role]) || null;
   if(def.channelOverride){
-    // a saved override for a channel this log doesn't have must not silently fall back to the role
     if(isText(def.channelOverride)) return null;
     if(!channelNames || channelNames.indexOf(def.channelOverride) !== -1) return def.channelOverride;
+    // The override names a channel this log doesn't have. A preset gauge must not guess -- but a
+    // custom-dash gauge that ALSO carries the role it was built from (stamped since 2026-09-08 so a
+    // shared dashboard works on a car whose log names its channels differently) may follow the role,
+    // which is the same channel by meaning. Presets never set channelOverride+role together on their
+    // own; only user dashes do.
+    if(def.roleFallback && byRole && !isText(byRole)) return byRole;
     return null;
   }
-  var byRole = (resolvedRoles && resolvedRoles[def.role]) || null;
   return isText(byRole) ? null : byRole;
+}
+// Reverse lookup: which role does this channel satisfy on the current log (null if none)? Used to
+// stamp `role` + `roleFallback` on custom-dash gauges so they stay meaningful on other cars.
+function roleForChannel(channel, resolvedRoles){
+  if(!channel || !resolvedRoles) return null;
+  for(var role in resolvedRoles){ if(Object.prototype.hasOwnProperty.call(resolvedRoles, role) && resolvedRoles[role] === channel) return role; }
+  return null;
 }
 
 // A gauge def may carry an alternate identity: `altRole` + an `alt` presentation block. When the

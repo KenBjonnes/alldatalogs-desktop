@@ -174,4 +174,92 @@ async function removeLayout(id) {
   return { ok: !error, error: error && error.message };
 }
 
-module.exports = { init, isEncryptionAvailable, getSession, signIn, signOut, fetchEntitlementToken, pullLayouts, pushLayout, removeLayout };
+// ---- shared library (library_items; browse is open to anyone, publish/remove need a session) -------
+const LIB_COLS = 'id,kind,name,description,owner_id,author_name,is_official,status,thumb_svg,vehicle,tags,pulls,created_at,updated_at';
+function likeTerm(q) { return String(q || '').replace(/[,()%\\]/g, ' ').trim().slice(0, 60); }
+async function libraryList(q) {
+  if (!client) return { items: [], hasMore: false };
+  q = q || {};
+  const size = Math.max(1, Math.min(60, q.pageSize || 30));
+  const from = Math.max(0, q.page || 0) * size;
+  let req = client.from('library_items').select(LIB_COLS)
+    .order('is_official', { ascending: false }).order('pulls', { ascending: false }).order('updated_at', { ascending: false })
+    .range(from, from + size);
+  if (q.kind) req = req.eq('kind', q.kind);
+  if (q.official) req = req.eq('is_official', true);
+  if (q.mine) {
+    const s = await getSession();
+    if (!s) return { items: [], hasMore: false };
+    req = req.eq('owner_id', s.user.id);
+  } else {
+    req = req.eq('status', 'published');
+  }
+  const term = likeTerm(q.q);
+  if (term) req = req.or(`name.ilike.%${term}%,description.ilike.%${term}%,vehicle.ilike.%${term}%,author_name.ilike.%${term}%`);
+  const { data, error } = await req;
+  if (error || !data) return { items: [], hasMore: false, error: error && error.message };
+  return { items: data.slice(0, size), hasMore: data.length > size };
+}
+async function libraryGet(id) {
+  if (!client || !id) return null;
+  const { data } = await client.from('library_items').select('*').eq('id', String(id)).maybeSingle();
+  return data || null;
+}
+async function libraryPublish(input) {
+  if (!client || !input) return { ok: false, error: 'Not ready.' };
+  const s = await getSession();
+  if (!s) return { ok: false, error: 'Sign in to share to the library.' };
+  const meta = (s.user && s.user.user_metadata) || {};
+  const author = String(meta.display_name || (s.user.email || '').split('@')[0] || 'AllDataLogs user').slice(0, 80);
+  const row = {
+    id: 'lib_' + Date.now().toString(36) + Math.floor(Math.random() * 1e6).toString(36),
+    kind: input.kind === 'histogram' ? 'histogram' : 'gauges',
+    name: String(input.name || '').trim().slice(0, 120),
+    description: String(input.description || '').trim().slice(0, 2000),
+    owner_id: s.user.id,
+    author_name: author,
+    payload: input.payload && typeof input.payload === 'object' ? input.payload : {},
+    thumb_svg: typeof input.thumb_svg === 'string' ? input.thumb_svg.slice(0, 60000) : null,
+    vehicle: String(input.vehicle || '').trim().slice(0, 120),
+    tags: Array.isArray(input.tags) ? input.tags.map((t) => String(t).trim().toLowerCase()).filter(Boolean).slice(0, 12) : [],
+  };
+  if (!row.name) return { ok: false, error: 'Give it a name first.' };
+  const { data, error } = await client.from('library_items').insert(row).select(LIB_COLS).single();
+  if (error) return { ok: false, error: error.message };
+  return { ok: true, item: data };
+}
+async function libraryRemove(id) {
+  if (!client || !id) return { ok: false, error: 'Not ready.' };
+  const { error } = await client.from('library_items').delete().eq('id', String(id));
+  return error ? { ok: false, error: error.message } : { ok: true };
+}
+async function libraryPull(id) {
+  if (!client || !id) return;
+  try { await client.rpc('library_pull', { item_id: String(id) }); } catch { /* counter only */ }
+}
+async function libraryMe() {
+  const s = await getSession();
+  return s ? { userId: s.user.id, email: s.user.email || null } : null;
+}
+async function libraryAdmin(action, body) {
+  if (!client) return { ok: false, error: 'Not ready.' };
+  const s = await getSession();
+  if (!s) return { ok: false, error: 'Sign in first.' };
+  try {
+    const { data, error } = await client.functions.invoke('admin', { body: { action, ...(body || {}) } });
+    if (error) return { ok: false, error: error.message };
+    return data || { ok: false, error: 'No response.' };
+  } catch (e) {
+    return { ok: false, error: (e && e.message) || String(e) };
+  }
+}
+let adminKnown = null;
+async function libraryIsAdmin() {
+  if (adminKnown !== null) return adminKnown;
+  const r = await libraryAdmin('whoami', {});
+  adminKnown = !!(r && r.admin);
+  return adminKnown;
+}
+
+module.exports = { init, isEncryptionAvailable, getSession, signIn, signOut, fetchEntitlementToken, pullLayouts, pushLayout, removeLayout,
+  libraryList, libraryGet, libraryPublish, libraryRemove, libraryPull, libraryMe, libraryIsAdmin, libraryAdmin };

@@ -807,6 +807,79 @@ function renderGaugeFascia(gaugeDefs){
   return { container: container, gaugeEls: gaugeEls };
 }
 
+// ---- Public: schematic SVG thumbnail of a custom-gauge dashboard --------------------------------
+// For the shared library: a small picture of the LAYOUT (types, positions, sizes, colours, labels)
+// drawn from the saved defs alone -- no log, no DOM, no CSS -- so it can be generated at publish time
+// and shown anywhere as a string. Real gauges are DOM+SVG+CSS hybrids sized by --dlv-gauge-u, so this
+// is a deliberate schematic, not a screenshot. Base boxes mirror the CSS at scale 1 (.pbd-dial-box
+// 172u wide for a dial, 96u tiles for number/light) plus label room.
+var GAUGE_THUMB_BASE = { 'round': { w: 172, h: 206 }, 'combo': { w: 177, h: 212 }, 'digital': { w: 96, h: 92 }, 'light': { w: 96, h: 92 } };
+function gaugeThumbBox(g){
+  var t = g.type === 'tach' ? 'round' : g.type;
+  if(t === 'vertical-bar' || t === 'horizontal-bar' || t === 'scorecard'){
+    var d = t === 'vertical-bar' ? { w: 92, h: 210 } : t === 'horizontal-bar' ? { w: 220, h: 76 } : { w: 260, h: 160 };
+    return { w: (+g.w > 0 ? +g.w : d.w), h: (+g.h > 0 ? +g.h : d.h) };
+  }
+  var b = GAUGE_THUMB_BASE[t] || GAUGE_THUMB_BASE.round, s = (+g.scale > 0 ? +g.scale : 1);
+  return { w: b.w * s, h: b.h * s };
+}
+function gaugesThumbnailSvg(gauges){
+  var esc = function(s){ return String(s == null ? '' : s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;'); };
+  var n = function(v){ return (Math.round(v * 10) / 10).toString(); };
+  var list = (gauges || []).filter(function(g){ return g && g.type && g.type !== 'scorecard'; });
+  var M = 16, minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
+  var boxes = list.map(function(g){
+    var b = gaugeThumbBox(g), x = +g.x || 0, y = +g.y || 0;
+    minX = Math.min(minX, x); minY = Math.min(minY, y); maxX = Math.max(maxX, x + b.w); maxY = Math.max(maxY, y + b.h);
+    return { g: g, x: x, y: y, w: b.w, h: b.h };
+  });
+  if(!boxes.length){ minX = minY = 0; maxX = 320 - 2 * M; maxY = 180 - 2 * M; }   // 320x180 placeholder
+  var W = Math.max(160, maxX - minX + 2 * M), Hh = Math.max(90, maxY - minY + 2 * M);
+  var out = ['<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ' + n(W) + ' ' + n(Hh) + '" preserveAspectRatio="xMidYMid meet">',
+    '<rect width="100%" height="100%" rx="10" fill="#0d0d11"/>'];
+  var font = 'system-ui,sans-serif';
+  boxes.forEach(function(b){
+    var g = b.g, x = b.x - minX + M, y = b.y - minY + M, col = g.color || '#e5322d', t = g.type === 'tach' ? 'round' : g.type;
+    var label = esc(String(g.label || g.channelOverride || '').slice(0, 18));
+    var tile = function(){ out.push('<rect x="' + n(x) + '" y="' + n(y) + '" width="' + n(b.w) + '" height="' + n(b.h) + '" rx="8" fill="#15151b" stroke="#2c2c34"/>'); };
+    var caption = function(fs){ out.push('<text x="' + n(x + b.w / 2) + '" y="' + n(y + b.h - 7) + '" text-anchor="middle" font-family="' + font + '" font-size="' + n(fs) + '" fill="#a8a8b2">' + label + '</text>'); };
+    if(t === 'round' || t === 'combo'){
+      var r = Math.min(b.w, b.h * 0.86) / 2, cx = x + b.w / 2, cy = y + r + 4, rr = r * 0.82;
+      var a0 = -225 * Math.PI / 180, a1 = 45 * Math.PI / 180, rl0 = 5 * Math.PI / 180, an = (-225 + 0.4 * 270) * Math.PI / 180;
+      out.push('<circle cx="' + n(cx) + '" cy="' + n(cy) + '" r="' + n(r) + '" fill="#15151b" stroke="#2c2c34" stroke-width="' + n(r * 0.06) + '"/>');
+      out.push('<path d="M ' + n(cx + rr * Math.cos(a0)) + ' ' + n(cy + rr * Math.sin(a0)) + ' A ' + n(rr) + ' ' + n(rr) + ' 0 1 1 ' + n(cx + rr * Math.cos(a1)) + ' ' + n(cy + rr * Math.sin(a1)) + '" fill="none" stroke="#3a3a44" stroke-width="' + n(r * 0.09) + '"/>');
+      out.push('<path d="M ' + n(cx + rr * Math.cos(rl0)) + ' ' + n(cy + rr * Math.sin(rl0)) + ' A ' + n(rr) + ' ' + n(rr) + ' 0 0 1 ' + n(cx + rr * Math.cos(a1)) + ' ' + n(cy + rr * Math.sin(a1)) + '" fill="none" stroke="' + esc(col) + '" stroke-width="' + n(r * 0.09) + '"/>');
+      out.push('<line x1="' + n(cx) + '" y1="' + n(cy) + '" x2="' + n(cx + rr * 0.9 * Math.cos(an)) + '" y2="' + n(cy + rr * 0.9 * Math.sin(an)) + '" stroke="' + esc(col) + '" stroke-width="' + n(r * 0.07) + '" stroke-linecap="round"/>');
+      out.push('<circle cx="' + n(cx) + '" cy="' + n(cy) + '" r="' + n(r * 0.1) + '" fill="#d0d0d6"/>');
+      if(t === 'combo'){ var sr = r * 0.33; out.push('<circle cx="' + n(cx) + '" cy="' + n(cy + r * 0.5) + '" r="' + n(sr) + '" fill="#101015" stroke="#3a3a44" stroke-width="' + n(sr * 0.1) + '"/>'); }
+      caption(Math.max(9, r * 0.16));
+    } else if(t === 'vertical-bar'){
+      tile();
+      var tw = b.w * 0.34, tx = x + (b.w - tw) / 2, ty = y + 14, th = b.h - 40;
+      out.push('<rect x="' + n(tx) + '" y="' + n(ty) + '" width="' + n(tw) + '" height="' + n(th) + '" rx="3" fill="#0a0a0d" stroke="#3a3a44"/>');
+      out.push('<rect x="' + n(tx) + '" y="' + n(ty + th * 0.45) + '" width="' + n(tw) + '" height="' + n(th * 0.55) + '" rx="3" fill="' + esc(col) + '"/>');
+      caption(Math.max(9, b.w * 0.12));
+    } else if(t === 'horizontal-bar'){
+      tile();
+      var hw = b.w - 24, hx = x + 12, hy = y + b.h * 0.42, hh = b.h * 0.28;
+      out.push('<rect x="' + n(hx) + '" y="' + n(hy) + '" width="' + n(hw) + '" height="' + n(hh) + '" rx="3" fill="#0a0a0d" stroke="#3a3a44"/>');
+      out.push('<rect x="' + n(hx) + '" y="' + n(hy) + '" width="' + n(hw * 0.6) + '" height="' + n(hh) + '" rx="3" fill="' + esc(col) + '"/>');
+      out.push('<text x="' + n(hx) + '" y="' + n(y + b.h * 0.3) + '" font-family="' + font + '" font-size="' + n(Math.max(9, b.h * 0.18)) + '" fill="#a8a8b2">' + label + '</text>');
+    } else if(t === 'light'){
+      tile();
+      var lr = Math.min(b.w, b.h) * 0.24;
+      out.push('<circle cx="' + n(x + b.w / 2) + '" cy="' + n(y + b.h * 0.42) + '" r="' + n(lr) + '" fill="#22c55e" stroke="#0a0a0d" stroke-width="' + n(lr * 0.15) + '"/>');
+      caption(Math.max(9, b.w * 0.12));
+    } else {
+      tile();
+      out.push('<text x="' + n(x + b.w / 2) + '" y="' + n(y + b.h * 0.62) + '" text-anchor="middle" font-family="ui-monospace,monospace" font-weight="700" font-size="' + n(Math.max(12, b.h * 0.42)) + '" fill="' + esc(col) + '">88.8</text>');
+      caption(Math.max(9, b.w * 0.12));
+    }
+  });
+  out.push('</svg>');
+  return out.join('');
+}
+
 // ---- Public: generic grouped-flex layout (fallback for presets with no fascia mapping) ---------
 function renderGaugeGrid(gaugeDefs){
   var container = document.createElement('div');

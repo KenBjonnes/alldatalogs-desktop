@@ -468,7 +468,8 @@
   async function boot() {
     window.configureViewer({
       brand: { mark: "B", name: "BigData", sub: "DATALOG VIEWER" },
-      layouts: layoutProvider
+      layouts: layoutProvider,
+      library: api.library
     });
     window.ensureViewerDom();
     wireExternalButtons();

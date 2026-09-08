@@ -55,6 +55,21 @@ interface BigdataApi {
     push(entry: SavedLayout): Promise<{ ok: boolean }>;
     remove(id: string): Promise<{ ok: boolean }>;
   };
+  // The engine's shared-library provider contract (datalog-library.js), proxied to main over IPC.
+  library: {
+    list(q: Dict): Promise<{ items: Dict[]; hasMore: boolean; error?: string }>;
+    get(id: string): Promise<Dict | null>;
+    publish(input: Dict): Promise<{ ok: boolean; item?: Dict; error?: string }>;
+    remove(id: string): Promise<{ ok: boolean; error?: string }>;
+    pull(id: string): Promise<void>;
+    me(): Promise<{ userId: string; email: string | null } | null>;
+    isAdmin(): Promise<boolean>;
+    admin: {
+      setOfficial(id: string, value: boolean): Promise<{ ok: boolean; error?: string }>;
+      hide(id: string, value: boolean): Promise<{ ok: boolean; error?: string }>;
+      remove(id: string): Promise<{ ok: boolean; error?: string }>;
+    };
+  };
   updates: {
     check(): Promise<{ ok: boolean; reason?: string }>;
     restart(): Promise<{ ok: boolean }>;
@@ -441,6 +456,7 @@ async function boot() {
   window.configureViewer({
     brand: { mark: 'B', name: 'BigData', sub: 'DATALOG VIEWER' },
     layouts: layoutProvider,
+    library: api.library,
   });
   window.ensureViewerDom();
 
