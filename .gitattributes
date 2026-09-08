@@ -1,0 +1,4 @@
+# Byte-exact everywhere. payload/ and the built main/*.js are hashed into payload/BUNDLED.json and
+# verified on every checkout (CI included); any CRLF/LF conversion would change the bytes and fail the
+# check, and the viewer engine is served as-is. So: no text conversion for any file in this repo.
+* -text
