@@ -1,14 +1,14 @@
 {
-  "builtAt": "2026-09-08T12:21:04.164Z",
+  "builtAt": "2026-09-08T13:46:45.032Z",
   "sources": {
     "releaseDir": "C:/Users/kenbj/Code/datalog viewer",
     "siteRepo": "C:/websites/Alldatalogs",
-    "siteCommit": "22bfa48"
+    "siteCommit": "98e7bfb"
   },
   "files": {
     "viewer-engine/datalog-viewer.css": {
-      "sha256": "f208da0ad93baaa971401e94c607c3901b2e54765c14677a3d74a24fcf0970ce",
-      "bytes": 116478,
+      "sha256": "e02a7a60ecf8cba4043570644496241414ca7ebf16593ecc95540c509c448ed8",
+      "bytes": 116900,
       "from": "C:/Users/kenbj/Code/datalog viewer/datalog-viewer.css"
     },
     "viewer-engine/datalog-histogram.css": {
@@ -127,8 +127,8 @@
       "from": "C:/websites/Alldatalogs/packages/datalog-core/browser/entry.ts (esbuild)"
     },
     "glue.js": {
-      "sha256": "b366153d80f4c59208d3c4c4077767c74645a74faf0c98f177dbbc946fe9fa77",
-      "bytes": 16834,
+      "sha256": "05da4da18c1093074bea543ec0fabbd57e216643719cbe09239efd42e8707eb1",
+      "bytes": 16923,
       "from": "C:/Users/kenbj/Code/alldatalogs-desktop/renderer/src/glue.ts (esbuild)"
     },
     "main/jws.js": {

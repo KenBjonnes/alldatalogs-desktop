@@ -366,9 +366,11 @@ function maybePullLayouts(s: LicenseState) {
 }
 
 function applyLicense(s: LicenseState) {
+  const switched = license.email !== s.email;
   license = s;
   window.setViewerPro?.(s.pro === true);
   maybePullLayouts(s);
+  if (switched) void refreshRecents(); // recents are per account (main keys them by the session's user)
   $('checking').hidden = s.reason !== 'checking';
   if (s.reason === 'checking') {
     // Keep whatever screen is up (sign-in on first run, home on a relaunch) under the overlay.

@@ -39,18 +39,37 @@ function fmtOf(name) {
   return e === '.hpl' ? 'HPL' : e === '.ld' ? 'MoTeC' : e === '.dl' ? 'Holley' : 'CSV';
 }
 
-// --- recents -------------------------------------------------------------------------------------
+// --- recents (per signed-in account) -------------------------------------------------------------
+// recent.json v2: { v: 2, byUser: { <account id | 'anon'>: [rows] } }. The list is scoped to the
+// AllDataLogs account that opened the files, not to the Windows profile: with two accounts signing
+// in on one PC the old flat list showed everyone everything (Ken, 2026-09-08). A v1 flat list is
+// kept under 'anon' (its owner is unknowable), which in practice starts everyone fresh.
 function recentPath() { return path.join(app.getPath('userData'), 'recent.json'); }
-function readRecent() {
-  try { const a = JSON.parse(fs.readFileSync(recentPath(), 'utf8')); return Array.isArray(a) ? a : []; } catch { return []; }
+function whoKey() {
+  try { return require('./license').currentUserId() || 'anon'; } catch { return 'anon'; }
 }
-function writeRecent(list) {
-  try { fs.mkdirSync(path.dirname(recentPath()), { recursive: true }); fs.writeFileSync(recentPath(), JSON.stringify(list, null, 2)); } catch { /* best effort */ }
+function readRecentAll() {
+  try {
+    const o = JSON.parse(fs.readFileSync(recentPath(), 'utf8'));
+    if (Array.isArray(o)) return { v: 2, byUser: { anon: o } };
+    if (o && typeof o === 'object' && o.byUser && typeof o.byUser === 'object') return o;
+  } catch { /* none yet */ }
+  return { v: 2, byUser: {} };
+}
+function readRecent(who) {
+  const list = readRecentAll().byUser[who || whoKey()];
+  return Array.isArray(list) ? list : [];
+}
+function writeRecent(list, who) {
+  const all = readRecentAll();
+  all.byUser[who || whoKey()] = list;
+  try { fs.mkdirSync(path.dirname(recentPath()), { recursive: true }); fs.writeFileSync(recentPath(), JSON.stringify(all, null, 2)); } catch { /* best effort */ }
 }
 function addRecent(f) {
-  const list = readRecent().filter((r) => r && typeof r.path === 'string' && r.path.toLowerCase() !== f.path.toLowerCase());
+  const who = whoKey();
+  const list = readRecent(who).filter((r) => r && typeof r.path === 'string' && r.path.toLowerCase() !== f.path.toLowerCase());
   list.unshift({ path: f.path, name: f.name, size: f.size, format: fmtOf(f.name), openedAt: new Date().toISOString() });
-  writeRecent(list.slice(0, RECENT_MAX));
+  writeRecent(list.slice(0, RECENT_MAX), who);
 }
 function listRecent() {
   return readRecent().filter((r) => { try { return fs.statSync(r.path).isFile(); } catch { return false; } });

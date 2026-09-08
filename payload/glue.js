@@ -364,9 +364,11 @@
     });
   }
   function applyLicense(s) {
+    const switched = license.email !== s.email;
     license = s;
     window.setViewerPro?.(s.pro === true);
     maybePullLayouts(s);
+    if (switched) void refreshRecents();
     $("checking").hidden = s.reason !== "checking";
     if (s.reason === "checking") {
       if (["screen-signin", "screen-gate", "screen-home"].every((id) => $(id).hidden)) showScreen("signin");

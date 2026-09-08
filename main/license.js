@@ -157,10 +157,14 @@ async function verifyStored(now) {
   catch { return { ok: false, error: 'malformed' }; }
 }
 
+let lastUserId = null; // the signed-in account as of the last session read (recents are scoped by it)
 async function sessionInfo() {
   const s = await sb.getSession();
+  lastUserId = s && s.user ? s.user.id : null;
   return s && s.user ? { userId: s.user.id, email: s.user.email || null, accessToken: s.access_token } : null;
 }
+/** Synchronous: the account id from the most recent session read, or null when signed out. */
+function currentUserId() { return DEV_PRO ? 'dev' : lastUserId; }
 
 async function recompute() {
   if (DEV_PRO) return state;
@@ -266,4 +270,4 @@ function install(opts) {
   recompute().then(() => refresh()).catch(() => {});
 }
 
-module.exports = { install, evaluate, getState, devPro, openBlockedReason, signOut, refresh, onWindowFocus, DAY_MS };
+module.exports = { install, evaluate, getState, devPro, openBlockedReason, signOut, refresh, onWindowFocus, currentUserId, DAY_MS };
