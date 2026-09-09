@@ -15,16 +15,17 @@ const fs = require('node:fs');
 const path = require('node:path');
 const crypto = require('node:crypto');
 
-const ACCEPT = new Set(['.hpl', '.csv', '.ld', '.dl']);
+const ACCEPT = new Set(['.hpl', '.csv', '.ld', '.dl', '.msl', '.mlg']);
 const MAX_BYTES = 250 * 1024 * 1024;
 const RECENT_MAX = 20;
 const TOKEN_TTL_MS = 10 * 60 * 1000;
 const FILTERS = [
-  { name: 'Datalogs', extensions: ['hpl', 'csv', 'ld', 'dl'] },
+  { name: 'Datalogs', extensions: ['hpl', 'csv', 'ld', 'dl', 'msl', 'mlg'] },
   { name: 'HP Tuners (*.hpl)', extensions: ['hpl'] },
   { name: 'CSV (*.csv)', extensions: ['csv'] },
   { name: 'MoTeC (*.ld)', extensions: ['ld'] },
   { name: 'Holley (*.dl)', extensions: ['dl'] },
+  { name: 'MegaSquirt / TunerStudio (*.msl, *.mlg)', extensions: ['msl', 'mlg'] },
   { name: 'All files', extensions: ['*'] },
 ];
 
@@ -80,7 +81,7 @@ function validate(p) {
   const ext = path.extname(p).toLowerCase();
   // Haltech's own log container is encrypted ("HEPS" header); NSP's CSV export is the way in.
   if (ext === '.hlg' || ext === '.hlgzip') return { error: 'Haltech .hlg logs are encrypted by NSP. Export the log as CSV in NSP (File > Export) and open that.' };
-  if (!ACCEPT.has(ext)) return { error: `BigData opens .hpl, .csv, .ld and .dl logs (this is ${ext ? '"' + ext + '"' : 'a file with no extension'}).` };
+  if (!ACCEPT.has(ext)) return { error: `BigData opens .hpl, .csv, .ld, .dl and MegaSquirt .msl logs (this is ${ext ? '"' + ext + '"' : 'a file with no extension'}).` };
   let st;
   try { st = fs.statSync(p); } catch { return { error: 'That file could not be found.' }; }
   if (!st.isFile()) return { error: 'That is not a file.' };
