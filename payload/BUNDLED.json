@@ -1,9 +1,9 @@
 {
-  "builtAt": "2026-09-09T18:32:00.771Z",
+  "builtAt": "2026-09-09T21:20:13.789Z",
   "sources": {
     "releaseDir": "C:/Users/kenbj/Code/datalog viewer",
     "siteRepo": "C:/websites/Alldatalogs",
-    "siteCommit": "d5695d1"
+    "siteCommit": "7956b75"
   },
   "files": {
     "viewer-engine/datalog-viewer.css": {
@@ -127,8 +127,8 @@
       "from": "C:/websites/Alldatalogs/apps/web/public/sample/mile.hpl"
     },
     "viewer-engine/dvcore.js": {
-      "sha256": "3882c292109925df727c1bdd21f8f17cba16a6c5ac45aa758b957c4b3e287c47",
-      "bytes": 68196,
+      "sha256": "3c91cac8a66c5a2369aaeedf7da5846612cfb343355754b0c0a8690b5c6657d8",
+      "bytes": 84898,
       "from": "C:/websites/Alldatalogs/packages/datalog-core/browser/entry.ts (esbuild)"
     },
     "glue.js": {
