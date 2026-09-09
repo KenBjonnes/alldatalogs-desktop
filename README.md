@@ -1,7 +1,7 @@
 # BigData for Windows
 
 The [AllDataLogs](https://alldatalogs.com) datalog viewer ("BigData") as a Windows desktop app: double-click a
-`.hpl` / `.ld` / `.dl` and it opens, everything runs offline, updates arrive automatically. It is part of
+`.hpl` / `.dl` / `.msl` / `.ld` and it opens, everything runs offline, updates arrive automatically. It is part of
 **AllDataLogs Pro**: sign in with your alldatalogs.com account.
 
 ## Install
@@ -12,11 +12,11 @@ The [AllDataLogs](https://alldatalogs.com) datalog viewer ("BigData") as a Windo
 3. Sign in with your AllDataLogs email and password. BigData needs the internet once to activate; after that it
    keeps working offline for up to 30 days between check-ins.
 
-**Opening logs by double-click:** BigData registers as a handler for `.hpl`, `.ld` and `.dl`. Windows will not
+**Opening logs by double-click:** BigData registers as a handler for `.hpl`, `.dl`, `.msl`, `.mlg` and `.ld`. Windows will not
 replace an existing default (VCM Scanner, MoTeC i2, Holley EFI); right-click a log → **Open with → BigData** and
 tick *Always*. `.csv` is deliberately not associated (that stays with Excel); drag it onto the window instead.
 
-Formats: HP Tuners `.hpl`, CSV, MoTeC `.ld`, Holley `.dl` — up to 250 MB.
+Formats: CSV, HP Tuners `.hpl`, SCT, Haltech and FuelTech CSV exports, Holley `.dl`, MegaSquirt `.msl`, MoTeC `.ld` — up to 250 MB.
 
 ## How it is built
 
