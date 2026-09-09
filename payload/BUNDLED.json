@@ -1,5 +1,5 @@
 {
-  "builtAt": "2026-09-09T14:21:42.763Z",
+  "builtAt": "2026-09-09T15:27:39.035Z",
   "sources": {
     "releaseDir": "C:/Users/kenbj/Code/datalog viewer",
     "siteRepo": "C:/websites/Alldatalogs",
@@ -7,8 +7,8 @@
   },
   "files": {
     "viewer-engine/datalog-viewer.css": {
-      "sha256": "72d8b3ee95e2452b761550280ef74c298f8c872e75bbb7a48d3ab52abf793e5a",
-      "bytes": 125981,
+      "sha256": "e55dd24fb184ea164fc61e7a04591641e87958e315daa2d998df2173cf4905ff",
+      "bytes": 127070,
       "from": "C:/Users/kenbj/Code/datalog viewer/datalog-viewer.css"
     },
     "viewer-engine/datalog-histogram.css": {
@@ -22,8 +22,8 @@
       "from": "C:/Users/kenbj/Code/datalog viewer/datalog-histogram-editor.css"
     },
     "viewer-engine/datalog-presets.js": {
-      "sha256": "d3a1a69e43f986b4af2b690dbb7e6cbebcff03f84a99e941d7116efef35fb0e5",
-      "bytes": 84512,
+      "sha256": "5d1caaec90a9e9cef50f540eff089f24a116c9e48ecb795a6a80b43b765e8ef4",
+      "bytes": 86840,
       "from": "C:/Users/kenbj/Code/datalog viewer/datalog-presets.js"
     },
     "viewer-engine/datalog-gauges.js": {
@@ -40,6 +40,11 @@
       "sha256": "4fbfbd90c75d5fdf7208194994225493cae5b48f68586ee727a1f720c1721f30",
       "bytes": 118164,
       "from": "C:/Users/kenbj/Code/datalog viewer/datalog-scorecard-evaluators.js"
+    },
+    "viewer-engine/datalog-accel.js": {
+      "sha256": "2ec83b56ed62e3d4c984f5138223c098a0f1292eef55892c70332331b4fe992f",
+      "bytes": 59569,
+      "from": "C:/Users/kenbj/Code/datalog viewer/datalog-accel.js"
     },
     "viewer-engine/datalog-expr.js": {
       "sha256": "23f2a49317e084a03dc603c43f1d72fa8c3a166bdff1a9e3594108b8a9db4be4",
@@ -82,8 +87,8 @@
       "from": "C:/Users/kenbj/Code/datalog viewer/datalog-library.css"
     },
     "viewer-engine/datalog-viewer.js": {
-      "sha256": "1a0c02bc11aa989dd7fac2b6596914961c30f504034c777cfa79f632aea7621a",
-      "bytes": 405486,
+      "sha256": "a8456ca24740748dbe2482148bcc007240edfb3634cfad09f62cd23c67e14a14",
+      "bytes": 414434,
       "from": "C:/Users/kenbj/Code/datalog viewer/datalog-viewer.js"
     },
     "viewer-engine/runtime.js": {
