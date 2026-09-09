@@ -25,7 +25,11 @@ interface LicenseState {
 interface Staged { token?: string; name: string; size?: number; path?: string; error?: string }
 interface ReadResult { name: string; path: string; size: number; data: Uint8Array; error?: string }
 interface RecentRow { path: string; name: string; size: number; format: string; openedAt: string }
-interface SavedLayout { id: string; name: string; state: Dict; updatedAt: number }
+// owner = the account (lower-case email) an entry is synced under; absent = saved while signed out.
+// The local store is one list per machine: without this, two sign-ins on one PC would see and
+// overwrite each other's rows, and a push of another account's row is refused by RLS -- the save
+// looks fine locally and never reaches the cloud (Ken, 2026-09-09).
+interface SavedLayout { id: string; name: string; state: Dict; updatedAt: number; owner?: string }
 
 interface BigdataApi {
   app: { version: string; dev: boolean; devPro: boolean; platform: string };
@@ -121,14 +125,19 @@ function writeLocal(list: SavedLayout[]) {
 function genId(): string {
   return 'ly_' + Date.now().toString(36) + Math.floor(Math.random() * 1e6).toString(36);
 }
-function listLayouts(): SavedLayout[] { return readLocal().sort((a, b) => b.updatedAt - a.updatedAt); }
+function ownerKey(): string | null { const e = (license.email || '').trim().toLowerCase(); return e || null; }
+/** Entries the signed-in account may see: its own synced rows plus the machine's signed-out (unowned) ones. */
+function visibleLayouts(list: SavedLayout[]): SavedLayout[] { const o = ownerKey(); return list.filter((l) => !l.owner || l.owner === o); }
+function listLayouts(): SavedLayout[] { return visibleLayouts(readLocal()).sort((a, b) => b.updatedAt - a.updatedAt); }
 function saveLayout(name: string, state: Dict): SavedLayout {
   const list = readLocal();
   const now = Date.now();
-  const existing = list.find((l) => l.name.toLowerCase() === name.toLowerCase());
+  const owner = ownerKey();
+  // dedup by name only among what this account can see; a signed-out entry re-saved while signed in is adopted
+  const existing = visibleLayouts(list).find((l) => l.name.toLowerCase() === name.toLowerCase());
   let entry: SavedLayout;
-  if (existing) { existing.state = state; existing.updatedAt = now; entry = existing; }
-  else { entry = { id: genId(), name, state, updatedAt: now }; list.push(entry); }
+  if (existing) { existing.state = state; existing.updatedAt = now; if (owner) existing.owner = owner; entry = existing; }
+  else { entry = owner ? { id: genId(), name, state, updatedAt: now, owner } : { id: genId(), name, state, updatedAt: now }; list.push(entry); }
   writeLocal(list);
   return entry;
 }
@@ -154,12 +163,32 @@ const layoutProvider = {
     removeLayout(id);
     if (license.pro === true) api.layouts.remove(id).catch(() => {});
   },
+  // On-demand cloud pull -- the viewer calls it whenever the layout picker opens, so a layout saved on
+  // another machine shows up without restarting the app. Throttled; resolves true when rows arrived.
+  refresh(): Promise<boolean> {
+    if (license.pro !== true || !license.email) return Promise.resolve(false);
+    const now = Date.now();
+    if (now - lastPullAt < PULL_THROTTLE_MS) return Promise.resolve(false);
+    lastPullAt = now;
+    return api.layouts.pull().then((r) => {
+      if (r && r.ok && Array.isArray(r.rows) && r.rows.length) { mergeCloudRows(r.rows); return true; }
+      return false;
+    }).catch(() => false);
+  },
+  // Whose cloud the lists show (the viewer prints it in the picker).
+  account(): { email: string; synced: boolean } | null {
+    return license.email ? { email: license.email, synced: license.pro === true } : null;
+  },
 };
+let lastPullAt = 0;
+const PULL_THROTTLE_MS = 8000;
 
-// Merge cloud rows into local storage, cloud wins on id (same rule as the website).
+// Merge cloud rows into local storage, cloud wins on id (same rule as the website); every pulled row
+// is stamped with the account it belongs to.
 function mergeCloudRows(rows: SavedLayout[]) {
+  const owner = ownerKey();
   const byId = new Map(readLocal().map((l) => [l.id, l]));
-  for (const r of rows) if (r && r.id && r.name) byId.set(r.id, r);
+  for (const r of rows) if (r && r.id && r.name) byId.set(r.id, owner ? { ...r, owner } : r);
   writeLocal([...byId.values()]);
 }
 
@@ -360,9 +389,10 @@ let pulledFor: string | null = null;
 function maybePullLayouts(s: LicenseState) {
   if (s.pro !== true || !s.email || pulledFor === s.email) return;
   pulledFor = s.email;
+  lastPullAt = Date.now();
   api.layouts.pull().then((r) => {
-    if (r && r.ok && Array.isArray(r.rows) && r.rows.length) { mergeCloudRows(r.rows); return window.reloadViewerLayouts?.(); }
-    return undefined;
+    if (r && r.ok && Array.isArray(r.rows) && r.rows.length) mergeCloudRows(r.rows);
+    return window.reloadViewerLayouts?.();   // re-list either way: the visible set is per account
   }).catch(() => {});
 }
 

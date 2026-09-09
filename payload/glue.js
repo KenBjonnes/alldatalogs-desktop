@@ -66,20 +66,30 @@
   function genId() {
     return "ly_" + Date.now().toString(36) + Math.floor(Math.random() * 1e6).toString(36);
   }
+  function ownerKey() {
+    const e = (license.email || "").trim().toLowerCase();
+    return e || null;
+  }
+  function visibleLayouts(list) {
+    const o = ownerKey();
+    return list.filter((l) => !l.owner || l.owner === o);
+  }
   function listLayouts() {
-    return readLocal().sort((a, b) => b.updatedAt - a.updatedAt);
+    return visibleLayouts(readLocal()).sort((a, b) => b.updatedAt - a.updatedAt);
   }
   function saveLayout(name, state) {
     const list = readLocal();
     const now = Date.now();
-    const existing = list.find((l) => l.name.toLowerCase() === name.toLowerCase());
+    const owner = ownerKey();
+    const existing = visibleLayouts(list).find((l) => l.name.toLowerCase() === name.toLowerCase());
     let entry;
     if (existing) {
       existing.state = state;
       existing.updatedAt = now;
+      if (owner) existing.owner = owner;
       entry = existing;
     } else {
-      entry = { id: genId(), name, state, updatedAt: now };
+      entry = owner ? { id: genId(), name, state, updatedAt: now, owner } : { id: genId(), name, state, updatedAt: now };
       list.push(entry);
     }
     writeLocal(list);
@@ -111,11 +121,33 @@
       removeLayout(id);
       if (license.pro === true) api.layouts.remove(id).catch(() => {
       });
+    },
+    // On-demand cloud pull -- the viewer calls it whenever the layout picker opens, so a layout saved on
+    // another machine shows up without restarting the app. Throttled; resolves true when rows arrived.
+    refresh() {
+      if (license.pro !== true || !license.email) return Promise.resolve(false);
+      const now = Date.now();
+      if (now - lastPullAt < PULL_THROTTLE_MS) return Promise.resolve(false);
+      lastPullAt = now;
+      return api.layouts.pull().then((r) => {
+        if (r && r.ok && Array.isArray(r.rows) && r.rows.length) {
+          mergeCloudRows(r.rows);
+          return true;
+        }
+        return false;
+      }).catch(() => false);
+    },
+    // Whose cloud the lists show (the viewer prints it in the picker).
+    account() {
+      return license.email ? { email: license.email, synced: license.pro === true } : null;
     }
   };
+  var lastPullAt = 0;
+  var PULL_THROTTLE_MS = 8e3;
   function mergeCloudRows(rows) {
+    const owner = ownerKey();
     const byId = new Map(readLocal().map((l) => [l.id, l]));
-    for (const r of rows) if (r && r.id && r.name) byId.set(r.id, r);
+    for (const r of rows) if (r && r.id && r.name) byId.set(r.id, owner ? { ...r, owner } : r);
     writeLocal([...byId.values()]);
   }
   var worker = null;
@@ -354,12 +386,10 @@
   function maybePullLayouts(s) {
     if (s.pro !== true || !s.email || pulledFor === s.email) return;
     pulledFor = s.email;
+    lastPullAt = Date.now();
     api.layouts.pull().then((r) => {
-      if (r && r.ok && Array.isArray(r.rows) && r.rows.length) {
-        mergeCloudRows(r.rows);
-        return window.reloadViewerLayouts?.();
-      }
-      return void 0;
+      if (r && r.ok && Array.isArray(r.rows) && r.rows.length) mergeCloudRows(r.rows);
+      return window.reloadViewerLayouts?.();
     }).catch(() => {
     });
   }
