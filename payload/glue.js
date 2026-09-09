@@ -367,6 +367,7 @@
     const switched = license.email !== s.email;
     license = s;
     window.setViewerPro?.(s.pro === true);
+    window.setScorecardEnabledForEmail?.(s.email ?? "");
     maybePullLayouts(s);
     if (switched) void refreshRecents();
     $("checking").hidden = s.reason !== "checking";
