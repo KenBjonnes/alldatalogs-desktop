@@ -159,6 +159,7 @@ function install(opts) {
     try {
       const data = await fs.promises.readFile(f.path);
       addRecent(f);
+      try { require('./history').noteOpened(f); } catch { /* history is best effort */ }
       return { name: f.name, path: f.path, size: f.size, data };
     } catch (e) {
       return { error: `Could not read ${f.name}: ${e && e.message ? e.message : e}` };
@@ -174,6 +175,7 @@ function install(opts) {
     const v = validate(p);
     if (v.error) return false;
     addRecent({ path: p, name: path.basename(p), size: v.size });
+    try { require('./history').noteOpened({ path: p, name: path.basename(p), size: v.size }); } catch { /* best effort */ }
     return true;
   });
 

@@ -331,5 +331,8 @@ async function reportFailedLog(r) {
   } catch { return 'failed'; }
 }
 
-module.exports = { init, isEncryptionAvailable, getSession, signIn, signOut, fetchEntitlementToken, pullLayouts, pushLayout, removeLayout, reportFailedLog, isTroubleshootReporter,
+/** The raw client (null before init). Used by history.js, which needs storage + the saved_logs table. */
+function getClient() { return client; }
+
+module.exports = { init, isEncryptionAvailable, getSession, signIn, signOut, fetchEntitlementToken, pullLayouts, pushLayout, removeLayout, reportFailedLog, isTroubleshootReporter, getClient,
   libraryList, libraryGet, libraryPublish, libraryUpdate, libraryRemove, libraryPull, libraryMe, libraryIsAdmin, libraryAdmin };

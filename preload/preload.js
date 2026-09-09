@@ -48,6 +48,16 @@ contextBridge.exposeInMainWorld('bigdata', {
     signOut: () => ipcRenderer.invoke('auth:signOut'),
   },
 
+  // Account history (Pro): the account's opened logs, re-openable here; the sync switch; change pings.
+  history: {
+    list: () => ipcRenderer.invoke('history:list'),
+    open: (id) => ipcRenderer.invoke('history:open', id),
+    remove: (id) => ipcRenderer.invoke('history:remove', id),
+    getSync: () => ipcRenderer.invoke('history:getSync'),
+    setSync: (on) => ipcRenderer.invoke('history:setSync', on),
+    onChanged: (cb) => subscribe('history:changed', cb),
+  },
+
   support: {
     // { name, bytes: ArrayBuffer, error, format, engine } -> 'sent' | 'skipped' | 'failed'
     reportFailedLog: (r) => ipcRenderer.invoke('support:reportFailedLog', r),

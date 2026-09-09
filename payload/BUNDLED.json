@@ -1,5 +1,5 @@
 {
-  "builtAt": "2026-09-09T23:18:57.823Z",
+  "builtAt": "2026-09-09T23:55:16.214Z",
   "sources": {
     "releaseDir": "C:/Users/kenbj/Code/datalog viewer",
     "siteRepo": "C:/websites/Alldatalogs",
@@ -132,8 +132,8 @@
       "from": "C:/websites/Alldatalogs/packages/datalog-core/browser/entry.ts (esbuild)"
     },
     "glue.js": {
-      "sha256": "d365a53869a29d420a3d21257bd948330a4f338dda8214cec9a8ebc21ed8c851",
-      "bytes": 19057,
+      "sha256": "badc84c3babaef11fb2909ec0a7b29adbc8b7a76afdbabff4d33555f149e861f",
+      "bytes": 20986,
       "from": "C:/Users/kenbj/Code/alldatalogs-desktop/renderer/src/glue.ts (esbuild)"
     },
     "main/jws.js": {

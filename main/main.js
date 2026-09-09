@@ -17,6 +17,7 @@ const files = require('./files');
 const prompt = require('./prompt');
 const license = require('./license');
 const supabase = require('./supabase');
+const history = require('./history');
 const updater = require('./updater');
 
 const DEV = !app.isPackaged;
@@ -151,6 +152,8 @@ function main() {
   supabase.init();
   license.install({ getWindow: () => mainWindow, supabase });
   files.install({ getWindow: () => mainWindow, gate: () => license.openBlockedReason() });
+  // Account history: opened logs saved to the account (Pro), listed + re-opened on every device.
+  history.install({ supabase, license, getWindow: () => mainWindow });
   updater.install({ getWindow: () => mainWindow });
 
   ipcMain.on('app:info', (event) => {

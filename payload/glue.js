@@ -370,10 +370,48 @@
     } catch {
       rows = [];
     }
+    let cloud = [];
+    try {
+      cloud = await api.history.list() || [];
+    } catch {
+      cloud = [];
+    }
+    const seen = new Set(cloud.map((c) => (c.name || "").toLowerCase() + "|" + (c.sizeBytes || 0)));
+    const local = rows.filter((r) => !seen.has((r.name || "").toLowerCase() + "|" + (r.size || 0)));
     const ul = $("recentList");
     ul.textContent = "";
-    $("recentEmpty").hidden = rows.length > 0;
-    for (const r of rows) {
+    $("recentEmpty").hidden = cloud.length + local.length > 0;
+    for (const c of cloud) {
+      const li = document.createElement("li");
+      li.className = "cloud";
+      li.title = c.origin === "manual" ? "In your account (saved by you)" : "In your account \u2014 opens on any device";
+      const name = document.createElement("div");
+      name.className = "rname";
+      name.textContent = c.name;
+      const meta = document.createElement("div");
+      meta.className = "rmeta";
+      meta.textContent = [c.format, fmtBytes(c.sizeBytes || 0), "account", fmtWhen(c.lastOpenedAt)].filter(Boolean).join(" \xB7 ");
+      li.append(name, meta);
+      li.addEventListener("click", async () => {
+        showLoader(c.name);
+        let r;
+        try {
+          r = await api.history.open(c.id);
+        } catch (e) {
+          hideLoader();
+          showError(errMsg(e, "Could not open that log from your account."));
+          return;
+        }
+        if (!r || "error" in r) {
+          hideLoader();
+          showError(r && "error" in r && r.error || "Could not open that log from your account.");
+          return;
+        }
+        handleFile(new File([r.data], r.name), "cloud");
+      });
+      ul.appendChild(li);
+    }
+    for (const r of local) {
       const li = document.createElement("li");
       li.title = r.path;
       const name = document.createElement("div");
@@ -381,13 +419,28 @@
       name.textContent = r.name;
       const meta = document.createElement("div");
       meta.className = "rmeta";
-      meta.textContent = [r.format, fmtBytes(r.size || 0), fmtWhen(r.openedAt)].filter(Boolean).join(" \xB7 ");
+      meta.textContent = [r.format, fmtBytes(r.size || 0), "this PC", fmtWhen(r.openedAt)].filter(Boolean).join(" \xB7 ");
       li.append(name, meta);
       li.addEventListener("click", async () => {
         openStaged(await api.files.openPath(r.path));
       });
       ul.appendChild(li);
     }
+  }
+  async function wireHistorySync() {
+    const cb = document.getElementById("historySync");
+    if (!cb) return;
+    try {
+      cb.checked = await api.history.getSync();
+    } catch {
+      cb.checked = true;
+    }
+    cb.addEventListener("change", () => {
+      void api.history.setSync(cb.checked);
+    });
+    api.history.onChanged(() => {
+      void refreshRecents();
+    });
   }
   var BANNERS = {
     dev: { text: () => "Developer build: Pro forced on by BIGDATA_DEV_PRO." },
@@ -529,6 +582,7 @@
     api.license.onChange(applyLicense);
     window.addEventListener("online", () => api.license.online());
     void refreshRecents();
+    void wireHistorySync();
     api.files.onOpen((s) => {
       void openStaged(s);
     });

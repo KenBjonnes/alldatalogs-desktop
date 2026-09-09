@@ -25,6 +25,7 @@ interface LicenseState {
 interface Staged { token?: string; name: string; size?: number; path?: string; error?: string }
 interface ReadResult { name: string; path: string; size: number; data: Uint8Array; error?: string }
 interface RecentRow { path: string; name: string; size: number; format: string; openedAt: string }
+interface HistoryRow { id: string; name: string; format: string; sizeBytes: number; lastOpenedAt: string; origin: 'manual' | 'auto' }
 // owner = the account (lower-case email) an entry is synced under; absent = saved while signed out.
 // The local store is one list per machine: without this, two sign-ins on one PC would see and
 // overwrite each other's rows, and a push of another account's row is refused by RLS -- the save
@@ -56,6 +57,14 @@ interface BigdataApi {
   };
   support: {
     reportFailedLog(r: { name: string; bytes: ArrayBuffer; error: string; format?: string; engine?: string }): Promise<'sent' | 'skipped' | 'failed'>;
+  };
+  history: {
+    list(): Promise<HistoryRow[]>;
+    open(id: string): Promise<{ name: string; format: string; size: number; data: Uint8Array } | { error: string }>;
+    remove(id: string): Promise<boolean>;
+    getSync(): Promise<boolean>;
+    setSync(on: boolean): Promise<boolean>;
+    onChanged(cb: () => void): () => void;
   };
   layouts: {
     pull(): Promise<{ ok: boolean; rows?: SavedLayout[] }>;
@@ -375,22 +384,53 @@ function fmtWhen(iso: string) {
   return days <= 0 ? 'today' : days === 1 ? 'yesterday' : days < 30 ? `${days} days ago` : d.toLocaleDateString();
 }
 
+// The History list (Ken, 2026-09-09: "when I get home, I want to see exactly the same things including my
+// history on the right"): the ACCOUNT's opened logs first (newest opened, from any device, re-opened by
+// download), then whatever is only on this PC. Same rule as the website and the phone apps.
 async function refreshRecents() {
   let rows: RecentRow[] = [];
   try { rows = await api.files.recent(); } catch { rows = []; }
+  let cloud: HistoryRow[] = [];
+  try { cloud = (await api.history.list()) || []; } catch { cloud = []; }
+  const seen = new Set(cloud.map((c) => (c.name || '').toLowerCase() + '|' + (c.sizeBytes || 0)));
+  const local = rows.filter((r) => !seen.has((r.name || '').toLowerCase() + '|' + (r.size || 0)));
   const ul = $('recentList');
   ul.textContent = '';
-  $('recentEmpty').hidden = rows.length > 0;
-  for (const r of rows) {
+  $('recentEmpty').hidden = cloud.length + local.length > 0;
+  for (const c of cloud) {
+    const li = document.createElement('li');
+    li.className = 'cloud';
+    li.title = c.origin === 'manual' ? 'In your account (saved by you)' : 'In your account — opens on any device';
+    const name = document.createElement('div'); name.className = 'rname'; name.textContent = c.name;
+    const meta = document.createElement('div'); meta.className = 'rmeta';
+    meta.textContent = [c.format, fmtBytes(c.sizeBytes || 0), 'account', fmtWhen(c.lastOpenedAt)].filter(Boolean).join(' · ');
+    li.append(name, meta);
+    li.addEventListener('click', async () => {
+      showLoader(c.name);
+      let r: { name: string; format: string; size: number; data: Uint8Array } | { error: string };
+      try { r = await api.history.open(c.id); } catch (e) { hideLoader(); showError(errMsg(e, 'Could not open that log from your account.')); return; }
+      if (!r || 'error' in r) { hideLoader(); showError((r && 'error' in r && r.error) || 'Could not open that log from your account.'); return; }
+      handleFile(new File([r.data], r.name), 'cloud');
+    });
+    ul.appendChild(li);
+  }
+  for (const r of local) {
     const li = document.createElement('li');
     li.title = r.path;
     const name = document.createElement('div'); name.className = 'rname'; name.textContent = r.name;
     const meta = document.createElement('div'); meta.className = 'rmeta';
-    meta.textContent = [r.format, fmtBytes(r.size || 0), fmtWhen(r.openedAt)].filter(Boolean).join(' · ');
+    meta.textContent = [r.format, fmtBytes(r.size || 0), 'this PC', fmtWhen(r.openedAt)].filter(Boolean).join(' · ');
     li.append(name, meta);
     li.addEventListener('click', async () => { openStaged(await api.files.openPath(r.path)); });
     ul.appendChild(li);
   }
+}
+async function wireHistorySync() {
+  const cb = document.getElementById('historySync') as HTMLInputElement | null;
+  if (!cb) return;
+  try { cb.checked = await api.history.getSync(); } catch { cb.checked = true; }
+  cb.addEventListener('change', () => { void api.history.setSync(cb.checked); });
+  api.history.onChanged(() => { void refreshRecents(); });
 }
 
 const BANNERS: Record<string, { text: (s: LicenseState) => string; bad?: boolean }> = {
@@ -527,6 +567,7 @@ async function boot() {
   window.addEventListener('online', () => api.license.online());
 
   void refreshRecents();
+  void wireHistorySync();
   api.files.onOpen((s) => { void openStaged(s); });
   api.files.ready();
 }
