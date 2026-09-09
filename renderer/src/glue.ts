@@ -98,10 +98,15 @@ declare global {
     reloadViewerLayouts?: () => Promise<unknown>;
     openViewerFromPromise: (p: Promise<unknown>, opts: Dict) => void;
     showToast: (msg: string) => void;
+    ADL_HOST?: Dict;
   }
 }
 
 const api = window.bigdata;
+// Declare the host to the engine before it renders. pinHeader: the viewer's header bar stays open instead
+// of collapsing to a hover strip -- there is no browser chrome here and the window is 920px+ tall
+// (Ken, 2026-09-09: "get rid of the auto hide on that top menu ... there is plenty of room").
+window.ADL_HOST = { kind: 'electron', platform: api.app.platform, pinHeader: true };
 const MAX_POINTS = 12000;              // display set for the charts (same as the site)
 const FULL_BUDGET_CELLS = 40_000_000;  // full-resolution set budget for Histograms (same as the site)
 const MAX_FILE_BYTES = 250 * 1048576;  // Pro cap (main enforces the same on staged files)

@@ -40,6 +40,7 @@
 
   // renderer/src/glue.ts
   var api = window.bigdata;
+  window.ADL_HOST = { kind: "electron", platform: api.app.platform, pinHeader: true };
   var MAX_POINTS = 12e3;
   var FULL_BUDGET_CELLS = 4e7;
   var MAX_FILE_BYTES = 250 * 1048576;
