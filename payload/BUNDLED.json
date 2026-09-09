@@ -1,9 +1,9 @@
 {
-  "builtAt": "2026-09-09T23:55:16.214Z",
+  "builtAt": "2026-09-09T23:56:38.762Z",
   "sources": {
     "releaseDir": "C:/Users/kenbj/Code/datalog viewer",
     "siteRepo": "C:/websites/Alldatalogs",
-    "siteCommit": "afd879d"
+    "siteCommit": "b6a462a"
   },
   "files": {
     "viewer-engine/datalog-viewer.css": {
