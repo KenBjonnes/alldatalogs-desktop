@@ -54,6 +54,9 @@ interface BigdataApi {
     signIn(email: string, password: string): Promise<{ ok: boolean; error?: string }>;
     signOut(): Promise<{ ok: boolean }>;
   };
+  support: {
+    reportFailedLog(r: { name: string; bytes: ArrayBuffer; error: string; format?: string; engine?: string }): Promise<'sent' | 'skipped' | 'failed'>;
+  };
   layouts: {
     pull(): Promise<{ ok: boolean; rows?: SavedLayout[] }>;
     push(entry: SavedLayout): Promise<{ ok: boolean }>;
@@ -238,7 +241,7 @@ async function runSyncJob(job: Job) {
   try { ab = await job.file.arrayBuffer(); } catch { showError('Could not read that file.'); hideLoader(); return; }
   if (cancelled || job.id !== jobSeq) { hideLoader(); return; }
   try { openParsed(decodeSync(job.fmt, ab), job.name, job.source); }
-  catch (e) { showError(errMsg(e, 'Could not open this file.')); }
+  catch (e) { const msg = errMsg(e, 'Could not open this file.'); showError(msg); void reportOpenFailure(job, ab, msg); }
   hideLoader();
 }
 
@@ -247,8 +250,21 @@ function onWorkerMessage(data: any) {
   const p = pending;
   pending = null;
   if (data.ok) openParsed(data.parsed, p ? p.name : data.name, p ? p.source : 'local');
-  else showError(data.error || 'Could not open this file.');
+  else { const msg = data.error || 'Could not open this file.'; showError(msg); if (p) void reportOpenFailure(p, null, msg); }
   hideLoader();
+}
+
+// A log that would not open: PBD reporters (Ken, anyone @pbdyno.com) send the bytes + error to the
+// failed-logs queue for troubleshooting (main does the network work with the signed-in session);
+// everyone else just sees the error. Best effort, never blocks (Ken, 2026-09-09).
+async function reportOpenFailure(job: Job, bytes: ArrayBuffer | null, msg: string) {
+  try {
+    if (job.source !== 'local' || !api.support) return;
+    const ab = bytes || await job.file.arrayBuffer();
+    const engine = (window.DVCore && (window.DVCore as { HPL_CONVERTER_VERSION?: string }).HPL_CONVERTER_VERSION) || '';
+    const r = await api.support.reportFailedLog({ name: job.name, bytes: ab, error: msg, format: job.fmt, engine });
+    if (r === 'sent') window.showToast('Sent to PBD for troubleshooting.');
+  } catch { /* never in the way of the error the user sees */ }
 }
 
 function getWorker(): Worker | null {

@@ -159,6 +159,8 @@ function main() {
   ipcMain.handle('shell:openExternal', (_event, url) => openExternal(url));
   // Cloud layouts (viewer_layouts, same rows the website syncs). Best effort: the renderer's local
   // store is the source of truth on this PC; failures never block a save.
+  // A log that would not open, sent for troubleshooting (PBD reporters only; see supabase.reportFailedLog).
+  ipcMain.handle('support:reportFailedLog', (_event, r) => supabase.reportFailedLog(r));
   ipcMain.handle('layouts:pull', () => supabase.pullLayouts());
   ipcMain.handle('layouts:push', (_event, entry) => supabase.pushLayout(entry));
   ipcMain.handle('layouts:remove', (_event, id) => supabase.removeLayout(id));

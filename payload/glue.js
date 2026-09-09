@@ -203,7 +203,9 @@
     try {
       openParsed(decodeSync(job.fmt, ab), job.name, job.source);
     } catch (e) {
-      showError(errMsg(e, "Could not open this file."));
+      const msg = errMsg(e, "Could not open this file.");
+      showError(msg);
+      void reportOpenFailure(job, ab, msg);
     }
     hideLoader();
   }
@@ -212,8 +214,22 @@
     const p = pending;
     pending = null;
     if (data.ok) openParsed(data.parsed, p ? p.name : data.name, p ? p.source : "local");
-    else showError(data.error || "Could not open this file.");
+    else {
+      const msg = data.error || "Could not open this file.";
+      showError(msg);
+      if (p) void reportOpenFailure(p, null, msg);
+    }
     hideLoader();
+  }
+  async function reportOpenFailure(job, bytes, msg) {
+    try {
+      if (job.source !== "local" || !api.support) return;
+      const ab = bytes || await job.file.arrayBuffer();
+      const engine = window.DVCore && window.DVCore.HPL_CONVERTER_VERSION || "";
+      const r = await api.support.reportFailedLog({ name: job.name, bytes: ab, error: msg, format: job.fmt, engine });
+      if (r === "sent") window.showToast("Sent to PBD for troubleshooting.");
+    } catch {
+    }
   }
   function getWorker() {
     if (workerBroken || typeof Worker === "undefined") return null;

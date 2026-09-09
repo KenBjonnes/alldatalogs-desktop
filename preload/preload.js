@@ -48,6 +48,11 @@ contextBridge.exposeInMainWorld('bigdata', {
     signOut: () => ipcRenderer.invoke('auth:signOut'),
   },
 
+  support: {
+    // { name, bytes: ArrayBuffer, error, format, engine } -> 'sent' | 'skipped' | 'failed'
+    reportFailedLog: (r) => ipcRenderer.invoke('support:reportFailedLog', r),
+  },
+
   layouts: {
     pull: () => ipcRenderer.invoke('layouts:pull'),
     push: (entry) => ipcRenderer.invoke('layouts:push', entry),

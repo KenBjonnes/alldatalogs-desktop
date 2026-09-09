@@ -1,9 +1,9 @@
 {
-  "builtAt": "2026-09-09T17:19:53.636Z",
+  "builtAt": "2026-09-09T18:06:10.565Z",
   "sources": {
     "releaseDir": "C:/Users/kenbj/Code/datalog viewer",
     "siteRepo": "C:/websites/Alldatalogs",
-    "siteCommit": "b29a755"
+    "siteCommit": "724a0ef"
   },
   "files": {
     "viewer-engine/datalog-viewer.css": {
@@ -87,8 +87,8 @@
       "from": "C:/Users/kenbj/Code/datalog viewer/datalog-library.css"
     },
     "viewer-engine/datalog-viewer.js": {
-      "sha256": "18da71e9b94e24e0e83b32740be3d0872b27b624d8d6720282de31c7bee69ea1",
-      "bytes": 426574,
+      "sha256": "49772b102b63236f642d0af82070f8e19defde683c1a541c8100eed0ba8632e0",
+      "bytes": 430477,
       "from": "C:/Users/kenbj/Code/datalog viewer/datalog-viewer.js"
     },
     "viewer-engine/runtime.js": {
@@ -127,13 +127,13 @@
       "from": "C:/websites/Alldatalogs/apps/web/public/sample/mile.hpl"
     },
     "viewer-engine/dvcore.js": {
-      "sha256": "f6083ad59dc8903feb22e8df7319c6de636cb99a0e6b5dd50de9f047301b121b",
-      "bytes": 65830,
+      "sha256": "3882c292109925df727c1bdd21f8f17cba16a6c5ac45aa758b957c4b3e287c47",
+      "bytes": 68196,
       "from": "C:/websites/Alldatalogs/packages/datalog-core/browser/entry.ts (esbuild)"
     },
     "glue.js": {
-      "sha256": "d5843b572cf56171158b656a9e8afeb6024fcb172602dedeb6287877b3b7bcf0",
-      "bytes": 18335,
+      "sha256": "236ffedce5df544cf64a0ea53f5b963a50e567cdf286dd904342f14a21d453bf",
+      "bytes": 18970,
       "from": "C:/Users/kenbj/Code/alldatalogs-desktop/renderer/src/glue.ts (esbuild)"
     },
     "main/jws.js": {

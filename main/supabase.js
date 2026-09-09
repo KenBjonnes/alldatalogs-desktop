@@ -296,5 +296,40 @@ async function libraryIsAdmin() {
   return adminKnown;
 }
 
-module.exports = { init, isEncryptionAvailable, getSession, signIn, signOut, fetchEntitlementToken, pullLayouts, pushLayout, removeLayout,
+// ---- failed-log reporting (Ken, 2026-09-09) -------------------------------------------------------
+// A log that would not open: for PBD reporters (Ken's gmail, anyone @pbdyno.com) the original bytes and
+// the error go to the private failed-logs bucket through the report-failed-log edge function, where the
+// troubleshooting job on Ken's PC picks them up. Anyone else: no network call (the reporter check runs
+// here first; the function enforces it again). Returns 'sent' | 'skipped' | 'failed', never throws.
+const FAILED_LOG_REPORTERS = ['kenbjonnes@gmail.com'];
+const FAILED_LOG_DOMAINS = ['pbdyno.com'];
+function isTroubleshootReporter(email) {
+  const e = String(email || '').trim().toLowerCase();
+  if (!e) return false;
+  if (FAILED_LOG_REPORTERS.includes(e)) return true;
+  return FAILED_LOG_DOMAINS.includes(e.split('@')[1] || '');
+}
+async function reportFailedLog(r) {
+  try {
+    if (!r || !r.name || !r.bytes) return 'failed';
+    const s = await getSession();
+    if (!s || !isTroubleshootReporter(s.user && s.user.email)) return 'skipped';
+    const bytes = Buffer.isBuffer(r.bytes) ? r.bytes : r.bytes instanceof Uint8Array ? r.bytes : new Uint8Array(r.bytes);
+    const headHex = Array.from(bytes.subarray(0, 64)).map((b) => b.toString(16).padStart(2, '0')).join('');
+    const url = `${cfg.SUPABASE_URL}/functions/v1/report-failed-log`;
+    const headers = { 'Content-Type': 'application/json', Authorization: `Bearer ${s.access_token}`, apikey: cfg.SUPABASE_ANON_KEY };
+    const begin = await fetch(url, { method: 'POST', headers, body: JSON.stringify({
+      action: 'begin', fileName: String(r.name), sizeBytes: bytes.length, format: r.format || '', error: String(r.error || ''),
+      app: 'desktop', appVersion: app.getVersion(), engine: r.engine || '', headHex }) });
+    const b = await begin.json().catch(() => null);
+    if (begin.status === 403) return 'skipped';
+    if (!begin.ok || !b || !b.ok || !b.signedUrl) return 'failed';
+    const put = await fetch(b.signedUrl, { method: 'PUT', headers: { 'Content-Type': 'application/octet-stream', apikey: cfg.SUPABASE_ANON_KEY }, body: bytes });
+    if (!put.ok) return 'failed';
+    await fetch(url, { method: 'POST', headers, body: JSON.stringify({ action: 'done', id: b.id }) }).catch(() => null);
+    return 'sent';
+  } catch { return 'failed'; }
+}
+
+module.exports = { init, isEncryptionAvailable, getSession, signIn, signOut, fetchEntitlementToken, pullLayouts, pushLayout, removeLayout, reportFailedLog, isTroubleshootReporter,
   libraryList, libraryGet, libraryPublish, libraryUpdate, libraryRemove, libraryPull, libraryMe, libraryIsAdmin, libraryAdmin };
