@@ -19,6 +19,11 @@
 
   var RELEASES = [
     {
+      version: '0.1.40', date: '2026-09-10', items: [
+        { kind: 'change', text: 'The manual now spells out exactly what Free and Pro include, and states plainly that the Windows and phone apps need an active Pro membership to open a log. The website says the same on its pricing and download pages.' },
+      ],
+    },
+    {
       version: '0.1.39', date: '2026-09-10', items: [
         { kind: 'new', text: 'A complete manual is built into the app. Press F1, or use the Help menu, and it opens in its own window: eighteen topics with a contents list and a search box that searches the whole text, and it works offline.' },
         { kind: 'new', text: 'This version history is in the app too, under Help then What is new, and on the website.' },

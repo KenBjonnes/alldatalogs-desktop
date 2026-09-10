@@ -69,9 +69,10 @@
         {
           id: 'free-pro', h: 'Free and Pro, in one line',
           html:
-            "<p>On the <b>website</b>, opening logs, graphs, the built-in gauges and the channel list are free. " +
-            "A membership adds the things you build and keep. <b>The Windows app and the phone apps are part of " +
-            "Pro</b> and need an active membership to open a log at all.</p>" +
+            "<p>On the <b>website</b>, opening logs, graphs, the built-in gauges and the channel list are free, " +
+            "for logs up to 15 MB. A membership adds the things you build and keep. <b>The Windows app and the " +
+            "phone apps are Pro only</b>: anyone can install them, but they need an active membership to open a " +
+            "log.</p>" +
             "<p>Anything marked " + PRO + " in this manual needs a membership. " +
             "<a href='#pro'>Free and Pro</a> has the full split, the file-size limits and how offline works.</p>",
         },
@@ -88,7 +89,10 @@
         {
           id: 'download', h: 'Download and install',
           html:
-            "<p>The Windows app is a <b>beta</b>. It is stable enough for daily use and it updates itself, but " +
+            "<div class='hlp-note'><b>BigData for Windows is part of AllDataLogs Pro.</b> Anyone can download " +
+            "the installer, but it needs an active Pro membership to open a log. If you sign in without one you " +
+            "get a screen offering <b>Start Pro</b> and <b>Manage subscription</b> rather than a dead end.</div>" +
+            "<p>The app is also a <b>beta</b>. It is stable enough for daily use and it updates itself, but " +
             "expect changes between versions, and tell us when something is wrong.</p>" +
             "<ol class='hlp-steps'>" +
             "<li>Download <code>BigData-Setup-&lt;version&gt;.exe</code> from the download page.</li>" +
@@ -829,23 +833,35 @@
         {
           id: 'split', h: 'What is in each',
           html:
-            "<p><b>Free, on the website:</b> opening logs in every supported format up to 15 MB, graphs, cards, " +
-            "the channel list, the built-in gauge clusters and adjusting them, all the built-in views, saving " +
-            "layouts and dashboards on that device, and browsing the library.</p>" +
+            "<div class='hlp-warn'><b>The apps are Pro.</b> BigData for Windows and the phone apps need an " +
+            "active membership to open a log. Anyone can download them; without a membership they show you how " +
+            "to start one instead of opening the file. The <b>website</b> is where the free tier lives.</div>" +
+            "<p><b>Free, in a browser, with no card:</b></p>" +
+            "<ul>" +
+            "<li>Open every supported format &mdash; HP Tuners .hpl, Holley .dl, MoTeC .ld, SCT, Haltech, " +
+            "FuelTech, MegaSquirt and CSV &mdash; up to 15 MB a log.</li>" +
+            "<li>Graphs with zoom, pan, a shared cursor and per-channel axis ranges.</li>" +
+            "<li>The full channel list with live values, search and filters.</li>" +
+            "<li>The built-in gauge clusters, and re-mapping any gauge to another channel.</li>" +
+            "<li>Numeric cards with minimum, maximum and average.</li>" +
+            "<li>Saving layouts and dashboards on the device you are using.</li>" +
+            "<li>Browsing the shared library.</li>" +
+            "</ul>" +
             "<p><b>Pro adds:</b></p>" +
             "<ul>" +
-            "<li>Histograms, math channels, and gauges behind a table.</li>" +
-            "<li>Custom gauge dashboards.</li>" +
-            "<li>Comparing a second log.</li>" +
+            "<li>Histogram tuning tables, math channels, and gauges behind a table.</li>" +
+            "<li>Custom gauge dashboards you build and keep.</li>" +
+            "<li>Comparing two logs on the same axes.</li>" +
             "<li>Race zero, time slips, lap times and Dragy data.</li>" +
             "<li>Using and sharing library items.</li>" +
-            "<li>Layouts and dashboards that sync across your devices.</li>" +
-            "<li>History saved to your account.</li>" +
+            "<li>Layouts, dashboards and tables synced to every device you sign in to.</li>" +
+            "<li>History of every log you open, saved to your account (1 GB).</li>" +
             "<li>Logs up to 250 MB.</li>" +
-            "<li>BigData for Windows and the phone apps, which need a membership to open a log at all.</li>" +
+            "<li>BigData for Windows and the phone apps.</li>" +
             "</ul>" +
             "<p>Pro-locked controls stay visible rather than hidden, so you can see what a membership adds " +
-            "before paying for one.</p>",
+            "before paying for one. Saving a layout is free; <i>syncing</i> it to your other devices is the " +
+            "Pro part.</p>",
         },
         {
           id: 'activation', h: 'Signing in and staying signed in',
