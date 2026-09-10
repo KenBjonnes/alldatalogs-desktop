@@ -12,7 +12,7 @@
 const fs = require('fs');
 const path = require('path');
 const crypto = require('crypto');
-const { app, ipcMain } = require('electron');
+const { app, ipcMain, dialog } = require('electron');
 const core = require('./history-core');
 
 let deps = null;          // { supabase, license, getWindow }
@@ -86,7 +86,23 @@ function install(d) {
   deps = d;
   ipcMain.handle('history:list', () => list());
   ipcMain.handle('history:open', (_e, id) => open(String(id || '')));
-  ipcMain.handle('history:remove', (_e, id) => remove(String(id || '')));
+  // The History list's delete button (Ken, 2026-09-10). This drops the copy stored in the account, so
+  // it asks first -- in main, where the deletion happens, not in the page. `name` is for the wording
+  // only; the id is what gets deleted. remove() itself (module export) stays confirmation-free.
+  ipcMain.handle('history:remove', async (_e, id, name) => {
+    const nm = String(name || '').trim() || 'this log';
+    const opts = {
+      type: 'warning', title: 'Delete from account', noLink: true,
+      message: `Delete "${nm}" from your account?`,
+      detail: 'It stops showing up in History on your other devices. Files on this PC are not touched.',
+      buttons: ['Delete', 'Cancel'], defaultId: 0, cancelId: 1,
+    };
+    const w = deps && deps.getWindow ? deps.getWindow() : null;
+    const r = await (w && !w.isDestroyed() ? dialog.showMessageBox(w, opts) : dialog.showMessageBox(opts));
+    if (!r || r.response !== 0) return { canceled: true };
+    const ok = await remove(String(id || ''));
+    return ok ? { ok: true } : { error: 'Could not delete that log from your account.' };
+  });
   ipcMain.handle('history:getSync', () => syncEnabled());
   ipcMain.handle('history:setSync', (_e, on) => setSync(!!on));
 }

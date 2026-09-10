@@ -31,6 +31,9 @@ contextBridge.exposeInMainWorld('bigdata', {
     recent: () => ipcRenderer.invoke('files:recent'),
     openPath: (p) => ipcRenderer.invoke('files:openPath', p),
     note: (p) => ipcRenderer.invoke('files:note', p),
+    // History list delete: forget drops the row, trash moves the file to the Recycle Bin (main asks first).
+    forget: (p) => ipcRenderer.invoke('files:forget', p),
+    trash: (p) => ipcRenderer.invoke('files:trash', p),
     pathOf: (file) => { try { return webUtils.getPathForFile(file) || ''; } catch { return ''; } },
     onOpen: (cb) => subscribe('files:open', cb),
     ready: () => ipcRenderer.send('renderer:ready'),
@@ -52,7 +55,7 @@ contextBridge.exposeInMainWorld('bigdata', {
   history: {
     list: () => ipcRenderer.invoke('history:list'),
     open: (id) => ipcRenderer.invoke('history:open', id),
-    remove: (id) => ipcRenderer.invoke('history:remove', id),
+    remove: (id, name) => ipcRenderer.invoke('history:remove', id, name),
     getSync: () => ipcRenderer.invoke('history:getSync'),
     setSync: (on) => ipcRenderer.invoke('history:setSync', on),
     onChanged: (cb) => subscribe('history:changed', cb),

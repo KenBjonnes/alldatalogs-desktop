@@ -26,6 +26,8 @@ interface Staged { token?: string; name: string; size?: number; path?: string; e
 interface ReadResult { name: string; path: string; size: number; data: Uint8Array; error?: string }
 interface RecentRow { path: string; name: string; size: number; format: string; openedAt: string }
 interface HistoryRow { id: string; name: string; format: string; sizeBytes: number; lastOpenedAt: string; origin: 'manual' | 'auto' }
+// What main answers a delete with: the user said no (canceled), it worked (ok), or it didn't (error).
+interface Removed { ok?: boolean; canceled?: boolean; trashed?: boolean; error?: string }
 // owner = the account (lower-case email) an entry is synced under; absent = saved while signed out.
 // The local store is one list per machine: without this, two sign-ins on one PC would see and
 // overwrite each other's rows, and a push of another account's row is refused by RLS -- the save
@@ -41,6 +43,8 @@ interface BigdataApi {
     recent(): Promise<RecentRow[]>;
     openPath(p: string): Promise<Staged>;
     note(p: string): Promise<boolean>;
+    forget(p: string): Promise<Removed>;
+    trash(p: string): Promise<Removed>;
     pathOf(file: File): string;
     onOpen(cb: (s: Staged) => void): () => void;
     ready(): void;
@@ -61,7 +65,7 @@ interface BigdataApi {
   history: {
     list(): Promise<HistoryRow[]>;
     open(id: string): Promise<{ name: string; format: string; size: number; data: Uint8Array } | { error: string }>;
-    remove(id: string): Promise<boolean>;
+    remove(id: string, name?: string): Promise<Removed>;
     getSync(): Promise<boolean>;
     setSync(on: boolean): Promise<boolean>;
     onChanged(cb: () => void): () => void;
@@ -387,6 +391,42 @@ function fmtWhen(iso: string) {
 // The History list (Ken, 2026-09-09: "when I get home, I want to see exactly the same things including my
 // history on the right"): the ACCOUNT's opened logs first (newest opened, from any device, re-opened by
 // download), then whatever is only on this PC. Same rule as the website and the phone apps.
+// One row: name + meta on the left, delete buttons on the right (Ken, 2026-09-10: "add a delete button
+// next to files in the desktop app so they are easy to delete"). The buttons live in their own column
+// and stop the click, so pressing one never opens the log.
+function recentRow(cls: string, title: string, name: string, meta: string, open: () => void) {
+  const li = document.createElement('li');
+  if (cls) li.className = cls;
+  li.title = title;
+  const text = document.createElement('div'); text.className = 'rtext';
+  const nm = document.createElement('div'); nm.className = 'rname'; nm.textContent = name;
+  const mt = document.createElement('div'); mt.className = 'rmeta'; mt.textContent = meta;
+  text.append(nm, mt);
+  const acts = document.createElement('div'); acts.className = 'ractions';
+  li.append(text, acts);
+  li.addEventListener('click', open);
+  return { li, acts };
+}
+function rowButton(acts: HTMLElement, glyph: string, label: string, kind: string, run: () => void) {
+  const b = document.createElement('button');
+  b.type = 'button';
+  b.className = 'rbtn ' + kind;
+  b.textContent = glyph;
+  b.title = label;
+  b.setAttribute('aria-label', label);
+  b.addEventListener('click', (e) => { e.stopPropagation(); run(); });
+  acts.appendChild(b);
+  return b;
+}
+// Main asks for confirmation and does the deleting; here we only report what came back and repaint.
+// A refresh runs even after a failure, so a row that is already gone stops being listed.
+async function runDelete(what: Promise<Removed>, fallback: string) {
+  let r: Removed;
+  try { r = await what; } catch (e) { r = { error: errMsg(e, fallback) }; }
+  if (r && r.canceled) return;
+  if (!r || (!r.ok && r.error)) showError((r && r.error) || fallback);
+  void refreshRecents();
+}
 async function refreshRecents() {
   let rows: RecentRow[] = [];
   try { rows = await api.files.recent(); } catch { rows = []; }
@@ -398,30 +438,31 @@ async function refreshRecents() {
   ul.textContent = '';
   $('recentEmpty').hidden = cloud.length + local.length > 0;
   for (const c of cloud) {
-    const li = document.createElement('li');
-    li.className = 'cloud';
-    li.title = c.origin === 'manual' ? 'In your account (saved by you)' : 'In your account — opens on any device';
-    const name = document.createElement('div'); name.className = 'rname'; name.textContent = c.name;
-    const meta = document.createElement('div'); meta.className = 'rmeta';
-    meta.textContent = [c.format, fmtBytes(c.sizeBytes || 0), 'account', fmtWhen(c.lastOpenedAt)].filter(Boolean).join(' · ');
-    li.append(name, meta);
-    li.addEventListener('click', async () => {
+    const meta = [c.format, fmtBytes(c.sizeBytes || 0), 'account', fmtWhen(c.lastOpenedAt)].filter(Boolean).join(' · ');
+    const title = c.origin === 'manual' ? 'In your account (saved by you)' : 'In your account — opens on any device';
+    const { li, acts } = recentRow('cloud', title, c.name, meta, async () => {
       showLoader(c.name);
       let r: { name: string; format: string; size: number; data: Uint8Array } | { error: string };
       try { r = await api.history.open(c.id); } catch (e) { hideLoader(); showError(errMsg(e, 'Could not open that log from your account.')); return; }
       if (!r || 'error' in r) { hideLoader(); showError((r && 'error' in r && r.error) || 'Could not open that log from your account.'); return; }
       handleFile(new File([r.data], r.name), 'cloud');
     });
+    // An account row IS the stored copy, so there is nothing to "remove from the list" separately.
+    rowButton(acts, '🗑', `Delete "${c.name}" from your account`, 'rdel', () => {
+      void runDelete(api.history.remove(c.id, c.name), 'Could not delete that log from your account.');
+    });
     ul.appendChild(li);
   }
   for (const r of local) {
-    const li = document.createElement('li');
-    li.title = r.path;
-    const name = document.createElement('div'); name.className = 'rname'; name.textContent = r.name;
-    const meta = document.createElement('div'); meta.className = 'rmeta';
-    meta.textContent = [r.format, fmtBytes(r.size || 0), 'this PC', fmtWhen(r.openedAt)].filter(Boolean).join(' · ');
-    li.append(name, meta);
-    li.addEventListener('click', async () => { openStaged(await api.files.openPath(r.path)); });
+    const meta = [r.format, fmtBytes(r.size || 0), 'this PC', fmtWhen(r.openedAt)].filter(Boolean).join(' · ');
+    const { li, acts } = recentRow('', r.path, r.name, meta, async () => { openStaged(await api.files.openPath(r.path)); });
+    rowButton(acts, '🗑', `Delete "${r.name}" — moves the file to the Recycle Bin`, 'rdel', () => {
+      void runDelete(api.files.trash(r.path), 'Could not delete that file.');
+    });
+    // Harmless and instant: the file stays put and the row returns next time the log is opened.
+    rowButton(acts, '✕', `Remove "${r.name}" from History — the file stays on this PC`, 'rforget', () => {
+      void runDelete(api.files.forget(r.path), 'Could not remove that log from History.');
+    });
     ul.appendChild(li);
   }
 }

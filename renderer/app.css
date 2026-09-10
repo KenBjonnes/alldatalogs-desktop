@@ -94,8 +94,20 @@ body {
 .recent { display: flex; flex-direction: column; min-height: 0; background: var(--card); border: 1px solid var(--card-border); border-radius: 14px; padding: 14px 14px 10px; }
 .recent h2 { margin: 0 0 8px; font-size: 11px; font-weight: 800; letter-spacing: 1.2px; text-transform: uppercase; color: var(--text-dim); }
 .recent ul { list-style: none; margin: 0; padding: 0; overflow: auto; flex: 1; }
-.recent li { padding: 8px 8px; border-radius: 8px; cursor: pointer; display: flex; flex-direction: column; gap: 2px; }
+.recent li { padding: 8px 8px; border-radius: 8px; cursor: pointer; display: flex; align-items: center; gap: 8px; }
 .recent li:hover { background: var(--bg-elev); }
+.recent .rtext { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px; }
+/* Delete buttons: dim until the row is hovered or a button has focus, so the list stays calm but the
+   buttons are always visible enough to be found (Ken, 2026-09-10). */
+.recent .ractions { display: flex; align-items: center; gap: 2px; opacity: .6; transition: opacity .12s; }
+.recent li:hover .ractions, .recent li:focus-within .ractions { opacity: 1; }
+.recent .rbtn {
+  appearance: none; border: 0; background: transparent; color: var(--text-dim);
+  font-size: 15px; line-height: 1; padding: 4px 5px; border-radius: 6px; cursor: pointer;
+}
+.recent .rbtn.rforget { font-size: 14px; font-weight: 700; }
+.recent .rbtn:hover { color: var(--text); background: rgba(209, 19, 46, .22); }
+.recent .rbtn:focus-visible { outline: 1px solid var(--amber); outline-offset: 1px; }
 .recent .rname { font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .recent .sync { display: flex; align-items: center; gap: 6px; margin: 0 0 8px; cursor: pointer; }
 .recent .sync input { margin: 0; }

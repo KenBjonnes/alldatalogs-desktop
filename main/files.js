@@ -10,7 +10,7 @@
  *
  * Files that arrive before the renderer has booted are queued until it reports 'renderer:ready'.
  */
-const { app, ipcMain, dialog } = require('electron');
+const { app, ipcMain, dialog, shell } = require('electron');
 const fs = require('node:fs');
 const path = require('node:path');
 const crypto = require('node:crypto');
@@ -37,7 +37,8 @@ let rendererReady = false;
 
 function fmtOf(name) {
   const e = path.extname(name).toLowerCase();
-  return e === '.hpl' ? 'HPL' : e === '.ld' ? 'MoTeC' : e === '.dl' ? 'Holley' : 'CSV';
+  // Same labels history.js uses -- .msl/.mlg showed up as "CSV" in the History list until 2026-09-10.
+  return e === '.hpl' ? 'HPL' : e === '.ld' ? 'MoTeC' : e === '.dl' ? 'Holley' : (e === '.msl' || e === '.mlg') ? 'MegaSquirt' : 'CSV';
 }
 
 // --- recents (per signed-in account) -------------------------------------------------------------
@@ -74,6 +75,20 @@ function addRecent(f) {
 }
 function listRecent() {
   return readRecent().filter((r) => { try { return fs.statSync(r.path).isFile(); } catch { return false; } });
+}
+function forgetRecent(p) {
+  const who = whoKey();
+  const list = readRecent(who);
+  const low = String(p).toLowerCase();
+  const next = list.filter((r) => !(r && typeof r.path === 'string' && r.path.toLowerCase() === low));
+  if (next.length === list.length) return false;
+  writeRecent(next, who);
+  return true;
+}
+function isKnownRecent(p) {
+  if (typeof p !== 'string' || !p) return false;
+  const low = p.toLowerCase();
+  return readRecent().some((r) => r && typeof r.path === 'string' && r.path.toLowerCase() === low);
 }
 
 // --- staging -------------------------------------------------------------------------------------
@@ -184,6 +199,47 @@ function install(opts) {
     const known = readRecent().some((r) => r && r.path === p);
     if (!known) return { error: 'That file is not in the recent list.' };
     return stage(p);
+  });
+
+  // --- deleting a log from the History list (Ken, 2026-09-10: "add a delete button next to files in
+  // the desktop app so they are easy to delete") ---------------------------------------------------
+  // Two separate operations so neither can happen by accident:
+  //   files:forget  drops the row from the list. The file on disk is NOT touched, needs no warning,
+  //                 and comes back the next time the log is opened.
+  //   files:trash   moves the file to the RECYCLE BIN (shell.trashItem, so it stays recoverable --
+  //                 never fs.unlink) after a native confirmation, then drops the row.
+  // Both accept only a path the app itself recorded (the rule files:openPath already used), so a
+  // renderer bug or injected script can never name an arbitrary file for main to delete, and the
+  // confirmation lives here rather than in the page for the same reason.
+  ipcMain.handle('files:forget', (_e, p) => {
+    if (!isKnownRecent(p)) return { error: 'That log is not in the History list.' };
+    forgetRecent(p);
+    return { ok: true };
+  });
+
+  ipcMain.handle('files:trash', async (_e, p) => {
+    if (!isKnownRecent(p)) return { error: 'That log is not in the History list.' };
+    const name = path.basename(p);
+    let exists = false;
+    try { exists = fs.statSync(p).isFile(); } catch { exists = false; }
+    const opts = {
+      type: 'warning', title: 'Delete log', noLink: true,
+      message: `Move "${name}" to the Recycle Bin?`,
+      detail: exists
+        ? `${p}\n\nIt also leaves the History list. You can restore it from the Recycle Bin.`
+        : `${p}\n\nThat file is already gone from this PC — this just clears it from the History list.`,
+      buttons: [exists ? 'Move to Recycle Bin' : 'Remove from History', 'Cancel'],
+      defaultId: 0, cancelId: 1,
+    };
+    const w = getWindow();
+    const r = await (w && !w.isDestroyed() ? dialog.showMessageBox(w, opts) : dialog.showMessageBox(opts));
+    if (!r || r.response !== 0) return { canceled: true };
+    if (exists) {
+      try { await shell.trashItem(p); }
+      catch (e) { return { error: `Could not delete ${name}: ${e && e.message ? e.message : e}` }; }
+    }
+    forgetRecent(p);
+    return { ok: true, trashed: exists };
   });
 }
 

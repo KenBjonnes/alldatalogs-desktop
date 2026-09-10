@@ -363,6 +363,50 @@
     const days = Math.floor((Date.now() - d.getTime()) / 864e5);
     return days <= 0 ? "today" : days === 1 ? "yesterday" : days < 30 ? `${days} days ago` : d.toLocaleDateString();
   }
+  function recentRow(cls, title, name, meta, open) {
+    const li = document.createElement("li");
+    if (cls) li.className = cls;
+    li.title = title;
+    const text = document.createElement("div");
+    text.className = "rtext";
+    const nm = document.createElement("div");
+    nm.className = "rname";
+    nm.textContent = name;
+    const mt = document.createElement("div");
+    mt.className = "rmeta";
+    mt.textContent = meta;
+    text.append(nm, mt);
+    const acts = document.createElement("div");
+    acts.className = "ractions";
+    li.append(text, acts);
+    li.addEventListener("click", open);
+    return { li, acts };
+  }
+  function rowButton(acts, glyph, label, kind, run) {
+    const b = document.createElement("button");
+    b.type = "button";
+    b.className = "rbtn " + kind;
+    b.textContent = glyph;
+    b.title = label;
+    b.setAttribute("aria-label", label);
+    b.addEventListener("click", (e) => {
+      e.stopPropagation();
+      run();
+    });
+    acts.appendChild(b);
+    return b;
+  }
+  async function runDelete(what, fallback) {
+    let r;
+    try {
+      r = await what;
+    } catch (e) {
+      r = { error: errMsg(e, fallback) };
+    }
+    if (r && r.canceled) return;
+    if (!r || !r.ok && r.error) showError(r && r.error || fallback);
+    void refreshRecents();
+  }
   async function refreshRecents() {
     let rows = [];
     try {
@@ -382,17 +426,9 @@
     ul.textContent = "";
     $("recentEmpty").hidden = cloud.length + local.length > 0;
     for (const c of cloud) {
-      const li = document.createElement("li");
-      li.className = "cloud";
-      li.title = c.origin === "manual" ? "In your account (saved by you)" : "In your account \u2014 opens on any device";
-      const name = document.createElement("div");
-      name.className = "rname";
-      name.textContent = c.name;
-      const meta = document.createElement("div");
-      meta.className = "rmeta";
-      meta.textContent = [c.format, fmtBytes(c.sizeBytes || 0), "account", fmtWhen(c.lastOpenedAt)].filter(Boolean).join(" \xB7 ");
-      li.append(name, meta);
-      li.addEventListener("click", async () => {
+      const meta = [c.format, fmtBytes(c.sizeBytes || 0), "account", fmtWhen(c.lastOpenedAt)].filter(Boolean).join(" \xB7 ");
+      const title = c.origin === "manual" ? "In your account (saved by you)" : "In your account \u2014 opens on any device";
+      const { li, acts } = recentRow("cloud", title, c.name, meta, async () => {
         showLoader(c.name);
         let r;
         try {
@@ -409,20 +445,21 @@
         }
         handleFile(new File([r.data], r.name), "cloud");
       });
+      rowButton(acts, "\u{1F5D1}", `Delete "${c.name}" from your account`, "rdel", () => {
+        void runDelete(api.history.remove(c.id, c.name), "Could not delete that log from your account.");
+      });
       ul.appendChild(li);
     }
     for (const r of local) {
-      const li = document.createElement("li");
-      li.title = r.path;
-      const name = document.createElement("div");
-      name.className = "rname";
-      name.textContent = r.name;
-      const meta = document.createElement("div");
-      meta.className = "rmeta";
-      meta.textContent = [r.format, fmtBytes(r.size || 0), "this PC", fmtWhen(r.openedAt)].filter(Boolean).join(" \xB7 ");
-      li.append(name, meta);
-      li.addEventListener("click", async () => {
+      const meta = [r.format, fmtBytes(r.size || 0), "this PC", fmtWhen(r.openedAt)].filter(Boolean).join(" \xB7 ");
+      const { li, acts } = recentRow("", r.path, r.name, meta, async () => {
         openStaged(await api.files.openPath(r.path));
+      });
+      rowButton(acts, "\u{1F5D1}", `Delete "${r.name}" \u2014 moves the file to the Recycle Bin`, "rdel", () => {
+        void runDelete(api.files.trash(r.path), "Could not delete that file.");
+      });
+      rowButton(acts, "\u2715", `Remove "${r.name}" from History \u2014 the file stays on this PC`, "rforget", () => {
+        void runDelete(api.files.forget(r.path), "Could not remove that log from History.");
       });
       ul.appendChild(li);
     }
