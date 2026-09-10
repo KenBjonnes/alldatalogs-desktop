@@ -19,6 +19,12 @@
 
   var RELEASES = [
     {
+      version: '0.1.43', date: '2026-09-10', items: [
+        { kind: 'fix', text: 'Moving the mouse over a graph is far lighter on the machine. Every mouse position used to rebuild all of the graphs from scratch, hundreds of times a second on a fast mouse; the crosshair and the readouts now update once per screen refresh and only repaint, which took the work behind one mouse move from about twenty milliseconds to under one.' },
+        { kind: 'fix', text: 'Dragging the overview bar under the graphs got the same treatment, so a long drag no longer stacks up a redraw for every position the mouse reported.' },
+      ],
+    },
+    {
       version: '0.1.42', date: '2026-09-10', items: [
         { kind: 'fix', text: 'The fourth graph is now offered on the Graph tab. The button was there only in a graph view you could reach from the old view picker, so the tab itself still stopped at three.' },
       ],
