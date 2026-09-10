@@ -75,6 +75,11 @@ In `KenBjonnes/alldatalogs-desktop` → Settings → Secrets and variables → A
 | `TRUSTED_SIGNING_PROFILE` | Certificate profile name from step 5 | `adl-public-trust` |
 | `TRUSTED_SIGNING_PUBLISHER` | The approved name, **exactly** as the certificate carries it | `Palm Beach Dyno, Inc.` |
 
+Or skip the GitHub UI for these four: `.\scripts\set-signing-vars.ps1 -Endpoint ... -Account ... -ProfileName
+... -Publisher ...` sets all four in one shot via `gh variable set` (requires `gh auth login` once). It
+deliberately never touches the three secrets above — those still get pasted into GitHub's Secrets tab by
+hand, same as any credential.
+
 `TRUSTED_SIGNING_PUBLISHER` is the one that bites. It has to equal the certificate's `CN`, including
 punctuation and any suffix like `, Inc.`, because auto-update compares them. CI checks this on every
 signed build and fails the release rather than shipping a mismatch.
