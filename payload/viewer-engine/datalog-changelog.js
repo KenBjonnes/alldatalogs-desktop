@@ -19,6 +19,12 @@
 
   var RELEASES = [
     {
+      version: '0.1.44', date: '2026-09-10', items: [
+        { kind: 'fix', text: 'The cursor line now has its own layer over each graph, so moving it no longer redraws the traces. On a big log with four graphs that alone was about forty milliseconds a frame; the line itself is now under a fifth of a millisecond and keeps up with the pointer, and it stays welded to the data while you drag a graph.' },
+        { kind: 'fix', text: 'The live values in the channel list are only refreshed for the rows on screen, and on a log with hundreds of channels they refresh about eighteen times a second instead of fighting the cursor for every frame. They always settle on the exact value once the pointer stops, and a normal-sized log still updates them every frame.' },
+      ],
+    },
+    {
       version: '0.1.43', date: '2026-09-10', items: [
         { kind: 'fix', text: 'Moving the mouse over a graph is far lighter on the machine. Every mouse position used to rebuild all of the graphs from scratch, hundreds of times a second on a fast mouse; the crosshair and the readouts now update once per screen refresh and only repaint, which took the work behind one mouse move from about twenty milliseconds to under one.' },
         { kind: 'fix', text: 'Dragging the overview bar under the graphs got the same treatment, so a long drag no longer stacks up a redraw for every position the mouse reported.' },
