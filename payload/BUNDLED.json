@@ -1,9 +1,9 @@
 {
-  "builtAt": "2026-09-09T23:56:38.762Z",
+  "builtAt": "2026-09-10T00:35:49.350Z",
   "sources": {
     "releaseDir": "C:/Users/kenbj/Code/datalog viewer",
     "siteRepo": "C:/websites/Alldatalogs",
-    "siteCommit": "b6a462a"
+    "siteCommit": "d388c9e"
   },
   "files": {
     "viewer-engine/datalog-viewer.css": {
@@ -62,8 +62,8 @@
       "from": "C:/Users/kenbj/Code/datalog viewer/datalog-histogram-ui.js"
     },
     "viewer-engine/datalog-histogram-editor.js": {
-      "sha256": "8e749c04fc4d8e06148e79471b4415f5e86fbb6d35a0d8296c65a8f08cfe0818",
-      "bytes": 136519,
+      "sha256": "b5839c37db58dc88607cf45bee5a095f984dc07a6aa969147ca4a62416cad331",
+      "bytes": 138508,
       "from": "C:/Users/kenbj/Code/datalog viewer/datalog-histogram-editor.js"
     },
     "viewer-engine/datalog-hpt.js": {
