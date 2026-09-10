@@ -51,6 +51,9 @@ const ENGINE = [
   'datalog-hpt.js',
   'datalog-library.js',
   'datalog-vehicles.js',
+  'datalog-help.css',
+  'datalog-changelog.js',
+  'datalog-help.js',
   'datalog-library.css',
   'datalog-viewer.js',
 ];

@@ -1,0 +1,31 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>BigData Help</title>
+<!--
+  The Help window's page. Deliberately standalone: it loads only the manual, the version history and
+  their stylesheet from the payload, so it opens instantly, works with no log open, no sign-in and no
+  connection, and cannot be affected by anything the viewer is doing in the other window.
+  The content itself ships with the engine (datalog-help.js), so it always matches this build.
+-->
+<link rel="stylesheet" href="/viewer-engine/datalog-help.css?v=__APP_VERSION__">
+<style>
+  html, body { height: 100%; margin: 0; background: #0b0b0e; }
+  body { display: flex; }
+  #help { flex: 1; min-width: 0; }
+  /* Tokens the engine stylesheets expect from a host page. */
+  :root {
+    --bg: #0b0b0e; --bg-elev: #111114; --card: #16161a; --card-border: #26262c;
+    --text: #f2f2f4; --text-dim: #9a9aa2; --text-faint: #5c5c66;
+    --red: #d1132e; --amber: #f5a623; --green: #22c55e;
+  }
+</style>
+</head>
+<body>
+<div id="help"></div>
+<script src="/viewer-engine/datalog-changelog.js?v=__APP_VERSION__"></script>
+<script src="/viewer-engine/datalog-help.js?v=__APP_VERSION__"></script>
+<script src="/help.js?v=__APP_VERSION__"></script>
+</body>
+</html>

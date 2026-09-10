@@ -88,6 +88,11 @@ contextBridge.exposeInMainWorld('bigdata', {
     },
   },
 
+  // The built-in manual, in its own window (also on F1 and the Help menu).
+  help: {
+    open: (topic) => ipcRenderer.invoke('help:open', topic),
+  },
+
   updates: {
     check: () => ipcRenderer.invoke('updates:check'),
     get: () => ipcRenderer.invoke('updates:get'),

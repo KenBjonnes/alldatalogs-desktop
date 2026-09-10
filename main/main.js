@@ -18,6 +18,7 @@ const prompt = require('./prompt');
 const license = require('./license');
 const supabase = require('./supabase');
 const history = require('./history');
+const help = require('./help');
 const updater = require('./updater');
 
 const DEV = !app.isPackaged;
@@ -136,6 +137,11 @@ function buildMenu() {
     {
       label: '&Help',
       submenu: [
+        // F1 is the accelerator Windows users expect for help, and it is registered here rather than
+        // in the page so it works with no log open and whichever window has focus.
+        { label: 'BigData Help', accelerator: 'F1', click: () => help.open() },
+        { label: "What's new", click: () => help.open('changelog') },
+        { type: 'separator' },
         { label: 'Check for updates…', click: () => updater.checkInteractive() },
         { label: 'AllDataLogs website', click: () => openExternal('https://alldatalogs.com/') },
         { type: 'separator' },
@@ -154,6 +160,8 @@ function main() {
   files.install({ getWindow: () => mainWindow, gate: () => license.openBlockedReason() });
   // Account history: opened logs saved to the account (Pro), listed + re-opened on every device.
   history.install({ supabase, license, getWindow: () => mainWindow });
+  // The Help window (F1 / Help menu): its own window, opened next to the main one.
+  help.install({ getWindow: () => mainWindow });
   updater.install({ getWindow: () => mainWindow });
 
   ipcMain.on('app:info', (event) => {

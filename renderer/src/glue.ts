@@ -91,6 +91,9 @@ interface BigdataApi {
       remove(id: string): Promise<{ ok: boolean; error?: string }>;
     };
   };
+  help: {
+    open(topic?: string): Promise<{ ok: boolean }>;
+  };
   updates: {
     check(): Promise<{ ok: boolean; reason?: string }>;
     restart(): Promise<{ ok: boolean }>;
@@ -556,6 +559,7 @@ function wireHome() {
   $('btnOpen').addEventListener('click', async () => { openStaged(await api.files.openDialog()); });
   $('btnSample').addEventListener('click', () => { void openSample(); });
   $('btnCancelLoad').addEventListener('click', cancelLoad);
+  $('btnHelp').addEventListener('click', () => { void api.help.open(); });
   $('btnUpdates').addEventListener('click', async () => {
     const r = await api.updates.check();
     if (!r.ok) window.showToast('Automatic updates are not enabled in this build yet.');

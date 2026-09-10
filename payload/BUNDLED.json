@@ -1,5 +1,5 @@
 {
-  "builtAt": "2026-09-10T11:49:15.042Z",
+  "builtAt": "2026-09-10T12:24:48.284Z",
   "sources": {
     "releaseDir": "C:/Users/kenbj/Code/datalog viewer",
     "siteRepo": "C:/websites/Alldatalogs",
@@ -81,6 +81,21 @@
       "bytes": 13165,
       "from": "C:/Users/kenbj/Code/datalog viewer/datalog-vehicles.js"
     },
+    "viewer-engine/datalog-help.css": {
+      "sha256": "35fd1a3aee2195790c2a2e889ceabc285c78898cfc97f8d2e12eb6917d65e4f9",
+      "bytes": 8056,
+      "from": "C:/Users/kenbj/Code/datalog viewer/datalog-help.css"
+    },
+    "viewer-engine/datalog-changelog.js": {
+      "sha256": "230c36ba8e4b42287bea7a04cc84069fd1b86d8c94ebcc40f931cf55160dcf78",
+      "bytes": 12498,
+      "from": "C:/Users/kenbj/Code/datalog viewer/datalog-changelog.js"
+    },
+    "viewer-engine/datalog-help.js": {
+      "sha256": "c5539ca6f2d6d1d0dac67bbe14b39de687c5a6ccc486b1d7b3cf4cfd77715c44",
+      "bytes": 76001,
+      "from": "C:/Users/kenbj/Code/datalog viewer/datalog-help.js"
+    },
     "viewer-engine/datalog-library.css": {
       "sha256": "4f3421400dad997af6a450a4b18ff7871ca72fa2ac9b4318c2ee04223c5060ec",
       "bytes": 6003,
@@ -132,8 +147,8 @@
       "from": "C:/websites/Alldatalogs/packages/datalog-core/browser/entry.ts (esbuild)"
     },
     "glue.js": {
-      "sha256": "dbe8a37c324eb7006320b9e4c545aef4d68313ca206c52ae0aa8ec741f42d8b6",
-      "bytes": 22371,
+      "sha256": "a5e83f835b1f40fb6e2849bce4c94c4c338be612d861e07d5dc86925b8c849b5",
+      "bytes": 22458,
       "from": "C:/Users/kenbj/Code/alldatalogs-desktop/renderer/src/glue.ts (esbuild)"
     },
     "main/jws.js": {

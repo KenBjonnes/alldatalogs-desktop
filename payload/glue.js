@@ -565,6 +565,9 @@
       void openSample();
     });
     $("btnCancelLoad").addEventListener("click", cancelLoad);
+    $("btnHelp").addEventListener("click", () => {
+      void api.help.open();
+    });
     $("btnUpdates").addEventListener("click", async () => {
       const r = await api.updates.check();
       if (!r.ok) window.showToast("Automatic updates are not enabled in this build yet.");
