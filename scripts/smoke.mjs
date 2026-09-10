@@ -68,7 +68,11 @@ const viewerOpen = (page) => page.waitForFunction(() => {
     version: typeof VIEWER_VERSION !== 'undefined' ? VIEWER_VERSION : null,
     channels: (window.VIEWER_DATA && window.VIEWER_DATA.channels) ? window.VIEWER_DATA.channels.length : (typeof VIEWER_DATA !== 'undefined' && VIEWER_DATA ? VIEWER_DATA.channels.length : -1),
     full: typeof VIEWER_DATA !== 'undefined' && VIEWER_DATA && VIEWER_DATA.full ? VIEWER_DATA.full.rows : -1,
-    canvases: document.querySelectorAll('#viewerContent canvas').length,
+    // Chart canvases only: NOT the overview-bar canvas, and not the .dlv-xhair cursor-line overlay
+    // each panel carries since engine 0.1.44 -- a bare canvas count mixes all three and would hide a
+    // missing chart.
+    canvases: document.querySelectorAll('.dlv-graph-canvas-wrap canvas:not(.dlv-xhair)').length,
+    xhairOverlays: document.querySelectorAll('.dlv-graph-canvas-wrap canvas.dlv-xhair').length,
     pro: typeof viewerIsPro === 'function' ? viewerIsPro() : null,
     promptShimmed: String(window.prompt).includes('promptSync'),
   }));
@@ -76,7 +80,8 @@ const viewerOpen = (page) => page.waitForFunction(() => {
   check(info.version === PKG_VERSION, `VIEWER_VERSION stamped from app version (got ${info.version}, package ${PKG_VERSION})`);
   check(info.channels > 5, `channels parsed (${info.channels})`);
   check(info.full > 1000, `full-resolution set present (${info.full} rows)`);
-  check(info.canvases > 0, `charts rendered (${info.canvases} canvases)`);
+  check(info.canvases > 0, `charts rendered (${info.canvases} chart canvases)`);
+  check(info.xhairOverlays === info.canvases, `every graph panel has its cursor-line overlay (${info.xhairOverlays} of ${info.canvases})`);
   check(info.pro === true, 'engine reports Pro');
   check(info.promptShimmed, 'window.prompt routed to promptSync');
   await page.screenshot({ path: join(OUT, '1-viewer-argv.png') });
