@@ -48,8 +48,11 @@ win:
       name: Holley Datalog
       description: Holley EFI datalog
       role: Viewer
-  # Code signing: add `signtoolOptions` or `azureSignOptions` here once a certificate exists. Once a
-  # signed build has shipped, never publish an unsigned one again (the updater will refuse it).
+  # Code signing lives in .github/workflows/release.yml, not here: it is passed as
+  # -c.win.azureSignOptions.* from repo variables + secrets (Azure Trusted Signing), so a build without
+  # those credentials -- a fork, a local `electron-builder` run -- still works instead of failing. See
+  # docs/code-signing.md. Once a signed build has shipped, never publish an unsigned one again (the
+  # updater compares the installer's certificate name against the installed app's app-update.yml).
 
 nsis:
   oneClick: false

@@ -76,9 +76,14 @@ install on quit.
 
 ### Code signing
 
-Unsigned for now (hence the SmartScreen note). To sign: get a certificate (Azure Trusted Signing or an OV
-code-signing cert), add `win.signtoolOptions` / `win.azureSignOptions` to `electron-builder.yml` and the secrets to
-the repo. Once a signed build has shipped, every later build must also be signed or the updater will refuse it.
+CI signs with **Azure Trusted Signing** as soon as the repository carries the `AZURE_TENANT_ID` /
+`AZURE_CLIENT_ID` / `AZURE_CLIENT_SECRET` secrets and the four `TRUSTED_SIGNING_*` variables; until then it
+builds the same unsigned installer and says so in the job log. Setup, the Azure-side steps and the traps are
+in [docs/code-signing.md](docs/code-signing.md).
+
+`TRUSTED_SIGNING_PUBLISHER` must equal the certificate's `CN` exactly — the release job fails if it doesn't,
+because electron-updater compares that name when verifying a downloaded update. Once a signed build has
+shipped, every later build must also be signed or the updater will refuse it.
 
 ### Key rotation
 

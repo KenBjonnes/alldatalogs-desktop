@@ -30,8 +30,64 @@ jobs:
         run: |
           $v = (Get-Content package.json -Raw | ConvertFrom-Json).version
           if ("v$v" -ne "${{ github.ref_name }}") { throw "Tag ${{ github.ref_name }} does not match package.json version v$v" }
+      # Code signing — Azure Trusted Signing (see docs/code-signing.md).
+      # electron-builder installs the TrustedSigning PowerShell module itself and authenticates with
+      # Azure's EnvironmentCredential, i.e. the three AZURE_* secrets. The account / profile / endpoint /
+      # publisher name are not secret, so they live in repo VARIABLES and can change without a code edit.
+      # With no credentials set the command is byte-for-byte the old unsigned build, so a fork, a re-run
+      # of an old tag, or a build before the certificate exists all keep working.
       - name: Build installer
-        run: npx electron-builder --win --x64 --publish never
+        id: build
+        shell: pwsh
+        env:
+          AZURE_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
+          AZURE_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
+          AZURE_CLIENT_SECRET: ${{ secrets.AZURE_CLIENT_SECRET }}
+          TS_ENDPOINT: ${{ vars.TRUSTED_SIGNING_ENDPOINT }}
+          TS_ACCOUNT: ${{ vars.TRUSTED_SIGNING_ACCOUNT }}
+          TS_PROFILE: ${{ vars.TRUSTED_SIGNING_PROFILE }}
+          TS_PUBLISHER: ${{ vars.TRUSTED_SIGNING_PUBLISHER }}
+        run: |
+          $a = @('--win', '--x64', '--publish', 'never')
+          $signing = $env:AZURE_TENANT_ID -and $env:AZURE_CLIENT_ID -and $env:AZURE_CLIENT_SECRET -and $env:TS_ENDPOINT -and $env:TS_ACCOUNT -and $env:TS_PROFILE -and $env:TS_PUBLISHER
+          if ($signing) {
+            $a += "-c.win.azureSignOptions.endpoint=$env:TS_ENDPOINT"
+            $a += "-c.win.azureSignOptions.codeSigningAccountName=$env:TS_ACCOUNT"
+            $a += "-c.win.azureSignOptions.certificateProfileName=$env:TS_PROFILE"
+            $a += "-c.win.azureSignOptions.publisherName=$env:TS_PUBLISHER"
+            Write-Host "Signing with Trusted Signing profile '$env:TS_PROFILE' as '$env:TS_PUBLISHER'"
+          } else {
+            Write-Host "::warning title=Unsigned build::No Azure Trusted Signing configuration — this installer is NOT signed"
+          }
+          "signed=$([int][bool]$signing)" | Out-File -FilePath $env:GITHUB_OUTPUT -Append -Encoding utf8
+          npx electron-builder @a
+          if ($LASTEXITCODE -ne 0) { throw "electron-builder failed" }
+
+      # The signature is what auto-update checks from the next version onwards: electron-updater compares
+      # the downloaded installer's certificate CN against the publisherName baked into the INSTALLED app's
+      # app-update.yml. A CN that doesn't match that name bricks every future update, so both are asserted
+      # here rather than discovered on the next release.
+      - name: Verify the signature
+        if: steps.build.outputs.signed == '1'
+        shell: pwsh
+        env:
+          TS_PUBLISHER: ${{ vars.TRUSTED_SIGNING_PUBLISHER }}
+        run: |
+          $exe = Get-ChildItem dist/*.exe | Select-Object -First 1
+          if (-not $exe) { throw "No installer in dist/" }
+          $sig = Get-AuthenticodeSignature $exe.FullName
+          Write-Host "$($sig.Status) :: $($sig.SignerCertificate.Subject)"
+          if ($sig.Status -ne 'Valid') { throw "Installer signature is $($sig.Status), expected Valid" }
+          $want = 'CN=' + $env:TS_PUBLISHER
+          if ($sig.SignerCertificate.Subject -notmatch [regex]::Escape($want)) {
+            throw "Certificate subject does not contain '$want' — set TRUSTED_SIGNING_PUBLISHER to the certificate's exact CN or auto-update will reject later builds"
+          }
+          $upd = 'dist/win-unpacked/resources/app-update.yml'
+          if (-not (Test-Path $upd)) { throw "Missing $upd" }
+          if ((Get-Content $upd -Raw) -notmatch [regex]::Escape($env:TS_PUBLISHER)) {
+            throw "app-update.yml has no publisherName '$env:TS_PUBLISHER' — installed apps could not verify the next update"
+          }
+          Write-Host "Signed, timestamped, and app-update.yml carries the publisher name."
       # electron-builder's own GitHub publisher uploads assets in parallel and, on a fresh tag, both
       # uploads raced to create the release; the 113 MB exe was lost while the step still exited 0
       # (v0.1.0, run 34174361361). gh uploads sequentially and fails loudly, so it publishes instead.
@@ -39,15 +95,22 @@ jobs:
         shell: pwsh
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          SIGNED: ${{ steps.build.outputs.signed }}
+          TS_PUBLISHER: ${{ vars.TRUSTED_SIGNING_PUBLISHER }}
         run: |
           $tag = "${{ github.ref_name }}"
           $exe = Get-ChildItem dist/*.exe | Select-Object -First 1
           if (-not $exe) { throw "No installer in dist/" }
           $files = @($exe.FullName, "$($exe.FullName).blockmap", (Resolve-Path dist/latest.yml).Path)
           foreach ($f in $files) { if (-not (Test-Path $f)) { throw "Missing $f" } }
+          $notes = if ($env:SIGNED -eq '1') {
+            "BigData for Windows $tag. Download BigData-Setup-*.exe. Digitally signed by $env:TS_PUBLISHER."
+          } else {
+            "BigData for Windows $tag. Download BigData-Setup-*.exe; see the README for the SmartScreen note."
+          }
           gh release view $tag *> $null
           if ($LASTEXITCODE -ne 0) {
-            gh release create $tag --title "BigData $tag" --notes "BigData for Windows $tag. Download BigData-Setup-*.exe; see the README for the SmartScreen note." --latest
+            gh release create $tag --title "BigData $tag" --notes $notes --latest
             if ($LASTEXITCODE -ne 0) { throw "gh release create failed" }
           }
           gh release upload $tag @files --clobber
