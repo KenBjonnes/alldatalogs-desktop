@@ -367,8 +367,9 @@
         {
           id: 'panels', h: 'One to four panels',
           html:
-            "<p>The small <b>1 2 3</b> buttons in the top-left of the upper graph choose how many panels you " +
-            "see. In <b>Graph View</b> there is a <b>4</b> as well, because that tab has the whole window.</p>" +
+            "<p>The small <b>1 2 3 4</b> buttons in the top-left of the upper graph choose how many panels you " +
+            "see. All four are offered on the <b>Graph</b> tab, which has the whole window; on the Gauges and " +
+            "Histograms tabs the pane is shared with the dashboard or the table, so three is the most.</p>" +
             "<p>The fourth panel is added <i>above</i> the bottom graph, so a channel on the lower panel stays " +
             "on the bottom whether you show two, three or four. Drop back to fewer panels and channels on a " +
             "hidden panel are drawn on the bottom one instead of vanishing; they return to their own panel when " +
