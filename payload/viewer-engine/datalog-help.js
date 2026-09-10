@@ -284,8 +284,8 @@
     {
       id: 'channels',
       title: 'The channel list',
-      summary: "Finding channels, filtering by kind, putting them on graphs, smoothing, and what each glyph means.",
-      tags: ['channels', 'search', 'filter', 'badge', 'units', 'value', 'sort', 'smoothing'],
+      summary: "Finding channels, favorites, folding the sections, putting them on graphs, smoothing, and what each glyph means.",
+      tags: ['channels', 'search', 'filter', 'badge', 'units', 'value', 'sort', 'smoothing', 'favorites', 'star', 'sections'],
       sections: [
         {
           id: 'find', h: 'Finding a channel',
@@ -305,6 +305,24 @@
             "the list in your own order instead.</p>",
         },
         {
+          id: 'favorites', h: 'Favorites and the sections',
+          html:
+            "<p>Every row has a star. Click it and the channel moves into a <b>Favorites</b> section at the very " +
+            "top of the list, and it stays starred on every log you open afterwards \u2014 the handful of channels " +
+            "you always look at are one glance away instead of a search away. Click the star again to send the " +
+            "channel back where it came from.</p>" +
+            "<p>Below Favorites the list is divided into the three kinds, each with its own heading and a count:</p>" +
+            "<table class='hlp-keys'><tbody>" +
+            "<tr><td><b>&#9673;</b></td><td><b>Logged channels</b> \u2014 what the scanner recorded.</td></tr>" +
+            "<tr><td><b>&fnof;</b></td><td><b>Math channels</b> \u2014 the ones you defined.</td></tr>" +
+            "<tr><td><b>&asymp;</b></td><td><b>Calculated</b> \u2014 estimated from this log by the viewer.</td></tr>" +
+            "</tbody></table>" +
+            "<p>Click a heading to fold that section away; the count keeps telling you how many are inside, and " +
+            "the app remembers which sections you had folded. A heading only appears for a kind this log actually " +
+            "has. While you are typing in the filter box every section opens, so a search can never hide its own " +
+            "results behind a folded heading.</p>",
+        },
+        {
           id: 'place', h: 'Putting a channel on a graph',
           html:
             "<p>Tick the box to plot a channel; the first one you tick goes on the upper graph. The letter " +
@@ -319,6 +337,8 @@
           html:
             "<table class='hlp-keys'><tbody>" +
             "<tr><td><b>&equiv;</b></td><td>Drag to reorder the list, or onto a graph to plot it there.</td></tr>" +
+            "<tr><td><b>&#9734;</b> <b>&#9733;</b></td><td>Favorite. Lit means starred, and starred channels sit " +
+            "in Favorites at the top of every log.</td></tr>" +
             "<tr><td><b>&fnof;</b> <b>&asymp;</b></td><td>Math channel / calculated channel.</td></tr>" +
             "<tr><td><b>&#9881;</b></td><td>On calculated rows only: the settings behind the estimate.</td></tr>" +
             "<tr><td><b>&#8767;</b></td><td>Smoothing for this channel. Lit, with the window beside it, when on.</td></tr>" +

@@ -19,6 +19,14 @@
 
   var RELEASES = [
     {
+      version: '0.1.41', date: '2026-09-10', items: [
+        { kind: 'new', text: 'Every channel in the list now has a star. Star one and it moves to a Favorites section at the top, and it stays starred on every log you open afterwards.' },
+        { kind: 'new', text: 'The channel list is divided into Logged channels, Math channels and Calculated, each heading foldable and each showing its count. The app remembers which sections you folded, and searching always opens them so a match can never hide behind a folded heading.' },
+        { kind: 'fix', text: 'Ticking a channel no longer throws the channel list back to the top \u2014 it stays where you were, and so does assigning one to a graph.' },
+        { kind: 'fix', text: 'Adding a gauge to a saved dashboard no longer stops one of the gauges already on it from reading. A dashboard already saved with that fault is repaired the next time you open it.' },
+      ],
+    },
+    {
       version: '0.1.40', date: '2026-09-10', items: [
         { kind: 'change', text: 'The manual now spells out exactly what Free and Pro include, and states plainly that the Windows and phone apps need an active Pro membership to open a log. The website says the same on its pricing and download pages.' },
       ],
