@@ -7,8 +7,9 @@ The [AllDataLogs](https://alldatalogs.com) datalog viewer ("BigData") as a Windo
 ## Install
 
 1. Download `BigData-Setup-<version>.exe` from the latest [release](https://github.com/KenBjonnes/alldatalogs-desktop/releases).
-2. Run it. Windows SmartScreen may say "Windows protected your PC" because the installer is not yet code-signed:
-   click **More info → Run anyway**.
+2. Run it. Since 1.0.3 the installer and the app are code-signed; Windows names **K2 Research & Development LLC**
+   as the verified publisher. SmartScreen can still say "Windows protected your PC" for a while on a new
+   certificate: click **More info**, check the publisher, then **Run anyway**.
 3. Sign in with your AllDataLogs email and password. BigData needs the internet once to activate; after that it
    keeps working offline for up to 30 days between check-ins.
 
