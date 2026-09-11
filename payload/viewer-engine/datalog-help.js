@@ -253,7 +253,8 @@
             "same moment.</li>" +
             "<li><b>Overview bar</b> at the bottom: the whole log end to end, with a red window showing what " +
             "you are zoomed into, a playhead at the cursor, and a mark at your race zero.</li>" +
-            "<li><b>Race readout</b> left of that bar, for zeroing the time axis at your launch.</li>" +
+            "<li><b>Time readout</b> left of that bar: the log's own time at the cursor, or your race time once " +
+            "you set a zero at your launch. It keeps one width, so nothing beside it shifts as the numbers change.</li>" +
             "</ul>",
         },
         {
@@ -429,7 +430,9 @@
           html:
             "<p>Set a zero point " + PRO + " and the time axis reads from your launch instead of from the start " +
             "of the file, which is what makes two runs comparable. Right-click the moment on a graph, or use " +
-            "<b>Set 0</b> in the race row. <b>&times;</b> clears it. The overview bar marks where the zero is.</p>",
+            "<b>Set 0</b> in the race row. <b>&times;</b> clears it. The overview bar marks where the zero is.</p>" +
+            "<p>Until a zero is set, the same readout shows <b>Time</b>: the log's own time at the cursor, as it " +
+            "was recorded. Setting a zero switches it to <b>Race</b> in amber; clearing it switches back.</p>",
         },
         {
           id: 'compare', h: 'Comparing two logs',

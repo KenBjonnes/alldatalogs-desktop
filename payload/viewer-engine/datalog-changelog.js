@@ -19,6 +19,13 @@
 
   var RELEASES = [
     {
+      version: '0.1.46', date: '2026-09-11', items: [
+        { kind: 'new', text: 'The readout under the graphs now shows the log time at the cursor whenever no race zero is set, in larger numbers than the race time used. Setting a zero switches it to race time, as before.' },
+        { kind: 'fix', text: 'The time readout keeps one width for the whole log, so the zoom bar beside it no longer shifts as the numbers change, a minus sign appears, or you set and clear the race zero.' },
+        { kind: 'change', text: 'The zoom bar under the graphs is 10% taller.' },
+      ],
+    },
+    {
       version: '0.1.45', date: '2026-09-11', items: [
         { kind: 'fix', text: 'On a log with hundreds of channels the channel list now draws only the rows you can see, so moving the cursor costs about the same on a 524-channel log as on a small one: a cursor frame with every live value went from about fifty milliseconds to about five, and rebuilding the list from twenty-five to under ten.' },
         { kind: 'change', text: 'Because the list is that cheap now, the live values keep up with the cursor on every frame again on big logs, rather than being paced to spare the machine.' },
