@@ -1,14 +1,14 @@
 {
-  "builtAt": "2026-09-11T11:12:29.635Z",
+  "builtAt": "2026-09-11T11:40:20.690Z",
   "sources": {
     "releaseDir": "C:/Users/kenbj/Code/datalog viewer",
     "siteRepo": "C:/websites/Alldatalogs",
-    "siteCommit": "79c3e52"
+    "siteCommit": "c3b8144"
   },
   "files": {
     "viewer-engine/datalog-viewer.css": {
-      "sha256": "d85a89c4fab4c0b6ac5722a58015409bbc037bf25b48f61dd10fb1e4d3a83329",
-      "bytes": 135349,
+      "sha256": "17f7a3d57f02ab91ce1896b043ca53b2ce3d2dc073dbd91c383ec1edcd9d6358",
+      "bytes": 137938,
       "from": "C:/Users/kenbj/Code/datalog viewer/datalog-viewer.css"
     },
     "viewer-engine/datalog-histogram.css": {
@@ -87,13 +87,13 @@
       "from": "C:/Users/kenbj/Code/datalog viewer/datalog-help.css"
     },
     "viewer-engine/datalog-changelog.js": {
-      "sha256": "09ed1b65c93ad2193a7049ea817e788c2e566cdd6d9d286794c1babb08472671",
-      "bytes": 16903,
+      "sha256": "66bdd145b5bbefd086a521fd8c7653707071722e8a37d2ea5019e6e1e75b9b30",
+      "bytes": 17493,
       "from": "C:/Users/kenbj/Code/datalog viewer/datalog-changelog.js"
     },
     "viewer-engine/datalog-help.js": {
-      "sha256": "331cebbac0ef19f8a61e88b80ed069db97cfe801c03b08d07f899a1e67fdf1e5",
-      "bytes": 79505,
+      "sha256": "84af07186221c1db728b265f3da066f8c966c9970cb240943039a7bd89fbd240",
+      "bytes": 80153,
       "from": "C:/Users/kenbj/Code/datalog viewer/datalog-help.js"
     },
     "viewer-engine/datalog-library.css": {
@@ -102,8 +102,8 @@
       "from": "C:/Users/kenbj/Code/datalog viewer/datalog-library.css"
     },
     "viewer-engine/datalog-viewer.js": {
-      "sha256": "854da8de0c1d7cd64a6d162ae97b6193ca33f99055faaf571fe1ef2168bf52d9",
-      "bytes": 478401,
+      "sha256": "9c1ffa4d97ba7aebe568d5067e2744c8138ad7147b2726fe79602c10d10debcd",
+      "bytes": 484716,
       "from": "C:/Users/kenbj/Code/datalog viewer/datalog-viewer.js"
     },
     "viewer-engine/runtime.js": {

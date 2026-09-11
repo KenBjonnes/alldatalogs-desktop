@@ -19,6 +19,12 @@
 
   var RELEASES = [
     {
+      version: '1.0.0', date: '2026-09-11', items: [
+        { kind: 'new', text: 'The graph legends can dock to the left of the graphs the way HP Tuners shows them: drag a legend to the left edge of its graph and every graph gets a column showing the name and unit of each channel over a large value in its colour. Drag one back onto a graph to float them again.' },
+        { kind: 'change', text: 'All the graphs dock together, so their time axes stay lined up and the cursor stays one straight line down them. The choice is remembered and saved with a Layout.' },
+      ],
+    },
+    {
       version: '0.1.46', date: '2026-09-11', items: [
         { kind: 'new', text: 'The readout under the graphs now shows the log time at the cursor whenever no race zero is set, in larger numbers than the race time used. Setting a zero switches it to race time, as before.' },
         { kind: 'fix', text: 'The time readout keeps one width for the whole log, so the zoom bar beside it no longer shifts as the numbers change, a minus sign appears, or you set and clear the race zero.' },
