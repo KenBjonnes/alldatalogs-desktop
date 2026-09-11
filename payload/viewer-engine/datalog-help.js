@@ -409,15 +409,15 @@
         {
           id: 'legend', h: 'The legend',
           html:
-            "<p>Each panel carries a legend listing its channels with their value at the cursor. Drag it to move " +
-            "it, drag its corner handle to resize it, double-click it to put it back, and click the <b>&times;</b> " +
-            "beside a channel to take that channel off the graph.</p>" +
-            "<p><b>Docking it, HP Tuners style.</b> Drag a legend to the left edge of its graph: the strip lights " +
-            "up, and when you let go every graph's legend snaps into a column down the left side, each channel " +
-            "shown as its name and unit over a large value in its own colour. Busy graphs pair them two to a row. " +
-            "All the graphs dock together so their time axes stay lined up under one crosshair. Drag any docked " +
-            "column out onto a graph to float them all again; the one you dragged lands where you let go. The " +
-            "choice is remembered, and saved with a Layout.</p>",
+            "<p><b>Docked, HP Tuners style.</b> Each graph's legend starts docked in a column down its left " +
+            "side, every channel shown as its name and unit over a large value in its own colour, with its value " +
+            "at the cursor. Busy graphs pair them two to a row. All the graphs dock together, so their time axes " +
+            "stay lined up under one crosshair. Click the <b>&times;</b> beside a channel to take it off the graph.</p>" +
+            "<p><b>Floating.</b> Drag any docked column out onto a graph and every legend becomes a small window " +
+            "over its graph instead; the one you dragged lands where you let go. Drag a floating legend to move " +
+            "it, drag its corner handle to resize it, and double-click it to put it back in its corner. Drag one " +
+            "to the left edge of its graph (the strip lights up) to dock them all again. Floating is remembered " +
+            "once you choose it, and saved with a Layout.</p>",
         },
         {
           id: 'right-click', h: 'Right-click a graph',

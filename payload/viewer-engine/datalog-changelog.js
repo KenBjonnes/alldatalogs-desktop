@@ -19,6 +19,12 @@
 
   var RELEASES = [
     {
+      version: '1.0.1', date: '2026-09-11', items: [
+        { kind: 'change', text: 'BigData for Windows now wears the real BigData logo: the connector and pulse mark is the app icon on the taskbar, the Start menu, the title bar and the installer, and the full logo heads the sign-in and home screens.' },
+        { kind: 'change', text: 'The graph legends now start docked to the left of the graphs. Drag one out onto a graph to float them, as before, and that choice is remembered.' },
+      ],
+    },
+    {
       version: '1.0.0', date: '2026-09-11', items: [
         { kind: 'new', text: 'The graph legends can dock to the left of the graphs the way HP Tuners shows them: drag a legend to the left edge of its graph and every graph gets a column showing the name and unit of each channel over a large value in its colour. Drag one back onto a graph to float them again.' },
         { kind: 'change', text: 'All the graphs dock together, so their time axes stay lined up and the cursor stays one straight line down them. The choice is remembered and saved with a Layout.' },

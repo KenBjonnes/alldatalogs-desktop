@@ -1,9 +1,9 @@
 {
-  "builtAt": "2026-09-11T11:40:20.690Z",
+  "builtAt": "2026-09-11T12:24:43.685Z",
   "sources": {
     "releaseDir": "C:/Users/kenbj/Code/datalog viewer",
     "siteRepo": "C:/websites/Alldatalogs",
-    "siteCommit": "c3b8144"
+    "siteCommit": "e8cb3c1"
   },
   "files": {
     "viewer-engine/datalog-viewer.css": {
@@ -87,13 +87,13 @@
       "from": "C:/Users/kenbj/Code/datalog viewer/datalog-help.css"
     },
     "viewer-engine/datalog-changelog.js": {
-      "sha256": "66bdd145b5bbefd086a521fd8c7653707071722e8a37d2ea5019e6e1e75b9b30",
-      "bytes": 17493,
+      "sha256": "50391f6e63bc5fa90accee6c029446449c60c839e640f1d3e488efe726747f50",
+      "bytes": 18004,
       "from": "C:/Users/kenbj/Code/datalog viewer/datalog-changelog.js"
     },
     "viewer-engine/datalog-help.js": {
-      "sha256": "84af07186221c1db728b265f3da066f8c966c9970cb240943039a7bd89fbd240",
-      "bytes": 80153,
+      "sha256": "3fac1281b719163dbb6a0048d921b3712765b1f3e54c44f608a10248f5b9ee6e",
+      "bytes": 80196,
       "from": "C:/Users/kenbj/Code/datalog viewer/datalog-help.js"
     },
     "viewer-engine/datalog-library.css": {
@@ -102,8 +102,8 @@
       "from": "C:/Users/kenbj/Code/datalog viewer/datalog-library.css"
     },
     "viewer-engine/datalog-viewer.js": {
-      "sha256": "9c1ffa4d97ba7aebe568d5067e2744c8138ad7147b2726fe79602c10d10debcd",
-      "bytes": 484716,
+      "sha256": "9f6c23046847446473e692739f9082da7e887827d8a4998180f12af3cf1d6eab",
+      "bytes": 485591,
       "from": "C:/Users/kenbj/Code/datalog viewer/datalog-viewer.js"
     },
     "viewer-engine/runtime.js": {
@@ -147,8 +147,8 @@
       "from": "C:/websites/Alldatalogs/packages/datalog-core/browser/entry.ts (esbuild)"
     },
     "glue.js": {
-      "sha256": "a5e83f835b1f40fb6e2849bce4c94c4c338be612d861e07d5dc86925b8c849b5",
-      "bytes": 22458,
+      "sha256": "f712c906e5f9d18d0a87e6a800fb4bdf1db54a24fdaf0e0a2542066eef74cf80",
+      "bytes": 22853,
       "from": "C:/Users/kenbj/Code/alldatalogs-desktop/renderer/src/glue.ts (esbuild)"
     },
     "main/jws.js": {

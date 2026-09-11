@@ -608,7 +608,19 @@
       }
     });
   }
+  function applyBrandLogo() {
+    const svg = window.BRAND_LOGO_SVG;
+    if (!svg) return;
+    document.querySelectorAll(".brand-mark").forEach((el) => {
+      el.innerHTML = svg;
+      el.classList.add("brand-logo");
+      el.setAttribute("role", "img");
+      el.setAttribute("aria-label", "BigData");
+      el.parentElement?.classList.add("brand-has-logo");
+    });
+  }
   async function boot() {
+    applyBrandLogo();
     window.configureViewer({
       brand: { mark: "B", name: "BigData", sub: "DATALOG VIEWER" },
       layouts: layoutProvider,
