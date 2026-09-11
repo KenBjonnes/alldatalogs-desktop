@@ -40,6 +40,16 @@ body {
 .brand-mark { font-weight: 900; letter-spacing: 1px; font-size: 20px; color: var(--text); }
 .brand-mark b { color: var(--red); }
 .brand-sub { font-size: 10px; font-weight: 700; letter-spacing: 1.6px; color: var(--text-dim); text-transform: uppercase; }
+/* The real BigData wordmark (glue.ts applyBrandLogo). Its dark ink follows `color`, so it reads light on
+   this dark UI; the red is fixed. Sized by height, width follows the art (576 x 78.5). */
+.brand-logo { display: block; line-height: 0; color: var(--text); }
+.brand-logo svg { display: block; height: 100%; width: auto; }
+.brand.brand-has-logo { flex-direction: column; align-items: flex-start; gap: 7px; }
+.card .brand.brand-has-logo { align-items: center; }
+.card .brand-logo { height: 40px; }
+.home-top .brand-logo { height: 32px; }
+/* the logo carries its own tagline, so the home header's "DATALOG VIEWER" would say it twice */
+.home-top .brand-has-logo .brand-sub { display: none; }
 
 /* Buttons */
 .btn {

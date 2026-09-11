@@ -592,8 +592,27 @@ function wireSignIn() {
   });
 }
 
+// ---- The real BigData logo -------------------------------------------------------------------------
+// Ken, 2026-09-11: "We need to use the real BigData logo on the windows app". The sign-in, Pro-required
+// and home screens showed a typed "BIG DATA". The engine already carries the real wordmark as
+// BRAND_LOGO_SVG (C:/websites/logos/bigdata.svg, its dark ink switched to currentColor so it reads on
+// this dark UI while the red stays red) and loads before this script, so the screens take that exact
+// art: one copy of the logo, not two. Without the engine the typed wordmark in the markup stays.
+function applyBrandLogo(): void {
+  const svg = (window as unknown as { BRAND_LOGO_SVG?: string }).BRAND_LOGO_SVG;
+  if (!svg) return;
+  document.querySelectorAll<HTMLElement>('.brand-mark').forEach((el) => {
+    el.innerHTML = svg;
+    el.classList.add('brand-logo');
+    el.setAttribute('role', 'img');
+    el.setAttribute('aria-label', 'BigData');
+    el.parentElement?.classList.add('brand-has-logo');
+  });
+}
+
 // ---- Boot -------------------------------------------------------------------------------------------
 async function boot() {
+  applyBrandLogo();   // before any screen is shown
   // Order matters (runtime.js rebuilds window.DATAVIEWER; the engine caches Pro separately):
   // configure → inject the overlay DOM → then tell the engine about Pro, and again on every change.
   window.configureViewer({

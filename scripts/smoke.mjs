@@ -60,6 +60,13 @@ const viewerOpen = (page) => page.waitForFunction(() => {
   const { app, page, consoleErrors } = await launch([LOG]);
   await page.waitForSelector('#screen-home:not([hidden])', { timeout: 20000 });
   check(true, 'home screen shown (dev Pro)');
+  // The real BigData logo, not typed text (Ken, 2026-09-11): glue.ts applyBrandLogo puts the engine's
+  // BRAND_LOGO_SVG into every brand slot. A build that loses it must not ship.
+  const logo = await page.evaluate(() => {
+    const m = document.querySelector('#screen-home .brand-mark'), s = m && m.querySelector('svg');
+    return { logo: !!(m && m.classList.contains('brand-logo') && s), h: s ? Math.round(s.getBoundingClientRect().height) : 0 };
+  });
+  check(logo.logo && logo.h > 20, `home screen shows the real BigData logo (${logo.h}px tall)`);
 
   await viewerOpen(page);
   check(true, `viewer opened from argv: ${LOG}`);
