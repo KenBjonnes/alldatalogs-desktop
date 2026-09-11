@@ -519,7 +519,8 @@
             "(with <b>Apply to all</b>), and which end a bar fills from. The same panel has " +
             "<b>&#10683; Duplicate</b>, <b>&#10065; Copy gauge</b> and <b>&#128465; Delete gauge</b>. A copied " +
             "gauge pastes with <kbd>Ctrl</kbd>+<kbd>V</kbd> or the palette's <b>Paste gauge</b>, including into " +
-            "another dashboard.</p>" +
+            "another dashboard. A scorecard opens its own settings window instead, with <b>&#128465; Delete " +
+            "scorecard</b> at the bottom: click it twice to take the scorecard off the dashboard.</p>" +
             "<p><b>&#10003; Finalize</b> fits the canvas to your gauges and leaves edit mode. <b>&#8681; Load " +
             "gauges</b> replaces the gauges with a saved set while keeping your graphs. Once finalized, the " +
             "<b>&ctdot;</b> button offers <b>Edit dash</b>, <b>Share to library…</b> and <b>Delete dash</b>.</p>",

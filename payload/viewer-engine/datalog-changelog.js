@@ -19,6 +19,11 @@
 
   var RELEASES = [
     {
+      version: '1.0.7', date: '2026-09-11', items: [
+        { kind: 'fix', text: 'A scorecard can now be taken off a dashboard: its settings window has Delete scorecard at the bottom, and a second click confirms it. Other gauges delete from their right-click panel, but a scorecard opens its own settings instead, so there was no way to remove one.' },
+      ],
+    },
+    {
       version: '1.0.6', date: '2026-09-11', items: [
         { kind: 'change', text: 'The Windows app icon is back to the red pulse line on black, as it was before 1.0.1, on the taskbar, the Start menu, the title bar and the installer. The full BigData logo stays on the sign-in and home screens.' },
       ],
