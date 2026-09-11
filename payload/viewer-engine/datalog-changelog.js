@@ -19,6 +19,12 @@
 
   var RELEASES = [
     {
+      version: '1.0.4', date: '2026-09-11', items: [
+        { kind: 'new', text: 'Right-click a channel in a graph legend, or its card, to change its colour. The line, its axis numbers, its name and value in the legend and its card all follow. Pick from sixteen swatches or a full colour picker, and Default colour puts it back.' },
+        { kind: 'change', text: 'A colour you pick stays with that channel on every log you open, and is saved with a Layout.' },
+      ],
+    },
+    {
       version: '1.0.3', date: '2026-09-11', items: [
         { kind: 'change', text: 'BigData for Windows is now digitally signed. The installer and the app show K2 Research & Development LLC as a verified publisher instead of an unknown one. On a brand-new certificate the Windows SmartScreen screen can still appear for a while and fades as more people install it.' },
       ],

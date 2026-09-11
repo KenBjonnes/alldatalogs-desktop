@@ -102,16 +102,18 @@
             "</ol>",
         },
         {
-          id: 'smartscreen', h: 'Windows will warn you the first time',
+          id: 'smartscreen', h: 'The signed installer and the Windows check',
           html:
-            "<div class='hlp-warn'><b>You have to approve the install by hand.</b> Windows SmartScreen shows " +
-            "&ldquo;Windows protected your PC&rdquo; for installers it has not seen before. Click <b>More " +
-            "info</b>, then <b>Run anyway</b>. This is not a virus warning.</div>" +
+            "<p>From version 1.0.3 the installer and the app are <b>digitally signed</b>. Windows shows " +
+            "<b>K2 Research &amp; Development LLC</b> as the verified publisher, where older versions said " +
+            "&ldquo;Unknown publisher&rdquo;.</p>" +
+            "<div class='hlp-note'><b>SmartScreen can still appear for a while.</b> Windows builds trust in a " +
+            "new certificate from how many people install it, so for the first weeks it may still show " +
+            "&ldquo;Windows protected your PC&rdquo;. It is not a virus warning. Click <b>More info</b>, check " +
+            "that the publisher reads K2 Research &amp; Development LLC, then click <b>Run anyway</b>.</div>" +
             "<p>Your browser may also hold the download with a <b>Keep</b> or <b>Keep anyway</b> option. Same " +
-            "reason, same answer.</p>" +
-            "<p>It happens because the installer is not yet code-signed with a certificate Windows recognises. " +
-            "Signing is in progress. Once it is live the publisher name appears instead of &ldquo;Unknown " +
-            "publisher&rdquo;, and the warning stops once enough people have installed that version.</p>",
+            "reason, same answer. If the publisher ever reads anything else, do not run it: download it again " +
+            "from the download page.</p>",
         },
         {
           id: 'signing-in', h: 'Signing in',
@@ -420,12 +422,18 @@
             "over its graph instead; the one you dragged lands where you let go. Drag a floating legend to move " +
             "it, drag its corner handle to resize it, and double-click it to put it back in its corner. Drag one " +
             "to the left edge of its graph (the strip lights up) to dock them all again. Floating is remembered " +
-            "once you choose it, and saved with a Layout.</p>",
+            "once you choose it, and saved with a Layout.</p>" +
+            "<p><b>Colours.</b> Right-click a channel in the legend, docked or floating, or its card, and pick a " +
+            "colour: its line, its axis numbers, its name and value in the legend and its card all change " +
+            "together. <b>Custom colour</b> opens a full colour picker, and <b>Default colour</b> puts it back. " +
+            "The colour stays with that channel on every log you open, and is saved with a Layout.</p>",
         },
         {
           id: 'right-click', h: 'Right-click a graph',
           html:
-            "<p>The menu opens headed with the exact time you clicked, and holds two things:</p>" +
+            "<p>The menu opens headed with the exact time you clicked, and holds two things. To change a " +
+            "channel's colour, right-click its name in the legend instead (see <a href='#graphs/legend'>The " +
+            "legend</a>).</p>" +
             "<ul>" +
             "<li><b>Set race zero here</b> " + PRO + ", and <b>Clear race zero</b> once one is set. With a " +
             "comparison loaded you get one for each log, and the two are used to align them.</li>" +
@@ -1029,8 +1037,9 @@
         {
           id: 'smartscreen', h: 'Windows blocked the installer',
           html:
-            "<p>Expected while the app is in beta and not yet signed. Click <b>More info</b>, then <b>Run " +
-            "anyway</b>. See <a href='#install-windows/smartscreen'>Installing</a>.</p>",
+            "<p>The installer is signed by K2 Research &amp; Development LLC, but Windows SmartScreen can still " +
+            "warn about a new certificate for a while. Click <b>More info</b>, check the publisher, then " +
+            "<b>Run anyway</b>. See <a href='#install-windows/smartscreen'>Installing</a>.</p>",
         },
         {
           id: 'slow', h: 'It feels slow on a huge log',
