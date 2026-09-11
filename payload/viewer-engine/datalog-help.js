@@ -667,7 +667,10 @@
             "expression and a unit, and the unit is inferred from the channels you used if you leave it blank.</p>" +
             "<div class='hlp-note'>Use <b>Insert channel…</b> rather than typing a channel name. It brackets it " +
             "correctly and matches the log's exact spelling, which is the usual cause of an expression that " +
-            "looks right and will not resolve.</div>",
+            "looks right and will not resolve.</div>" +
+            "<p><b>Share to library…</b> " + PRO + " under the selected channel publishes it with every math " +
+            "channel it uses, and <b>Browse library…</b> under <b>+ New math channel</b> brings in channels other " +
+            "tuners have shared. See <a href='#library/browse'>The library</a>.</p>",
         },
       ],
     },
@@ -841,24 +844,27 @@
     {
       id: 'library',
       title: 'The library',
-      summary: "Gauge dashboards and histograms shared between tuners.",
-      tags: ['library', 'share', 'official', 'browse'],
+      summary: "Gauge dashboards, histograms and math channels shared between tuners.",
+      tags: ['library', 'share', 'official', 'browse', 'math'],
       sections: [
         {
           id: 'browse', h: 'Browsing and using',
           html:
-            "<p><b>Browse the library…</b> appears in the Custom Gauges picker and in the histogram list menu. " +
+            "<p><b>Browse the library…</b> appears in the Custom Gauges picker, in the histogram list menu and " +
+            "in the Math Channels manager, with a tab for each kind: gauge dashboards, histograms and math channels. " +
             "Browsing is free. Items are either <b>Official</b> or shared by another tuner, each with a " +
             "thumbnail, the car it was built for, and how many people have pulled it. <b>Use</b> " + PRO +
             " loads it into your session.</p>" +
             "<p>Shared dashboards bind by role wherever they can, so they still read correctly on a car whose " +
-            "channels are named differently. A shared histogram carries the math channels it needs.</p>",
+            "channels are named differently. A shared histogram carries the math channels it needs, and so does " +
+            "a shared math channel: using one adds it, and every math channel its expression uses, to your own " +
+            "list. If you already have one with the same name, yours is kept.</p>",
         },
         {
           id: 'share', h: 'Sharing yours',
           html:
             "<p><b>Share to library…</b> " + PRO + " is in the dashboard's <b>&ctdot;</b> menu and in a " +
-            "histogram row's menu. Give it a name, a description and the car it suits. You can remove anything " +
+            "histogram row's menu, and under the selected channel in the Math Channels manager. Give it a name, a description and the car it suits. You can remove anything " +
             "you shared.</p>",
         },
       ],

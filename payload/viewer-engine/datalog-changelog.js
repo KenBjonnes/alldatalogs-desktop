@@ -19,6 +19,13 @@
 
   var RELEASES = [
     {
+      version: '1.0.5', date: '2026-09-11', items: [
+        { kind: 'new', text: 'Math channels are in the shared library. Share one from the Math Channels manager and it takes along every math channel its expression uses; the library has a new Math channels tab, and Use adds them to your own list.' },
+        { kind: 'change', text: 'Using a shared math channel never overwrites one of yours: if you already have one with the same name, yours is kept.' },
+        { kind: 'fix', text: 'The preview under a math expression now works when the expression uses another math channel. It used to say that channel was missing from the log, even though the channel itself computed fine.' },
+      ],
+    },
+    {
       version: '1.0.4', date: '2026-09-11', items: [
         { kind: 'new', text: 'Right-click a channel in a graph legend, or its card, to change its colour. The line, its axis numbers, its name and value in the legend and its card all follow. Pick from sixteen swatches or a full colour picker, and Default colour puts it back.' },
         { kind: 'change', text: 'A colour you pick stays with that channel on every log you open, and is saved with a Layout.' },
