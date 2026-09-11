@@ -1,32 +1,7 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" width="256" height="256">
-  <!-- BigData app icon: the connector-and-pulse mark from the real BigData logo
-       (C:\websites\logos\bigdata.svg: the wordmark's own left-hand mark, same paths, same black and
-       red), centred on a white tile because the logo is dark ink made for a light ground. A faint edge
-       keeps the tile from dissolving on a white Explorer window. Ken, 2026-09-11: "We need to use the
-       real BigData logo on the windows app". Rendered to icon.png / icon.ico by scripts/make-icon.mjs. -->
-  <rect x="8" y="8" width="240" height="240" rx="54" fill="#ffffff"/>
-  <rect x="9" y="9" width="238" height="238" rx="53" fill="none" stroke="#d6d6dc" stroke-width="2"/>
-  <!-- mark bbox in the logo: x 0..135.4, y 0..78.5 -> 198 wide, centred -->
-  <g transform="translate(29 70.6) scale(1.4625)">
-    <path fill="#ee2626" d="M111.09,46.07l.29.05,12.49.13-15.65,28.16c-1.12,2.010-2.72,4.020-5.32,4.020l-83.9.03c-3.07,0-4.26-1.56-5.24-4.1l-4.03-10.47,22.94-.04,4.28-3.7.95,2.54c.24.63,1.96,1.63,2.47,1.090l3.37-3.55,6.85,17.38,18.73-18.95,32.77-.04c1.79,0,2.78-1.010,3.55-2.44l5.44-10.1Z"/>
-    <path fill="#030303" d="M13.4,27.17l7.2,18.65-6.33,1.73c-1.4.3-3.08.34-4.74.17L0,26.6,17.6,2.71C18.82,1.07,20.15-.03,22.42.04l97.07.03-16.17,9.36-74.03-.02c-1.77,0-3.46.66-4.4,1.95l-11.49,15.81Z"/>
-    <path fill="#030303" d="M111.38,46.12l-.29-.05-4.81.26-4.08,7.29h-25.59s4.9-4.92,4.9-4.92l14.25.03c1.3,0,3.49-.58,4.44-1.44l16.25-30.11-7.44-.42c-.44-.74-.85-2.27-.77-3.12L135.38,0l-23.99,46.12Z"/>
-    <path fill="#ee2626" d="M81.51,48.7l-4.9,4.92h-8.26s-15.56,15.31-15.56,15.31l-7.09-16.64-4.05,3.68-1.71-5.05-7.93,8.05H7.89s-2.17-5.04-2.17-5.04l13.72-.04,11.78-.05,10.55-11.72,2.45,5.88c1.13-1.42,3.99-2.03,4.53-.72l5.69,13.74,12.92-12.34,14.14.03Z"/>
-    <g fill="#19191a">
-      <polygon points="33.53 25.02 27.38 24.95 27.89 19 34.22 19 33.53 25.02"/>
-      <polygon points="73.95 24.99 67.9 24.87 68.26 19.05 74.56 18.88 73.95 24.99"/>
-      <polygon points="87.18 24.95 81.11 24.88 81.59 19.09 87.84 18.89 87.18 24.95"/>
-      <path d="M47.3,24.58c-1.73.61-4.27.58-6.2.1l.65-5.78,6.040.05-.49,5.62Z"/>
-      <path d="M60.7,24.99h-5.88c.05-2.34.21-3.92.59-6.04h5.83s-.54,6.04-.54,6.04Z"/>
-      <path d="M100.38,24.43c-1.54.81-3.77.72-5.95.26l.53-5.69,5.97-.08-.54,5.5Z"/>
-      <polygon points="98.99 37.85 92.67 37.9 93.41 32.07 99.62 32.02 98.99 37.85"/>
-      <polygon points="72.46 37.85 66.47 37.95 66.95 32.09 73.1 32 72.46 37.85"/>
-    </g>
-    <g fill="#030303">
-      <polygon points="45.82 37.87 39.57 37.84 40.24 32.020 46.37 32.02 45.82 37.87"/>
-      <polygon points="59.13 37.9 53.06 37.9 53.58 32.11 59.75 32.03 59.13 37.9"/>
-      <polygon points="32.08 37.87 26.04 37.88 26.58 32.09 32.68 32 32.08 37.87"/>
-      <polygon points="85.8 37.85 79.74 37.92 80.3 32.14 86.33 32.01 85.8 37.85"/>
-    </g>
-  </g>
+  <!-- BigData app icon: the red pulse from the BigData wordmark on the viewer's near-black ground. -->
+  <rect x="8" y="8" width="240" height="240" rx="54" fill="#0b0b0e"/>
+  <rect x="10" y="10" width="236" height="236" rx="52" fill="none" stroke="#2c2c34" stroke-width="4"/>
+  <polyline points="30,196 226,196" fill="none" stroke="#f4f4f6" stroke-opacity=".28" stroke-width="8" stroke-linecap="round"/>
+  <polyline points="30,150 72,150 94,106 116,186 140,64 162,172 182,150 226,150" fill="none" stroke="#ee2325" stroke-width="20" stroke-linecap="round" stroke-linejoin="round"/>
 </svg>
