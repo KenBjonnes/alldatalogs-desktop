@@ -19,6 +19,11 @@
 
   var RELEASES = [
     {
+      version: '1.0.3', date: '2026-09-11', items: [
+        { kind: 'change', text: 'BigData for Windows is now digitally signed. The installer and the app show K2 Research & Development LLC as a verified publisher instead of an unknown one. On a brand-new certificate the Windows SmartScreen screen can still appear for a while and fades as more people install it.' },
+      ],
+    },
+    {
       version: '1.0.2', date: '2026-09-11', items: [
         { kind: 'fix', text: 'The docked legend column never shows a scrollbar. When a graph is short the text steps down and busy graphs pair the tiles or switch to a compact list, and long names are abbreviated word by word instead of being cut off at the end: Estimated Acceleration reads EST ACCEL. Values are sized for the widest number each channel can show, so scrubbing never pushes one off its tile.' },
         { kind: 'change', text: 'The calculated channels have short names everywhere: EST ACCEL, EST SPEED, WHEEL SLIP, WHEEL SPIN and the rest.' },
