@@ -767,6 +767,9 @@
             "dashboard.</p>" +
             "<p>So switching layouts switches the gauges with them. A Holley layout brings back its Holley " +
             "dashboard; a standard layout brings back the V8 cluster.</p>" +
+            "<p>The <b>Custom Gauges</b> menu then shows the name of the gauge set the layout brought, so editing " +
+            "and saving it updates that set. If its gauges match none of your saved sets, they are named after the " +
+            "layout, and saving them asks for a name.</p>" +
             "<div class='hlp-note'>Layouts saved before version 0.1.37 carry no gauge choice yet. Load one, save " +
             "it again, and it will from then on.</div>",
         },
@@ -779,7 +782,9 @@
             "<li><b>Save Layout As New…</b> asks for a name and makes another.</li>" +
             "<li><b>Save Custom Gauges</b> saves just the dashboard and the graph channels on screen with it. " +
             "Use a layout for a whole way of working, a gauge set for a cluster you want under several " +
-            "layouts.</li>" +
+            "layouts. It never replaces a different set without asking: if the gauges on screen no longer match " +
+            "the set they are named after, it asks for a name, and typing the name of a set with different " +
+            "gauges asks before replacing it.</li>" +
             "<li><b>Delete this Layout</b> and <b>Delete these Custom Gauges</b> remove the loaded one; the " +
             "pickers also have a bin on every row.</li>" +
             "<li><b>&#8681; Download HPL</b> appears when the log came from your account, and downloads the " +

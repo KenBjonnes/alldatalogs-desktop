@@ -19,6 +19,12 @@
 
   var RELEASES = [
     {
+      version: '1.0.8', date: '2026-09-11', items: [
+        { kind: 'fix', text: 'Switching to a Layout that brings its own gauges now shows those gauges by their real name in the Custom Gauges menu. It used to keep the name of the gauges you had before, so editing and saving the new gauges wrote them over the old set.' },
+        { kind: 'fix', text: 'Saving gauges never replaces a different saved set without asking. When the gauges on screen no longer match the set they are named after, Save asks for a name, and typing the name of a set with different gauges asks before replacing it.' },
+      ],
+    },
+    {
       version: '1.0.7', date: '2026-09-11', items: [
         { kind: 'fix', text: 'A scorecard can now be taken off a dashboard: its settings window has Delete scorecard at the bottom, and a second click confirms it. Other gauges delete from their right-click panel, but a scorecard opens its own settings instead, so there was no way to remove one.' },
       ],
