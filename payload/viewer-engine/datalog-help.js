@@ -411,7 +411,10 @@
           html:
             "<p><b>Docked, HP Tuners style.</b> Each graph's legend starts docked in a column down its left " +
             "side, every channel shown as its name and unit over a large value in its own colour, with its value " +
-            "at the cursor. Busy graphs pair them two to a row. All the graphs dock together, so their time axes " +
+            "at the cursor. The column always fits its graph: when space runs short the text steps down, busy " +
+            "graphs pair the tiles or switch to a compact list, and long names are abbreviated word by word, never scrolled or " +
+            "cut off at the end. Only on a graph too short to show every channel at any size do the last few " +
+            "step out, counted by a small +N you can hover to see them. All the graphs dock together, so their time axes " +
             "stay lined up under one crosshair. Click the <b>&times;</b> beside a channel to take it off the graph.</p>" +
             "<p><b>Floating.</b> Drag any docked column out onto a graph and every legend becomes a small window " +
             "over its graph instead; the one you dragged lands where you let go. Drag a floating legend to move " +

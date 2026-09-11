@@ -19,6 +19,12 @@
 
   var RELEASES = [
     {
+      version: '1.0.2', date: '2026-09-11', items: [
+        { kind: 'fix', text: 'The docked legend column never shows a scrollbar. When a graph is short the text steps down and busy graphs pair the tiles or switch to a compact list, and long names are abbreviated word by word instead of being cut off at the end: Estimated Acceleration reads EST ACCEL. Values are sized for the widest number each channel can show, so scrubbing never pushes one off its tile.' },
+        { kind: 'change', text: 'The calculated channels have short names everywhere: EST ACCEL, EST SPEED, WHEEL SLIP, WHEEL SPIN and the rest.' },
+      ],
+    },
+    {
       version: '1.0.1', date: '2026-09-11', items: [
         { kind: 'change', text: 'BigData for Windows now wears the real BigData logo: the connector and pulse mark is the app icon on the taskbar, the Start menu, the title bar and the installer, and the full logo heads the sign-in and home screens.' },
         { kind: 'change', text: 'The graph legends now start docked to the left of the graphs. Drag one out onto a graph to float them, as before, and that choice is remembered.' },
