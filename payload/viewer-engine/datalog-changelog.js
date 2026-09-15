@@ -19,6 +19,12 @@
 
   var RELEASES = [
     {
+      version: '1.0.9', date: '2026-09-15', items: [
+        { kind: 'fix', text: 'Logs that name their channels by SAE PID now map like any other: Short Term Fuel Trim 1 (SAE), Long Term Fuel Trim 1 (SAE), the SAE accelerator pedal and Intake Manifold Absolute Pressure (SAE) find their gauges, default graphs and scorecard categories.' },
+        { kind: 'fix', text: 'Layouts, histograms and math channels built on a log that says Engine RPM or WB EQ Ratio Bank 1 now find the same channel on a log that says Engine RPM (SAE) or WB EQ Ratio 1 (SAE), so the graphs come up and the tables fill in instead of showing missing parameter.' },
+      ],
+    },
+    {
       version: '1.0.8', date: '2026-09-11', items: [
         { kind: 'fix', text: 'Switching to a Layout that brings its own gauges now shows those gauges by their real name in the Custom Gauges menu. It used to keep the name of the gauges you had before, so editing and saving the new gauges wrote them over the old set.' },
         { kind: 'fix', text: 'Saving gauges never replaces a different saved set without asking. When the gauges on screen no longer match the set they are named after, Save asks for a name, and typing the name of a set with different gauges asks before replacing it.' },

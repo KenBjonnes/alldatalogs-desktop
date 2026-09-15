@@ -767,6 +767,10 @@
             "dashboard.</p>" +
             "<p>So switching layouts switches the gauges with them. A Holley layout brings back its Holley " +
             "dashboard; a standard layout brings back the V8 cluster.</p>" +
+            "<p>Channels are matched by meaning, not only by spelling. A layout, a histogram or a math channel " +
+            "built on a log that says <b>Engine RPM</b> or <b>WB EQ Ratio Bank 1</b> finds the same channel on a log " +
+            "that says <b>Engine RPM (SAE)</b> or <b>WB EQ Ratio 1 (SAE)</b>, and the gauges, the default graphs and " +
+            "the tables follow the SAE names for RPM, lambda, fuel trims and the accelerator pedal too.</p>" +
             "<p>The <b>Custom Gauges</b> menu then shows the name of the gauge set the layout brought, so editing " +
             "and saving it updates that set. If its gauges match none of your saved sets, they are named after the " +
             "layout, and saving them asks for a name.</p>" +
