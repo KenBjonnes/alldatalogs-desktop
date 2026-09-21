@@ -1,6 +1,6 @@
 /*
- * parse-worker.js — decodes a datalog (CSV / HP Tuners HPL / MoTeC LD / Holley DL) off the main
- * thread so the loader UI stays responsive and a long or hung parse can be cancelled by the page
+ * parse-worker.js — decodes a datalog (CSV / HP Tuners HPL / MoTeC LD / Holley DL / dyno TRB) off the
+ * main thread so the loader UI stays responsive and a long or hung parse can be cancelled by the page
  * calling worker.terminate(). Loads the same decoder bundle the page uses (dvcore.js) plus pako for
  * HPL inflate. Worker-safe: dvcore.js references no window/document. Classic worker (importScripts)
  * so it needs no bundler and works from the static export.
@@ -22,6 +22,8 @@ self.onmessage = async (e) => {
       csvText = DVCore.convertLdToCsv(bytes);
     } else if (data.fmt === 'Holley') {
       csvText = DVCore.convertHolleyDlToCsv(bytes);
+    } else if (data.fmt === 'Dyno') {
+      csvText = DVCore.convertTrbToCsv(bytes);
     } else {
       csvText = new TextDecoder().decode(bytes);
     }

@@ -15,17 +15,18 @@ const fs = require('node:fs');
 const path = require('node:path');
 const crypto = require('node:crypto');
 
-const ACCEPT = new Set(['.hpl', '.csv', '.ld', '.dl', '.msl', '.mlg']);
+const ACCEPT = new Set(['.hpl', '.csv', '.ld', '.dl', '.msl', '.mlg', '.trb']);
 const MAX_BYTES = 250 * 1024 * 1024;
 const RECENT_MAX = 20;
 const TOKEN_TTL_MS = 10 * 60 * 1000;
 const FILTERS = [
-  { name: 'Datalogs', extensions: ['csv', 'hpl', 'dl', 'msl', 'mlg', 'ld'] },
+  { name: 'Datalogs', extensions: ['csv', 'hpl', 'dl', 'msl', 'mlg', 'ld', 'trb'] },
   { name: 'CSV / SCT / Haltech / FuelTech (*.csv)', extensions: ['csv'] },
   { name: 'HP Tuners (*.hpl)', extensions: ['hpl'] },
   { name: 'Holley (*.dl)', extensions: ['dl'] },
   { name: 'MegaSquirt / TunerStudio (*.msl, *.mlg)', extensions: ['msl', 'mlg'] },
   { name: 'MoTeC (*.ld)', extensions: ['ld'] },
+  { name: 'Chassis dyno run (*.trb)', extensions: ['trb'] },
   { name: 'All files', extensions: ['*'] },
 ];
 
@@ -38,7 +39,8 @@ let rendererReady = false;
 function fmtOf(name) {
   const e = path.extname(name).toLowerCase();
   // Same labels history.js uses -- .msl/.mlg showed up as "CSV" in the History list until 2026-09-10.
-  return e === '.hpl' ? 'HPL' : e === '.ld' ? 'MoTeC' : e === '.dl' ? 'Holley' : (e === '.msl' || e === '.mlg') ? 'MegaSquirt' : 'CSV';
+  return e === '.hpl' ? 'HPL' : e === '.ld' ? 'MoTeC' : e === '.dl' ? 'Holley'
+    : (e === '.msl' || e === '.mlg') ? 'MegaSquirt' : e === '.trb' ? 'Dyno' : 'CSV';
 }
 
 // --- recents (per signed-in account) -------------------------------------------------------------
@@ -96,7 +98,7 @@ function validate(p) {
   const ext = path.extname(p).toLowerCase();
   // Haltech's own log container is encrypted ("HEPS" header); NSP's CSV export is the way in.
   if (ext === '.hlg' || ext === '.hlgzip') return { error: 'Haltech .hlg logs are encrypted by NSP. Export the log as CSV in NSP (File > Export) and open that.' };
-  if (!ACCEPT.has(ext)) return { error: `BigData opens .csv (incl. SCT, Haltech, FuelTech exports), .hpl, .dl, .msl and .ld logs (this is ${ext ? '"' + ext + '"' : 'a file with no extension'}).` };
+  if (!ACCEPT.has(ext)) return { error: `BigData opens .csv (incl. SCT, Haltech, FuelTech exports), .hpl, .dl, .msl and .ld logs and .trb dyno runs (this is ${ext ? '"' + ext + '"' : 'a file with no extension'}).` };
   let st;
   try { st = fs.statSync(p); } catch { return { error: 'That file could not be found.' }; }
   if (!st.isFile()) return { error: 'That is not a file.' };

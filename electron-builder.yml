@@ -1,7 +1,7 @@
 # electron-builder.yml — BigData for Windows packaging.
 #
 # NSIS x64, per-user install (HKCU, no UAC prompt), assisted installer so people see where it goes.
-# File associations register BigData as a handler for .hpl / .ld / .dl; Windows 10/11 will NOT steal an
+# File associations register BigData as a handler for .hpl / .ld / .dl / .trb; Windows 10/11 will NOT steal an
 # existing default (VCM Scanner, i2, Holley EFI) — users choose "Open with → Always". .csv is deliberately
 # not associated (it belongs to Excel on most PCs).
 #
@@ -47,6 +47,10 @@ win:
     - ext: dl
       name: Holley Datalog
       description: Holley EFI datalog
+      role: Viewer
+    - ext: trb
+      name: Dyno Run
+      description: Chassis dyno run file
       role: Viewer
   # Code signing lives in .github/workflows/release.yml, not here: it is passed as
   # -c.win.azureSignOptions.* from repo variables + secrets (Azure Trusted Signing), so a build without

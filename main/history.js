@@ -29,7 +29,8 @@ function setSync(on) {
 }
 function fmtOf(name) {
   const l = String(name || '').toLowerCase();
-  return l.endsWith('.hpl') ? 'HPL' : l.endsWith('.ld') ? 'MoTeC' : l.endsWith('.dl') ? 'Holley' : (l.endsWith('.msl') || l.endsWith('.mlg')) ? 'MegaSquirt' : 'CSV';
+  return l.endsWith('.hpl') ? 'HPL' : l.endsWith('.ld') ? 'MoTeC' : l.endsWith('.dl') ? 'Holley'
+    : (l.endsWith('.msl') || l.endsWith('.mlg')) ? 'MegaSquirt' : l.endsWith('.trb') ? 'Dyno' : 'CSV';
 }
 function proNow() {
   try { const st = deps.license.getState(); return !!(st && st.pro === true); } catch { return false; }

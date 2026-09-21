@@ -1104,6 +1104,10 @@
             "what i2 displays, because i2 keeps display units in the project rather than in the log." },
     { tool: 'MegaSquirt / TunerStudio', ext: '.msl', direct: true,
       note: "Text logs open directly. Units are whatever TunerStudio wrote." },
+    { tool: 'Chassis dyno run', ext: '.TRB', direct: true,
+      note: "A single dyno pull opens like any log, on its own time base, with rpm, power, torque, road " +
+            "speed and both wideband channels. Channels the dyno software does not name in the file are " +
+            "shown as Dyno Slot and a number." },
     { tool: 'Anything else', ext: '.csv', direct: true,
       note: "A comma-separated file with a first column called time or offset, and optionally a units row " +
             "underneath the names." },
@@ -1142,6 +1146,19 @@
           "<tr><td><b>A very old <code>.hpl</code></b></td><td>Open it in a current VCM Scanner and re-save, or " +
           "export a CSV from Scanner.</td></tr>" +
           "</tbody></table>",
+      },
+      {
+        id: 'dyno', h: 'Dyno runs',
+        html:
+          "<p>A <code>.TRB</code> file is one pull off a chassis dyno rather than a log off the car, so it " +
+          "reads a little differently. It is short &mdash; often under twenty seconds &mdash; and it covers " +
+          "the sweep up and the coast back down, so rpm rises to the top of the pull and then falls away. " +
+          "Everything else works as usual: graphs, the cursor, histograms, gauges and Layouts.</p>" +
+          "<p>Engine RPM, road speed, the barometer and both wideband channels take their normal places, so " +
+          "a dashboard built for a car log still reads. Power and torque arrive twice, plain and " +
+          "SAE-corrected; when the correction factor for the run is 1.00 the two are the same number.</p>" +
+          "<p>The run's paperwork &mdash; shop, customer, vehicle and the operator's comment &mdash; is " +
+          "stored in the file and is read, but is not shown anywhere yet.</p>",
       },
       {
         id: 'units', h: 'Units and naming',

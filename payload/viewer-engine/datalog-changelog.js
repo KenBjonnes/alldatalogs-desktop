@@ -19,6 +19,12 @@
 
   var RELEASES = [
     {
+      version: '1.0.10', date: '2026-09-21', items: [
+        { kind: 'new', text: 'Chassis dyno runs open. Drag a .TRB run file in and it charts like any log, with engine rpm, power, torque, road speed, the weather channels and both wideband channels named and on their usual gauges.' },
+        { kind: 'change', text: 'A dyno channel the run file does not name is listed as Dyno Slot and a number rather than being left out, so nothing recorded on the run is hidden from you.' },
+      ],
+    },
+    {
       version: '1.0.9', date: '2026-09-15', items: [
         { kind: 'fix', text: 'Logs that name their channels by SAE PID now map like any other: Short Term Fuel Trim 1 (SAE), Long Term Fuel Trim 1 (SAE), the SAE accelerator pedal and Intake Manifold Absolute Pressure (SAE) find their gauges, default graphs and scorecard categories.' },
         { kind: 'fix', text: 'Layouts, histograms and math channels built on a log that says Engine RPM or WB EQ Ratio Bank 1 now find the same channel on a log that says Engine RPM (SAE) or WB EQ Ratio 1 (SAE), so the graphs come up and the tables fill in instead of showing missing parameter.' },
