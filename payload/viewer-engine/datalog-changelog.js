@@ -19,6 +19,11 @@
 
   var RELEASES = [
     {
+      version: '1.0.11', date: '2026-09-21', items: [
+        { kind: 'change', text: 'Dyno runs are now listed everywhere the other formats are, in this manual and on the website, including the list of file types Windows opens in BigData by double-click.' },
+      ],
+    },
+    {
       version: '1.0.10', date: '2026-09-21', items: [
         { kind: 'new', text: 'Chassis dyno runs open. Drag a .TRB run file in and it charts like any log, with engine rpm, power, torque, road speed, the weather channels and both wideband channels named and on their usual gauges.' },
         { kind: 'change', text: 'A dyno channel the run file does not name is listed as Dyno Slot and a number rather than being left out, so nothing recorded on the run is hidden from you.' },

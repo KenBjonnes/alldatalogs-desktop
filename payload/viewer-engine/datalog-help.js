@@ -171,7 +171,7 @@
             "<li><b>Drag and drop</b> a file onto the window.</li>" +
             "<li><b>Open log…</b> on the home screen, or the File menu in the Windows app.</li>" +
             "<li><b>Double-click a log</b> in Explorer. The Windows app registers as a handler for " +
-            "<code>.hpl</code>, <code>.ld</code> and <code>.dl</code>. Windows will not take a file type away " +
+            "<code>.hpl</code>, <code>.ld</code>, <code>.dl</code> and <code>.trb</code>. Windows will not take a file type away " +
             "from VCM Scanner or i2 by itself, so the first time you may need <b>Open with &rarr; Choose another " +
             "app &rarr; BigData</b>, ticking &ldquo;Always use this app&rdquo; if you want it to stick. " +
             "<code>.csv</code> is deliberately not claimed, because on most machines that belongs to Excel.</li>" +
@@ -895,7 +895,7 @@
             "to start one instead of opening the file. The <b>website</b> is where the free tier lives.</div>" +
             "<p><b>Free, in a browser, with no card:</b></p>" +
             "<ul>" +
-            "<li>Open every supported format &mdash; HP Tuners .hpl, Holley .dl, MoTeC .ld, SCT, Haltech, " +
+            "<li>Open every supported format &mdash; HP Tuners .hpl, Holley .dl, MoTeC .ld, chassis dyno .TRB, SCT, Haltech, " +
             "FuelTech, MegaSquirt and CSV &mdash; up to 15 MB a log.</li>" +
             "<li>Graphs with zoom, pan, a shared cursor and per-channel axis ranges.</li>" +
             "<li>The full channel list with live values, search and filters.</li>" +
