@@ -457,7 +457,15 @@
             "<p><b>Analyze &rarr; Compare a second log</b> " + PRO + " draws a second log over the same axes. " +
             "The compare bar names it and says whether it is <b>aligned on race zero</b> or <b>aligned on " +
             "start</b>, with nudge buttons of 50 ms and 500 ms either way, the current offset, a reset, and " +
-            "<b>&times;</b> to remove the comparison.</p>",
+            "<b>&times;</b> to remove the comparison.</p>" +
+            "<p>Every channel in the graph legend shows <b>both</b> values at the cursor: your log's, and " +
+            "under or beside it the second log's, smaller and underlined with the same dashes as its line. " +
+            "It is read at the second log's own time, so nudging the alignment moves the number with the " +
+            "trace. Where the cursor is outside the second recording it reads <b>--</b> rather than holding " +
+            "the last value it had.</p>" +
+            "<p>A <b>&#8776;</b> in front of the second value means that log calls the channel something " +
+            "else and it was matched by meaning &mdash; hover it to see which channel was actually read. " +
+            "A channel the second log does not have at all gets no second value, and no dashed line.</p>",
         },
         {
           id: 'perf', h: 'Time slips, laps and Dragy',
@@ -908,7 +916,7 @@
             "<ul>" +
             "<li>Histogram tuning tables, math channels, and gauges behind a table.</li>" +
             "<li>Custom gauge dashboards you build and keep.</li>" +
-            "<li>Comparing two logs on the same axes.</li>" +
+            "<li>Comparing two logs on the same axes, with both values in the legend.</li>" +
             "<li>Race zero, time slips, lap times and Dragy data.</li>" +
             "<li>Using and sharing library items.</li>" +
             "<li>Layouts, dashboards and tables synced to every device you sign in to.</li>" +

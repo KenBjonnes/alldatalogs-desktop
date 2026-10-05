@@ -19,6 +19,13 @@
 
   var RELEASES = [
     {
+      version: '1.0.12', date: '2026-10-05', items: [
+        { kind: 'new', text: 'Comparing two logs now shows the second log\u2019s value, not just its dashed line. Every channel in the graph legend reads both at once, the comparison smaller and underlined with the same dashes as its trace.' },
+        { kind: 'change', text: 'The comparison value is read at the second log\u2019s own time, so nudging the alignment moves the number with the trace, and it reads -- where the cursor is past the end of that recording instead of holding its last value.' },
+        { kind: 'change', text: 'When the second log calls a channel something else, its value is marked with \u2248 and names the channel it actually read on hover.' },
+      ],
+    },
+    {
       version: '1.0.11', date: '2026-09-21', items: [
         { kind: 'change', text: 'Dyno runs are now listed everywhere the other formats are, in this manual and on the website, including the list of file types Windows opens in BigData by double-click.' },
       ],
