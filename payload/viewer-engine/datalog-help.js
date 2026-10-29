@@ -470,7 +470,9 @@
         {
           id: 'cam', h: 'Cam timing (Ti-VCT)',
           html:
-            "<p><b>Analyze &rarr; Cam timing</b> works out what a camshaft is actually doing on an engine " +
+            "<p><b>On alldatalogs.com only, for now</b> &mdash; it is being refined before it comes to the " +
+            "Windows app.</p>" +
+            "<p><b>Analyze &rarr; Cam timing</b> " + PRO + " works out what a camshaft is actually doing on an engine " +
             "whose cams move. Pick the engine, pick a cam, move the two phaser positions, and it gives you " +
             "the valve events, both centrelines, overlap and the installed separation, with a valve-lift " +
             "diagram drawn against crank angle. Pick a second cam and it is drawn over the first, dashed, " +
@@ -944,6 +946,7 @@
             "<li>Histogram tuning tables, math channels, and gauges behind a table.</li>" +
             "<li>Custom gauge dashboards you build and keep.</li>" +
             "<li>Comparing two logs on the same axes, with both values in the legend.</li>" +
+            "<li>Cam timing for Ti-VCT engines, and comparing two camshafts (on alldatalogs.com).</li>" +
             "<li>Race zero, time slips, lap times and Dragy data.</li>" +
             "<li>Using and sharing library items.</li>" +
             "<li>Layouts, dashboards and tables synced to every device you sign in to.</li>" +

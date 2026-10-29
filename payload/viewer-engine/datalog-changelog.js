@@ -19,6 +19,11 @@
 
   var RELEASES = [
     {
+      version: '1.0.14', date: '2026-10-29', items: [
+        { kind: 'change', text: 'Cam timing is a Pro feature on alldatalogs.com while it is refined, and has been taken out of the Windows app for now. It comes back to the Windows app once it is finished.' },
+      ],
+    },
+    {
       version: '1.0.13', date: '2026-10-29', items: [
         { kind: 'new', text: 'Cam timing for Ti-VCT engines, under Analyze. Pick the engine and a camshaft, move the phasers, and read the valve events, centrelines, overlap and installed separation, with a valve-lift diagram against crank angle. No log needed.' },
         { kind: 'new', text: 'Two camshafts at once: the second is drawn over the first, dashed, with the difference in every figure beside it.' },
