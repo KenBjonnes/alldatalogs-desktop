@@ -19,6 +19,13 @@
 
   var RELEASES = [
     {
+      version: '1.0.13', date: '2026-10-29', items: [
+        { kind: 'new', text: 'Cam timing for Ti-VCT engines, under Analyze. Pick the engine and a camshaft, move the phasers, and read the valve events, centrelines, overlap and installed separation, with a valve-lift diagram against crank angle. No log needed.' },
+        { kind: 'new', text: 'Two camshafts at once: the second is drawn over the first, dashed, with the difference in every figure beside it.' },
+        { kind: 'new', text: 'Gen 1 through Gen 4 Mustang GT, with each generation\u2019s own park position and phaser travel, plus the Comp Cams grinds for Gen 1 and Gen 2. Every cam says where its numbers came from and at what checking height, because Ford publishes valve lift for these engines and nothing else.' },
+      ],
+    },
+    {
       version: '1.0.12', date: '2026-10-05', items: [
         { kind: 'new', text: 'Comparing two logs now shows the second log\u2019s value, not just its dashed line. Every channel in the graph legend reads both at once, the comparison smaller and underlined with the same dashes as its trace.' },
         { kind: 'change', text: 'The comparison value is read at the second log\u2019s own time, so nudging the alignment moves the number with the trace, and it reads -- where the cursor is past the end of that recording instead of holding its last value.' },

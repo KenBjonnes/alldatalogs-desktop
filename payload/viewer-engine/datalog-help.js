@@ -468,6 +468,33 @@
             "A channel the second log does not have at all gets no second value, and no dashed line.</p>",
         },
         {
+          id: 'cam', h: 'Cam timing (Ti-VCT)',
+          html:
+            "<p><b>Analyze &rarr; Cam timing</b> works out what a camshaft is actually doing on an engine " +
+            "whose cams move. Pick the engine, pick a cam, move the two phaser positions, and it gives you " +
+            "the valve events, both centrelines, overlap and the installed separation, with a valve-lift " +
+            "diagram drawn against crank angle. Pick a second cam and it is drawn over the first, dashed, " +
+            "with the difference in every figure. It needs no log open &mdash; it is a calculator.</p>" +
+            "<p><b>Positions are crank degrees from park, and positive retards.</b> That is Ford's own " +
+            "convention, from its published production cam timing. It is worth knowing because two other " +
+            "conventions are in circulation: a cam card that writes advance as a positive number, and a " +
+            "standalone cam controller whose table is zeroed at the end of the phaser's travel rather than " +
+            "at park. Numbers from either have to be converted before they are typed in here, and getting " +
+            "it wrong moves everything by up to fifty degrees while still looking reasonable.</p>" +
+            "<p>Where the cams park is not the same on every generation, which is why the engine has to be " +
+            "chosen first. On a 2011-14 the intake parks against a stop at its retarded end and can only " +
+            "advance, so its number is never positive. From 2015 on the intake is centre parked, on a pin in " +
+            "mid travel, and moves both ways. The exhaust parks fully advanced on every generation and only " +
+            "ever retards. The panel limits each slider to what that engine can physically reach, and says " +
+            "so if a figure lands outside it.</p>" +
+            "<p>Every cam says where its numbers came from, because for these engines Ford publishes valve " +
+            "lift and nothing else &mdash; no duration, no events, no centrelines, for any generation. Some " +
+            "entries are off a cam card, some are read out of a calibration, and some rest on figures no " +
+            "factory document confirms. A cam's events are only meaningful at a stated checking height, so " +
+            "each one names its own, and comparing two quoted at different heights is flagged rather than " +
+            "quietly allowed.</p>",
+        },
+        {
           id: 'perf', h: 'Time slips, laps and Dragy',
           html:
             "<p><b>Analyze</b> also takes performance data " + PRO + ": a <b>time slip</b>, <b>lap times</b> or " +

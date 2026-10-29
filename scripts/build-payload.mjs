@@ -51,6 +51,9 @@ const ENGINE = [
   'datalog-hpt.js',
   'datalog-library.js',
   'datalog-vehicles.js',
+  // Loaded lazily by datalog-viewer.js the first time Cam Timing is opened, so it is copied but
+  // deliberately NOT in SCRIPTS below -- see the loader's note on why it is in no script list.
+  'datalog-cam.js',
   'datalog-help.css',
   'datalog-changelog.js',
   'datalog-help.js',
