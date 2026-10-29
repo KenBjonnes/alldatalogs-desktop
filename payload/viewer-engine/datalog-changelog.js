@@ -19,6 +19,14 @@
 
   var RELEASES = [
     {
+      version: '1.0.17', date: '2026-10-29', items: [
+        { kind: 'fix', text: 'On alldatalogs.com, Cam timing opened from a log no longer covers it. It always docks beside the graphs, so the log can still be scrolled and clicked; before, a log with no cam channels got a full-screen pop-up.' },
+        { kind: 'fix', text: 'Cam timing opens on the car’s own engine: a Mustang log whose file name carries its VIN, as HP Tuners names them, picks the generation from the model year, so a 2024 log opens on Gen 4 instead of whatever was picked last.' },
+        { kind: 'new', text: 'Cam timing lists aftermarket cams: L&M and GSC grinds for Gen 3, GSC for Gen 4, and Comp’s Gen 3 range, which takes the intake centreline from your cam card. “Your own cam card” takes the durations and centrelines off any card.' },
+        { kind: 'change', text: 'Cam timing: the stock Gen 3 and Gen 4 cams now default to an estimate at .050", so they compare like for like with aftermarket cams. No .050" figure is published for either engine, so the estimate is marked as one; the figures read from the calibration are still in the list.' },
+      ],
+    },
+    {
       version: '1.0.16', date: '2026-10-29', items: [
         { kind: 'fix', text: 'On alldatalogs.com, the Cam timing sliders now drag the whole way in one go. Only the number moves while you drag, and the diagram redraws when you let go — they used to move a notch at a time.' },
       ],

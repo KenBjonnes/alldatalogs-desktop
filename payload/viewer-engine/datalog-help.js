@@ -473,8 +473,12 @@
             "<p><b>On alldatalogs.com only, for now</b> &mdash; it is being refined before it comes to the " +
             "Windows app. It has a page of its own at <b>alldatalogs.com/cam-timing</b>, for reference with no " +
             "log at all, and it is also under <b>Analyze</b> while a log is open.</p>" +
-            "<p><b>Following a log.</b> Opened from <b>Analyze</b> on a log that records where the cams are, " +
-            "it docks beside the graphs instead of covering them, and camshaft A follows the cursor: its two " +
+            "<p><b>With a log open</b> it docks beside the graphs rather than covering them, so the log can " +
+            "still be scrolled and clicked while it is up. It also opens on the right engine for the car: " +
+            "HP Tuners puts the VIN in a log's file name, and a Mustang's VIN gives its year, so a 2024 log " +
+            "opens on Gen 4. The line under the engine says when it was picked that way; pick another engine " +
+            "and that choice stands.</p>" +
+            "<p><b>Following a log.</b> When the log also records where the cams are, camshaft A follows the cursor: its two " +
             "phaser positions are read from the log's <b>Intake Cam Angle</b> and <b>Exhaust Cam Angle</b> as you " +
             "move through it, with the rpm and time alongside. Untick <b>Follow the log</b> to hold A where the " +
             "log had it and adjust from there, and use camshaft B to see how a different grind would sit at " +
@@ -503,7 +507,21 @@
             "entries are off a cam card, some are read out of a calibration, and some rest on figures no " +
             "factory document confirms. A cam's events are only meaningful at a stated checking height, so " +
             "each one names its own, and comparing two quoted at different heights is flagged rather than " +
-            "quietly allowed.</p>",
+            "quietly allowed.</p>" +
+            "<p><b>The cam list</b> is split into <b>Factory</b>, <b>Aftermarket</b> and <b>Your own cam card</b>. " +
+            "The aftermarket list holds the grinds whose makers publish enough to place them: duration at .050\" " +
+            "and where the centrelines sit with the phasers parked. Some makers print the durations but no " +
+            "centreline; those are marked <b>needs card ICL</b>, and are drawn at a stated stand-in until you " +
+            "type in the intake centreline from the card that came with the cams &mdash; the exhaust follows " +
+            "from the lobe separation. For anything not listed, <b>Your own cam card</b> takes the four numbers " +
+            "off any card: both durations at .050\" and both centrelines at park. Numbers you type are remembered " +
+            "on that computer.</p>" +
+            "<p><b>Stock Gen 3 and Gen 4.</b> Nobody publishes these cams at .050\", so each has two entries. " +
+            "<b>Calibration events</b> are the opening and closing points stored in the tune, which are measured " +
+            "much lower than .050\" and so read 40-50&deg; longer. <b>.050 ESTIMATE</b> is the default: Gen 3's " +
+            "calibration events are identical to Gen 2's, whose cam is measured at 211&deg;/211&deg; at .050\", " +
+            "so that difference is carried across. Gen 4's estimate rests on more assumptions. Degreeing a stock " +
+            "cam would replace both.</p>",
         },
         {
           id: 'perf', h: 'Time slips, laps and Dragy',
