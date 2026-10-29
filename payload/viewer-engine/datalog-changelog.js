@@ -19,6 +19,12 @@
 
   var RELEASES = [
     {
+      version: '1.0.15', date: '2026-10-29', items: [
+        { kind: 'new', text: 'Cam timing has its own page on alldatalogs.com, so it can be used for reference without opening a log.' },
+        { kind: 'new', text: 'On alldatalogs.com, Cam timing opened from Analyze with a log loaded docks beside the graphs and follows the cursor: camshaft A’s phaser positions come from the log’s Intake Cam Angle and Exhaust Cam Angle as you move through it.' },
+      ],
+    },
+    {
       version: '1.0.14', date: '2026-10-29', items: [
         { kind: 'change', text: 'Cam timing is a Pro feature on alldatalogs.com while it is refined, and has been taken out of the Windows app for now. It comes back to the Windows app once it is finished.' },
       ],

@@ -471,7 +471,16 @@
           id: 'cam', h: 'Cam timing (Ti-VCT)',
           html:
             "<p><b>On alldatalogs.com only, for now</b> &mdash; it is being refined before it comes to the " +
-            "Windows app.</p>" +
+            "Windows app. It has a page of its own at <b>alldatalogs.com/cam-timing</b>, for reference with no " +
+            "log at all, and it is also under <b>Analyze</b> while a log is open.</p>" +
+            "<p><b>Following a log.</b> Opened from <b>Analyze</b> on a log that records where the cams are, " +
+            "it docks beside the graphs instead of covering them, and camshaft A follows the cursor: its two " +
+            "phaser positions are read from the log's <b>Intake Cam Angle</b> and <b>Exhaust Cam Angle</b> as you " +
+            "move through it, with the rpm and time alongside. Untick <b>Follow the log</b> to hold A where the " +
+            "log had it and adjust from there, and use camshaft B to see how a different grind would sit at " +
+            "the same phaser positions. A logged position outside what the engine can physically reach is " +
+            "shown as it was logged and flagged, rather than quietly clamped, because that is usually a " +
+            "channel that is not what its name says.</p>" +
             "<p><b>Analyze &rarr; Cam timing</b> " + PRO + " works out what a camshaft is actually doing on an engine " +
             "whose cams move. Pick the engine, pick a cam, move the two phaser positions, and it gives you " +
             "the valve events, both centrelines, overlap and the installed separation, with a valve-lift " +
