@@ -19,6 +19,11 @@
 
   var RELEASES = [
     {
+      version: '1.0.16', date: '2026-10-29', items: [
+        { kind: 'fix', text: 'On alldatalogs.com, the Cam timing sliders now drag the whole way in one go. Only the number moves while you drag, and the diagram redraws when you let go — they used to move a notch at a time.' },
+      ],
+    },
+    {
       version: '1.0.15', date: '2026-10-29', items: [
         { kind: 'new', text: 'Cam timing has its own page on alldatalogs.com, so it can be used for reference without opening a log.' },
         { kind: 'new', text: 'On alldatalogs.com, Cam timing opened from Analyze with a log loaded docks beside the graphs and follows the cursor: camshaft A’s phaser positions come from the log’s Intake Cam Angle and Exhaust Cam Angle as you move through it.' },
