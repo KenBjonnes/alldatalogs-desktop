@@ -19,6 +19,11 @@
 
   var RELEASES = [
     {
+      version: '1.0.20', date: '2026-10-30', items: [
+        { kind: 'change', text: 'Cam timing: the notes on where each engine’s and each cam’s figures came from are gone from the panel, leaving the numbers, the graph and the warnings.' },
+      ],
+    },
+    {
       version: '1.0.19', date: '2026-10-30', items: [
         { kind: 'change', text: 'On alldatalogs.com the menu bar at the top of a log stays open, as it does in the Windows app, instead of hiding until you hover the strip.' },
         { kind: 'fix', text: 'Cam timing: the follower ratio now follows the engine. 2018-on Coyotes use 1.89, the figure on GSC’s Gen 3 cam cards, instead of 2.01 for every generation.' },

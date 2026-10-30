@@ -830,7 +830,6 @@
     '  border:1px solid var(--card-border, #26262c);border-radius:5px;padding:5px 7px;font:inherit;font-size:12px;}',
     '.dlv-cam-eng select{min-width:250px;}',
     '.dlv-cam-ratio .dlv-cam-num{width:84px;}',
-    '.dlv-cam-ratiowhy{display:block;margin-top:3px;}',
     '.dlv-cam-engnote{flex:1 1 220px;font-size:11px;color:var(--text-faint, #5c5c66);line-height:1.35;',
     '  text-transform:none;letter-spacing:0;}',
     '/* Two cam columns side by side; they stack on a phone. */',
@@ -1193,13 +1192,11 @@
         '<label class="dlv-cam-ratio"><span>Follower ratio</span>' +
           '<input type="number" class="dlv-cam-num" id="dlvCamRatio" min="1.5" max="2.5" step="0.001" value="' + s.ratio + '">' +
         '</label>' +
-        '<div class="dlv-cam-engnote">' +
-          (s.engineWhy ? '<b class="dlv-cam-engwhy">' + esc(s.engineWhy) + '</b> ' : '') +
-          esc((K.ENGINES[s.engine] || {}).source || '') +
-          ((K.ENGINES[s.engine] || {}).ratioSource ? '<span class="dlv-cam-ratiowhy">Follower ratio ' +
-            K.followerRatioFor(s.engine).toFixed(2) + ': ' + esc(K.ENGINES[s.engine].ratioSource) +
-            (Math.abs(s.ratio - K.followerRatioFor(s.engine)) > 1e-9 ? ' (you have typed ' + s.ratio + ')' : '') +
-            '.</span>' : '') + '</div>' +
+        // Only what the user needs on screen: which engine the log picked. Where each engine's and each
+        // cam's figures came from (`source`, `ratioSource`, `provenance`) stays in the data and the code
+        // comments, not on the panel (Ken, 2026-10-30: "get rid of notes like this ... intake read from
+        // Ken's calibration; centre-parked intake per Ken; travel limits assumed from Gen 2 ...").
+        (s.engineWhy ? '<div class="dlv-cam-engnote"><b class="dlv-cam-engwhy">' + esc(s.engineWhy) + '</b></div>' : '') +
       '</div>' +
       liveBarHtml() +
       '<div class="dlv-cam-cols">' + camColumnHtml('a', s.engine, s.a, s.ipA, s.epA, followingWhat()) +
@@ -1214,8 +1211,6 @@
       '</div>' +
       tableHtml(evA, evB) +
       '<div class="dlv-cam-prov">' +
-        (camA ? '<p><b>A — ' + esc(camA.label) + '</b> (events at ' + esc(camA.height) + '). ' + esc(camA.provenance) + '</p>' : '') +
-        (camB ? '<p><b>B — ' + esc(camB.label) + '</b> (events at ' + esc(camB.height) + '). ' + esc(camB.provenance) + '</p>' : '') +
         '<p class="dlv-cam-sign">Positions are crank degrees from park, <b>positive retards</b> — Ford’s own ' +
           'convention. A cam card that writes advance as positive, or a controller whose table is zeroed at a ' +
           'travel limit rather than at park, has to be converted before its numbers are typed in here.</p>' +

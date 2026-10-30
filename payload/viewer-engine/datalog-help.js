@@ -495,8 +495,8 @@
             "<p><b>Follower ratio</b> turns a cam's lobe lift into valve lift, and it is not the same on every " +
             "generation: <b>2.01</b> on 2011-17 and <b>1.89</b> on 2018 on, which is the figure GSC prints on its " +
             "Gen 3 cam cards (no Gen 4 card prints one; GSC's Gen 4 grinds give the same valve lift as the same Gen 3 " +
-            "grinds, so Gen 3's is used). Picking an engine sets its ratio, and the line under the engine says where " +
-            "it came from. Type over it with one you have measured. It only changes cams whose maker prints lobe " +
+            "grinds, so Gen 3's is used). Picking an engine sets its ratio; type over it with one you have measured. " +
+            "It only changes cams whose maker prints lobe " +
             "lift; a cam that prints valve lift is drawn at that lift.</p>" +
             "<p><b>Positions are crank degrees from park, and positive retards.</b> That is Ford's own " +
             "convention, from its published production cam timing. It is worth knowing because two other " +
@@ -510,12 +510,11 @@
             "mid travel, and moves both ways. The exhaust parks fully advanced on every generation and only " +
             "ever retards. The panel limits each slider to what that engine can physically reach, and says " +
             "so if a figure lands outside it.</p>" +
-            "<p>Every cam says where its numbers came from, because for these engines Ford publishes valve " +
-            "lift and nothing else &mdash; no duration, no events, no centrelines, for any generation. Some " +
-            "entries are off a cam card, some are read out of a calibration, and some rest on figures no " +
-            "factory document confirms. A cam's events are only meaningful at a stated checking height, so " +
-            "each one names its own, and comparing two quoted at different heights is flagged rather than " +
-            "quietly allowed.</p>" +
+            "<p>For these engines Ford publishes valve lift and nothing else &mdash; no duration, no events, no " +
+            "centrelines, for any generation. Some entries are off a cam card, some are read out of a " +
+            "calibration, and some rest on figures no factory document confirms. A cam's events are only " +
+            "meaningful at a stated checking height, so comparing two quoted at different heights is flagged " +
+            "rather than quietly allowed.</p>" +
             "<p><b>The cam list</b> is split into <b>Factory</b>, <b>Aftermarket</b> and <b>Your own cam card</b>. " +
             "The aftermarket list holds the grinds whose makers publish enough to place them: duration at .050\" " +
             "and where the centrelines sit with the phasers parked. Some makers print the durations but no " +
