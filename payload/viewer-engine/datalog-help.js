@@ -477,7 +477,7 @@
             "it, so no part of a graph is hidden underneath and the log can still be scrolled and clicked " +
             "while it is up. Close it and the log takes the full width again. It also opens on the right engine for the car: " +
             "HP Tuners puts the VIN in a log's file name, and a Mustang's VIN gives its year, so a 2024 log " +
-            "opens on Gen 4; pick another engine and that choice stands. Beside a log, <b>Camshaft B</b> starts " +
+            "opens on Gen 4; pick another generation and that choice stands. Beside a log, <b>Camshaft B</b> starts " +
             "folded to its title bar to save height &mdash; click the bar to open it. A cam picked for B is still " +
             "drawn while it is folded, and the bar names it.</p>" +
             "<p><b>Following a log.</b> When the log also records where the cams are, camshaft A follows the cursor: its two " +
@@ -488,7 +488,8 @@
             "shown as it was logged and flagged, rather than quietly clamped, because that is usually a " +
             "channel that is not what its name says.</p>" +
             "<p><b>Analyze &rarr; Cam timing</b> " + PRO + " works out what a camshaft is actually doing on an engine " +
-            "whose cams move. Pick the engine, pick a cam, move the two phaser positions, and it gives you " +
+            "whose cams move. Pick the <b>Model</b>, then its <b>Generation</b> (the year range), pick a cam, move " +
+            "the two phaser positions, and it gives you " +
             "the valve events, both centrelines, overlap and the installed separation, with a valve-lift " +
             "diagram drawn against crank angle; a light grey dashed line marks TDC, where overlap is centred. " +
             "Pick a second cam and it is drawn over the first, dashed, " +
@@ -505,7 +506,7 @@
             "standalone cam controller whose table is zeroed at the end of the phaser's travel rather than " +
             "at park. Numbers from either have to be converted before they are typed in here, and getting " +
             "it wrong moves everything by up to fifty degrees while still looking reasonable.</p>" +
-            "<p>Where the cams park is not the same on every generation, which is why the engine has to be " +
+            "<p>Where the cams park is not the same on every generation, which is why the generation has to be " +
             "chosen first. On a 2011-14 the intake parks against a stop at its retarded end and can only " +
             "advance, so its number is never positive. From 2015 on the intake is centre parked, on a pin in " +
             "mid travel, and moves both ways &mdash; up to 50&deg; either side of park. The exhaust parks fully advanced on every generation and only " +

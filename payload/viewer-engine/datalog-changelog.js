@@ -19,6 +19,11 @@
 
   var RELEASES = [
     {
+      version: '1.0.22', date: '2026-10-30', items: [
+        { kind: 'change', text: 'Cam timing: pick the model first, then its generation (the year range) from a second list, ready for more models alongside the Mustang GT.' },
+      ],
+    },
+    {
       version: '1.0.21', date: '2026-10-30', items: [
         { kind: 'fix', text: 'Cam timing: on 2015-and-later Coyotes the intake now goes 50° either side of park. It stopped at 20° advanced, which tunes go well past.' },
         { kind: 'change', text: 'Cam timing beside a log: Camshaft B starts folded to its title bar to save height; click it to open. A cam picked for B is still drawn while folded.' },

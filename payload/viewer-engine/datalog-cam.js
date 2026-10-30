@@ -241,9 +241,20 @@
   // The travel limits are what make a position physically possible, so the UI clamps to them and the
   // log reader can flag a channel reading outside them — which is how a mis-scaled PID gets caught
   // rather than quietly producing impossible valve events.
+  // The engine picker is MODEL first, then generation / year range under it (Ken, 2026-10-30: "list the
+  // model first, then a sub menu for generation/year range. easier to have as we add more models").
+  // Each engine names its `model` and its `gen` label; adding a model is a MODELS row plus its engines.
+  var MODELS = [
+    { id: 'mustang-gt', label: 'Mustang GT (Coyote 5.0)' },
+  ];
+  function modelOf(engineId) { return (ENGINES[engineId] || {}).model || null; }
+  function enginesFor(modelId) {
+    return Object.keys(ENGINES).filter(function (k) { return ENGINES[k].model === modelId; });
+  }
+
   var ENGINES = {
     'coyote-gen1': {
-      label: 'Coyote Gen 1 — 2011-14 Mustang GT',
+      label: 'Coyote Gen 1 — 2011-14 Mustang GT', model: 'mustang-gt', gen: 'Gen 1 — 2011-14',
       stockCam: 'coyote-gen1-stock',
       intake:  { min: -50, max: 0,  park: 'retarded' },
       exhaust: { min: 0,   max: 50, park: 'advanced' },
@@ -252,7 +263,7 @@
               'Boss 302 production table reaching 89° ATDC',
     },
     'coyote-gen2': {
-      label: 'Coyote Gen 2 — 2015-17 Mustang GT',
+      label: 'Coyote Gen 2 — 2015-17 Mustang GT', model: 'mustang-gt', gen: 'Gen 2 — 2015-17',
       stockCam: 'coyote-gen2-stock',
       intake:  { min: -50, max: 50, park: 'mid-lock' },
       exhaust: { min: 0,   max: 50, park: 'advanced' },
@@ -260,7 +271,7 @@
       source: 'Comp CY-r cam card (park ICL 109.0) and Ken’s own calibration (109.5), agreeing',
     },
     'coyote-gen3': {
-      label: 'Coyote Gen 3 — 2018-23 Mustang GT',
+      label: 'Coyote Gen 3 — 2018-23 Mustang GT', model: 'mustang-gt', gen: 'Gen 3 — 2018-23',
       stockCam: 'coyote-gen3-stock-050',
       intake:  { min: -50, max: 50, park: 'mid-lock' },
       exhaust: { min: 0,   max: 50, park: 'advanced' },
@@ -270,7 +281,7 @@
       source: 'intake read from Ken’s calibration; exhaust park assumed unchanged from Gen 2',
     },
     'coyote-gen4': {
-      label: 'Coyote Gen 4 — 2024+ Mustang GT',
+      label: 'Coyote Gen 4 — 2024+ Mustang GT', model: 'mustang-gt', gen: 'Gen 4 — 2024+',
       stockCam: 'coyote-gen4-stock-050',
       // Centre-parked intake like Gen 2 and Gen 3 (Ken, 2026-10-29); +/-50 travel for now, as on
       // Gen 2 and 3 (see the note above ENGINES).
@@ -744,6 +755,9 @@
     clampPosition: clampPosition,
     fordAt: fordAt,
     ENGINES: ENGINES,
+    MODELS: MODELS,
+    modelOf: modelOf,
+    enginesFor: enginesFor,
     CAMS: CAMS,
     FORD_WOT: FORD_WOT,
     FOLLOWER_RATIO: FOLLOWER_RATIO,
@@ -830,7 +844,8 @@
     '  letter-spacing:.4px;text-transform:uppercase;color:var(--text-dim, #9a9aa2);}',
     '.dlv-cam-top select,.dlv-cam-num{background:var(--bg-soft, #0d0d11);color:var(--text, #e8e8ea);',
     '  border:1px solid var(--card-border, #26262c);border-radius:5px;padding:5px 7px;font:inherit;font-size:12px;}',
-    '.dlv-cam-eng select{min-width:250px;}',
+    '.dlv-cam-eng select{min-width:150px;}',
+    '.dlv-cam-model select{min-width:170px;}',
     '.dlv-cam-ratio .dlv-cam-num{width:84px;}',
     '.dlv-cam-engnote{flex:1 1 220px;font-size:11px;color:var(--text-faint, #5c5c66);line-height:1.35;',
     '  text-transform:none;letter-spacing:0;}',
@@ -917,7 +932,7 @@
     '@media (max-width:640px){',
     '  .dlv-cam-ovl{padding:10px 8px;}',
     '  .dlv-cam-body{padding:10px;}',
-    '  .dlv-cam-eng select{min-width:0;width:100%;}',
+    '  .dlv-cam-eng select,.dlv-cam-model select{min-width:0;width:100%;}',
     '}',
     '/* Inline on its own page: the same box, without the pop-up\'s backdrop and positioning. */',
     '.dlv-cam.dlv-cam-inline{width:100%;box-shadow:none;}'
@@ -1177,9 +1192,13 @@
   function bodyHtml() {
     var K = cam();
     var s = state;
-    var engOpts = Object.keys(K.ENGINES).map(function (k) {
+    var model = K.modelOf(s.engine);
+    var modelOpts = K.MODELS.map(function (m) {
+      return '<option value="' + esc(m.id) + '"' + (m.id === model ? ' selected' : '') + '>' + esc(m.label) + '</option>';
+    }).join('');
+    var engOpts = K.enginesFor(model).map(function (k) {
       return '<option value="' + esc(k) + '"' + (k === s.engine ? ' selected' : '') + '>' +
-        esc(K.ENGINES[k].label) + '</option>';
+        esc(K.ENGINES[k].gen || K.ENGINES[k].label) + '</option>';
     }).join('');
     var camA = camById(s.a), camB = s.b ? camById(s.b) : null;
     var profA = camA ? K.liftProfile(camA, s.ipA, s.epA, s.ratio) : null;
@@ -1207,7 +1226,8 @@
     });
 
     return '<div class="dlv-cam-top">' +
-        '<label class="dlv-cam-eng"><span>Engine</span><select class="dlv-cam-engsel">' + engOpts + '</select></label>' +
+        '<label class="dlv-cam-model"><span>Model</span><select class="dlv-cam-modelsel">' + modelOpts + '</select></label>' +
+        '<label class="dlv-cam-eng"><span>Generation</span><select class="dlv-cam-engsel">' + engOpts + '</select></label>' +
         '<label class="dlv-cam-ratio"><span>Follower ratio</span>' +
           '<input type="number" class="dlv-cam-num" id="dlvCamRatio" min="1.5" max="2.5" step="0.001" value="' + s.ratio + '">' +
         '</label>' +
@@ -1307,10 +1327,18 @@
       }
       render();
     });
+    var model = ovl.querySelector('.dlv-cam-modelsel');
+    if (model) model.addEventListener('change', function () {
+      // A new model opens on its newest generation.
+      var gens = cam().enginesFor(model.value);
+      if (gens.length) pickEngine(gens[gens.length - 1]);
+    });
     var eng = ovl.querySelector('.dlv-cam-engsel');
-    if (eng) eng.addEventListener('change', function () {
+    if (eng) eng.addEventListener('change', function () { pickEngine(eng.value); });
+    function pickEngine(engineId) {
       var K = cam();
-      state.engine = eng.value;
+      if (!K.ENGINES[engineId]) return;
+      state.engine = engineId;
       state.engineWhy = '';   // a hand pick overrides what the log said
       try { if (global.localStorage) global.localStorage.setItem(ENGINE_KEY, state.engine); } catch (e) {}
       // Switching engine changes which cams exist and how far the phasers go, so the selection and
@@ -1321,7 +1349,7 @@
       state.ipA = state.epA = state.ipB = state.epB = 0;
       state.ratio = K.followerRatioFor(state.engine);   // a different head, a different follower
       render();
-    });
+    }
     var ratio = ovl.querySelector('#dlvCamRatio');
     if (ratio) ratio.addEventListener('change', function () {
       var v = parseFloat(ratio.value);
