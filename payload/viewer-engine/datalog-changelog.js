@@ -19,6 +19,12 @@
 
   var RELEASES = [
     {
+      version: '1.0.25', date: '2026-10-30', items: [
+        { kind: 'change', text: 'Cam timing follows more logs: besides Intake / Exhaust Cam Angle it reads the VCT Cam Phase Angle channels, SCT’s “variable valve timing … actual” and VCT1_INTP / VCT1_EXHP, MoTeC’s VTC Bank 1 Position, the bank 2 channels and other cam angle or position names.' },
+        { kind: 'fix', text: 'Cam timing no longer follows a cam channel the vehicle does not answer: some logs read 169° or 400° in a VCT phase angle for the whole log, and the panel now passes over it for the next channel. The INT CAM / EXH CAM gauges read Cam Angle before the phase angle for the same reason.' },
+      ],
+    },
+    {
       version: '1.0.24', date: '2026-10-30', items: [
         { kind: 'new', text: 'Cam timing adds the F-150 5.0: 2011-14, 2015-17, 2018-20 and 2021+, worked out from the trucks’ own tunes (and L&M’s stock 210° / 212° for the 2021+), plus GSC’s F-150 cams for 2018-20. A truck picked in the vehicle record opens on its generation.' },
       ],

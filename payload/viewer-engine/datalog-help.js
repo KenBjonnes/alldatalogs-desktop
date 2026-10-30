@@ -481,8 +481,13 @@
             "folded to its title bar to save height &mdash; click the bar to open it. A cam picked for B is still " +
             "drawn while it is folded, and the bar names it.</p>" +
             "<p><b>Following a log.</b> When the log also records where the cams are, camshaft A follows the cursor: its two " +
-            "phaser positions are read from the log's <b>Intake Cam Angle</b> and <b>Exhaust Cam Angle</b> as you " +
-            "move through it, and the two positions are shown beside the tick box. Untick <b>Follow the log</b> to hold A where the " +
+            "phaser positions are read from the log as you move through it, and the two positions are shown " +
+            "beside the tick box. HP Tuners' <b>Intake Cam Angle</b> and <b>Exhaust Cam Angle</b> are used first, " +
+            "then <b>VCT Intake / Exhaust Cam Phase Angle</b>, SCT's <b>variable valve timing ... actual</b> and " +
+            "<b>VCT1_INTP</b> / <b>VCT1_EXHP</b>, MoTeC's <b>VTC Intake / Exhaust Bank 1 Position</b>, the bank 2 " +
+            "channels, and any other intake or exhaust cam angle or position; never a desired, target or " +
+            "duty-cycle channel. A channel whose values no phaser could reach (a vehicle that does not answer " +
+            "that PID reads 169&deg; or 400&deg; all log) is passed over for the next one. Untick <b>Follow the log</b> to hold A where the " +
             "log had it and adjust from there, and use camshaft B to see how a different grind would sit at " +
             "the same phaser positions. A logged position outside what the engine can physically reach is " +
             "shown as it was logged and flagged, rather than quietly clamped, because that is usually a " +
