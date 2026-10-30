@@ -1,9 +1,9 @@
 {
-  "builtAt": "2026-10-29T16:49:41.099Z",
+  "builtAt": "2026-10-30T10:16:12.505Z",
   "sources": {
     "releaseDir": "C:/Users/kenbj/Code/datalog viewer",
     "siteRepo": "C:/websites/Alldatalogs",
-    "siteCommit": "61d888e"
+    "siteCommit": "b0d1d8a"
   },
   "files": {
     "viewer-engine/datalog-viewer.css": {
@@ -82,8 +82,8 @@
       "from": "C:/Users/kenbj/Code/datalog viewer/datalog-vehicles.js"
     },
     "viewer-engine/datalog-cam.js": {
-      "sha256": "c3a1aba29cc5f2f623758216b97d46af66ef27a70421d07b44000764f4b2517a",
-      "bytes": 87090,
+      "sha256": "5e42764f4d0a694bff2159a0d0a68e0c0b80f1b9bde6b0872625bf216b80054f",
+      "bytes": 87067,
       "from": "C:/Users/kenbj/Code/datalog viewer/datalog-cam.js"
     },
     "viewer-engine/datalog-help.css": {
@@ -92,13 +92,13 @@
       "from": "C:/Users/kenbj/Code/datalog viewer/datalog-help.css"
     },
     "viewer-engine/datalog-changelog.js": {
-      "sha256": "6fe37a4d32391c42ef61cb7ab373deff0aa01d175cb093179a347503f354462e",
-      "bytes": 26793,
+      "sha256": "b450523ea44b9556c80be707fbce1a3691598662cc89c4eb1bcbe7c4ddcf6b06",
+      "bytes": 27249,
       "from": "C:/Users/kenbj/Code/datalog viewer/datalog-changelog.js"
     },
     "viewer-engine/datalog-help.js": {
-      "sha256": "f853b2d1b076ab3f5a12f0fa4eec7e3c16020883920292347994df6d8a8f2ed2",
-      "bytes": 91259,
+      "sha256": "e3e658bc8c8c7d0e16170747b5c2d38f2fe7f3834d6db14784d992d918b11d37",
+      "bytes": 91404,
       "from": "C:/Users/kenbj/Code/datalog viewer/datalog-help.js"
     },
     "viewer-engine/datalog-library.css": {
@@ -107,8 +107,8 @@
       "from": "C:/Users/kenbj/Code/datalog viewer/datalog-library.css"
     },
     "viewer-engine/datalog-viewer.js": {
-      "sha256": "81ab6c89c2f3b8f40c5890227b8c1586051380c43dd1b864c0dc81e452d07191",
-      "bytes": 529522,
+      "sha256": "285af46e9385d4925d4468cc0832d5df65d9c037af6514ae5c8246e6146e8d0b",
+      "bytes": 532025,
       "from": "C:/Users/kenbj/Code/datalog viewer/datalog-viewer.js"
     },
     "viewer-engine/runtime.js": {
@@ -152,8 +152,8 @@
       "from": "C:/websites/Alldatalogs/packages/datalog-core/browser/entry.ts (esbuild)"
     },
     "glue.js": {
-      "sha256": "c8c21dd6b5c8da48d80ce49ede665d55f9e357962e20c697abad5c5c6e86eb75",
-      "bytes": 22944,
+      "sha256": "00e4375332ae00f474bb535801ea13825d46da48f854ccb126832b10a4737eae",
+      "bytes": 23191,
       "from": "C:/Users/kenbj/Code/alldatalogs-desktop/renderer/src/glue.ts (esbuild)"
     },
     "main/jws.js": {

@@ -19,6 +19,12 @@
 
   var RELEASES = [
     {
+      version: '1.0.18', date: '2026-10-30', items: [
+        { kind: 'new', text: 'Cam timing is in the Windows app, for Pro: under Analyze while a log is open, the same as on alldatalogs.com.' },
+        { kind: 'fix', text: 'Cam timing opened from a log takes its own column on the right and the log narrows to fit beside it, instead of covering the right-hand end of the graphs. Close it and the log gets the full width back.' },
+      ],
+    },
+    {
       version: '1.0.17', date: '2026-10-29', items: [
         { kind: 'fix', text: 'On alldatalogs.com, Cam timing opened from a log no longer covers it. It always docks beside the graphs, so the log can still be scrolled and clicked; before, a log with no cam channels got a full-screen pop-up.' },
         { kind: 'fix', text: 'Cam timing opens on the car’s own engine: a Mustang log whose file name carries its VIN, as HP Tuners names them, picks the generation from the model year, so a 2024 log opens on Gen 4 instead of whatever was picked last.' },

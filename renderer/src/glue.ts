@@ -621,6 +621,9 @@ async function boot() {
     brand: { mark: 'B', name: 'BigData', sub: 'DATALOG VIEWER' },
     layouts: layoutProvider,
     library: api.library,
+    // Cam timing (Pro, inside the engine). Held back from this app while it was being dialled in on
+    // alldatalogs.com; Ken switched it on here 2026-10-30 ("don't hide it in the windows app anymore").
+    features: { camTiming: true },
   });
   window.ensureViewerDom();
 

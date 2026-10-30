@@ -470,11 +470,12 @@
         {
           id: 'cam', h: 'Cam timing (Ti-VCT)',
           html:
-            "<p><b>On alldatalogs.com only, for now</b> &mdash; it is being refined before it comes to the " +
-            "Windows app. It has a page of its own at <b>alldatalogs.com/cam-timing</b>, for reference with no " +
-            "log at all, and it is also under <b>Analyze</b> while a log is open.</p>" +
-            "<p><b>With a log open</b> it docks beside the graphs rather than covering them, so the log can " +
-            "still be scrolled and clicked while it is up. It also opens on the right engine for the car: " +
+            "<p><b>On alldatalogs.com and in the Windows app</b>, not in the phone apps yet. It is under " +
+            "<b>Analyze</b> while a log is open, and alldatalogs.com also gives it a page of its own at " +
+            "<b>alldatalogs.com/cam-timing</b>, for reference with no log at all.</p>" +
+            "<p><b>With a log open</b> it takes its own column on the right and the log narrows to fit beside " +
+            "it, so no part of a graph is hidden underneath and the log can still be scrolled and clicked " +
+            "while it is up. Close it and the log takes the full width again. It also opens on the right engine for the car: " +
             "HP Tuners puts the VIN in a log's file name, and a Mustang's VIN gives its year, so a 2024 log " +
             "opens on Gen 4. The line under the engine says when it was picked that way; pick another engine " +
             "and that choice stands.</p>" +
@@ -973,7 +974,7 @@
             "<li>Histogram tuning tables, math channels, and gauges behind a table.</li>" +
             "<li>Custom gauge dashboards you build and keep.</li>" +
             "<li>Comparing two logs on the same axes, with both values in the legend.</li>" +
-            "<li>Cam timing for Ti-VCT engines, and comparing two camshafts (on alldatalogs.com).</li>" +
+            "<li>Cam timing for Ti-VCT engines, and comparing two camshafts (on alldatalogs.com and in the Windows app).</li>" +
             "<li>Race zero, time slips, lap times and Dragy data.</li>" +
             "<li>Using and sharing library items.</li>" +
             "<li>Layouts, dashboards and tables synced to every device you sign in to.</li>" +
