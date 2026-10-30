@@ -1,9 +1,9 @@
 {
-  "builtAt": "2026-10-30T11:35:28.158Z",
+  "builtAt": "2026-10-30T12:30:59.369Z",
   "sources": {
     "releaseDir": "C:/Users/kenbj/Code/datalog viewer",
     "siteRepo": "C:/websites/Alldatalogs",
-    "siteCommit": "82f3454"
+    "siteCommit": "972295c"
   },
   "files": {
     "viewer-engine/datalog-viewer.css": {
@@ -82,8 +82,8 @@
       "from": "C:/Users/kenbj/Code/datalog viewer/datalog-vehicles.js"
     },
     "viewer-engine/datalog-cam.js": {
-      "sha256": "3123103442858403dddf111b62f3c84513e58a25a2738b70ced6a1ce7daca052",
-      "bytes": 91634,
+      "sha256": "7d4b4f23c4e6983e3b5403b953ac6e234057498c761cecc36064bdeb538c50e9",
+      "bytes": 101919,
       "from": "C:/Users/kenbj/Code/datalog viewer/datalog-cam.js"
     },
     "viewer-engine/datalog-help.css": {
@@ -92,13 +92,13 @@
       "from": "C:/Users/kenbj/Code/datalog viewer/datalog-help.css"
     },
     "viewer-engine/datalog-changelog.js": {
-      "sha256": "8ef9fea1f0a5862adb542f13077d6a0984a853d7cb931084a792d95e374c2c59",
-      "bytes": 29030,
+      "sha256": "e7c3f3fc33b392152458567f163b5d9c04202e5ed93da5b9f6b3a2936cb396e9",
+      "bytes": 30125,
       "from": "C:/Users/kenbj/Code/datalog viewer/datalog-changelog.js"
     },
     "viewer-engine/datalog-help.js": {
-      "sha256": "2df56dd0c2b20a61a55bc288fefb8de845c0340cfcb6f711e42ec2855262b190",
-      "bytes": 92285,
+      "sha256": "a99b1e20f73f04eaffca8797916baea4dd48f3b72470af3e03b2608c6abbadda",
+      "bytes": 92937,
       "from": "C:/Users/kenbj/Code/datalog viewer/datalog-help.js"
     },
     "viewer-engine/datalog-library.css": {
@@ -107,8 +107,8 @@
       "from": "C:/Users/kenbj/Code/datalog viewer/datalog-library.css"
     },
     "viewer-engine/datalog-viewer.js": {
-      "sha256": "f200c172fdfd7f4760c29d246b886e89101ba87745a3869eec59a9774c789020",
-      "bytes": 532050,
+      "sha256": "f288bb4a2ac23e19cd323203dc51d200aa6bbe0038a84cc153cf68fefa4f8fab",
+      "bytes": 532693,
       "from": "C:/Users/kenbj/Code/datalog viewer/datalog-viewer.js"
     },
     "viewer-engine/runtime.js": {

@@ -19,6 +19,15 @@
 
   var RELEASES = [
     {
+      version: '1.0.23', date: '2026-10-30', items: [
+        { kind: 'new', text: 'Cam timing has more models: GT350, and — marked provisional — Boss 302, GT500, F-150 Raptor R and Mustang GTD (the last three share the same cams). A GT350 or 2020-22 GT500 log opens on its own model from the VIN.' },
+        { kind: 'change', text: 'Cam timing: the stock 2018-23 Mustang GT cam is now L&M’s measured stock card at .050" (210.6° / 212.5°, centrelines 109 / 123) instead of an estimate, drawn with its real asymmetric lobes. The calibration-events entry is still in the list.' },
+        { kind: 'change', text: 'Cam timing: the 2011-14 and 2015-17 stock exhausts park at 125° BTDC, L&M’s figure, which puts every stock exhaust event 2° earlier.' },
+        { kind: 'new', text: 'Cam timing: L&M’s LM-C18-IO-1, LM-GT3F-1 and LM-20GT5-NSR cams added. Comp cams now use Comp’s printed valve lift.' },
+        { kind: 'fix', text: 'Cam timing: cams with asymmetric lobes now show their real centreline. L&M’s LM-C11-IO read 135.5° instead of its 129°.' },
+      ],
+    },
+    {
       version: '1.0.22', date: '2026-10-30', items: [
         { kind: 'change', text: 'Cam timing: pick the model first, then its generation (the year range) from a second list, ready for more models alongside the Mustang GT.' },
       ],

@@ -525,12 +525,18 @@
             "from the lobe separation. For anything not listed, <b>Your own cam card</b> takes the four numbers " +
             "off any card: both durations at .050\" and both centrelines at park. Numbers you type are remembered " +
             "on that computer.</p>" +
-            "<p><b>Stock Gen 3 and Gen 4.</b> Nobody publishes these cams at .050\", so each has two entries. " +
-            "<b>Calibration events</b> are the opening and closing points stored in the tune, which are measured " +
-            "much lower than .050\" and so read 40-50&deg; longer. <b>.050 ESTIMATE</b> is the default: Gen 3's " +
-            "calibration events are identical to Gen 2's, whose cam is measured at 211&deg;/211&deg; at .050\", " +
-            "so that difference is carried across. Gen 4's estimate rests on more assumptions. Degreeing a stock " +
-            "cam would replace both.</p>",
+            "<p><b>The models.</b> Mustang GT (2011-14, 2015-17, 2018-23 and 2024+), Boss 302, GT350, GT500, " +
+            "F-150 Raptor R and Mustang GTD. The GT500, Raptor R and GTD share the same cams. Models marked " +
+            "<b>provisional</b> &mdash; the Boss 302, GT500, Raptor R and GTD &mdash; use figures nobody has " +
+            "independently confirmed for that engine, so treat them as a guide.</p>" +
+            "<p><b>Where the stock cams come from.</b> The 2018-23 Mustang GT and the GT350 come from L&amp;M " +
+            "Engines' own stock-cam worksheets: the opening and closing points at .050\" and at .004\", so the " +
+            "lobes are drawn as asymmetric as they really are, from where the valve leaves its seat. The 2011-14 " +
+            "and 2015-17 exhausts park at 125&deg; BTDC, L&amp;M's figure (some cam cards say 123&deg;). " +
+            "Gen 3 also has a <b>calibration events</b> entry, the opening and closing points stored in the " +
+            "tune; they are measured much lower than .050\" and so read about 50&deg; longer. Gen 4 has no " +
+            "published card yet: its <b>.050 ESTIMATE</b> is worked out from its calibration events and is the " +
+            "default until a stock cam is degreed.</p>",
         },
         {
           id: 'perf', h: 'Time slips, laps and Dragy',
