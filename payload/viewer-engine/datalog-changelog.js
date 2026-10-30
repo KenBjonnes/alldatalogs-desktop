@@ -19,6 +19,11 @@
 
   var RELEASES = [
     {
+      version: '1.0.24', date: '2026-10-30', items: [
+        { kind: 'new', text: 'Cam timing adds the F-150 5.0: 2011-14, 2015-17, 2018-20 and 2021+, worked out from the trucks’ own tunes (and L&M’s stock 210° / 212° for the 2021+), plus GSC’s F-150 cams for 2018-20. A truck picked in the vehicle record opens on its generation.' },
+      ],
+    },
+    {
       version: '1.0.23', date: '2026-10-30', items: [
         { kind: 'new', text: 'Cam timing has more models: GT350, and — marked provisional — Boss 302, GT500, F-150 Raptor R and Mustang GTD (the last three share the same cams). A GT350 or 2020-22 GT500 log opens on its own model from the VIN.' },
         { kind: 'change', text: 'Cam timing: the stock 2018-23 Mustang GT cam is now L&M’s measured stock card at .050" (210.6° / 212.5°, centrelines 109 / 123) instead of an estimate, drawn with its real asymmetric lobes. The calibration-events entry is still in the list.' },

@@ -525,8 +525,11 @@
             "from the lobe separation. For anything not listed, <b>Your own cam card</b> takes the four numbers " +
             "off any card: both durations at .050\" and both centrelines at park. Numbers you type are remembered " +
             "on that computer.</p>" +
-            "<p><b>The models.</b> Mustang GT (2011-14, 2015-17, 2018-23 and 2024+), Boss 302, GT350, GT500, " +
-            "F-150 Raptor R and Mustang GTD. The GT500, Raptor R and GTD share the same cams. Models marked " +
+            "<p><b>The models.</b> Mustang GT (2011-14, 2015-17, 2018-23 and 2024+), F-150 5.0 (2011-14, " +
+            "2015-17, 2018-20 and 2021+), Boss 302, GT350, GT500, F-150 Raptor R and Mustang GTD. The F-150 " +
+            "stock cams are worked out from the truck's tune, which matches its Mustang's intake with the exhaust " +
+            "closing 1&deg; later, and from L&amp;M's 210&deg;/212&deg; for the 2021+ truck, so they are marked " +
+            "<b>.050 ESTIMATE</b>. The GT500, Raptor R and GTD share the same cams. Models marked " +
             "<b>provisional</b> &mdash; the Boss 302, GT500, Raptor R and GTD &mdash; use figures nobody has " +
             "independently confirmed for that engine, so treat them as a guide.</p>" +
             "<p><b>Where the stock cams come from.</b> The 2018-23 Mustang GT and the GT350 come from L&amp;M " +
