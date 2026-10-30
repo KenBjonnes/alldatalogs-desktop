@@ -19,6 +19,13 @@
 
   var RELEASES = [
     {
+      version: '1.0.21', date: '2026-10-30', items: [
+        { kind: 'fix', text: 'Cam timing: on 2015-and-later Coyotes the intake now goes 50° either side of park. It stopped at 20° advanced, which tunes go well past.' },
+        { kind: 'change', text: 'Cam timing beside a log: Camshaft B starts folded to its title bar to save height; click it to open. A cam picked for B is still drawn while folded.' },
+        { kind: 'change', text: 'Cam timing: the panel shows no notes at all now, just the numbers, the graph and any warnings. The line beside Follow the log is just the intake and exhaust positions, so it stays on one line.' },
+      ],
+    },
+    {
       version: '1.0.20', date: '2026-10-30', items: [
         { kind: 'change', text: 'Cam timing: the notes on where each engine’s and each cam’s figures came from are gone from the panel, leaving the numbers, the graph and the warnings.' },
       ],

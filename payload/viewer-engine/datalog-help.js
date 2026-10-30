@@ -477,11 +477,12 @@
             "it, so no part of a graph is hidden underneath and the log can still be scrolled and clicked " +
             "while it is up. Close it and the log takes the full width again. It also opens on the right engine for the car: " +
             "HP Tuners puts the VIN in a log's file name, and a Mustang's VIN gives its year, so a 2024 log " +
-            "opens on Gen 4. The line under the engine says when it was picked that way; pick another engine " +
-            "and that choice stands.</p>" +
+            "opens on Gen 4; pick another engine and that choice stands. Beside a log, <b>Camshaft B</b> starts " +
+            "folded to its title bar to save height &mdash; click the bar to open it. A cam picked for B is still " +
+            "drawn while it is folded, and the bar names it.</p>" +
             "<p><b>Following a log.</b> When the log also records where the cams are, camshaft A follows the cursor: its two " +
             "phaser positions are read from the log's <b>Intake Cam Angle</b> and <b>Exhaust Cam Angle</b> as you " +
-            "move through it, with the rpm and time alongside. Untick <b>Follow the log</b> to hold A where the " +
+            "move through it, and the two positions are shown beside the tick box. Untick <b>Follow the log</b> to hold A where the " +
             "log had it and adjust from there, and use camshaft B to see how a different grind would sit at " +
             "the same phaser positions. A logged position outside what the engine can physically reach is " +
             "shown as it was logged and flagged, rather than quietly clamped, because that is usually a " +
@@ -507,7 +508,7 @@
             "<p>Where the cams park is not the same on every generation, which is why the engine has to be " +
             "chosen first. On a 2011-14 the intake parks against a stop at its retarded end and can only " +
             "advance, so its number is never positive. From 2015 on the intake is centre parked, on a pin in " +
-            "mid travel, and moves both ways. The exhaust parks fully advanced on every generation and only " +
+            "mid travel, and moves both ways &mdash; up to 50&deg; either side of park. The exhaust parks fully advanced on every generation and only " +
             "ever retards. The panel limits each slider to what that engine can physically reach, and says " +
             "so if a figure lands outside it.</p>" +
             "<p>For these engines Ford publishes valve lift and nothing else &mdash; no duration, no events, no " +
