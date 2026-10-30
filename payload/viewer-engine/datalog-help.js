@@ -489,8 +489,15 @@
             "<p><b>Analyze &rarr; Cam timing</b> " + PRO + " works out what a camshaft is actually doing on an engine " +
             "whose cams move. Pick the engine, pick a cam, move the two phaser positions, and it gives you " +
             "the valve events, both centrelines, overlap and the installed separation, with a valve-lift " +
-            "diagram drawn against crank angle. Pick a second cam and it is drawn over the first, dashed, " +
+            "diagram drawn against crank angle; a light grey dashed line marks TDC, where overlap is centred. " +
+            "Pick a second cam and it is drawn over the first, dashed, " +
             "with the difference in every figure. It needs no log open &mdash; it is a calculator.</p>" +
+            "<p><b>Follower ratio</b> turns a cam's lobe lift into valve lift, and it is not the same on every " +
+            "generation: <b>2.01</b> on 2011-17 and <b>1.89</b> on 2018 on, which is the figure GSC prints on its " +
+            "Gen 3 cam cards (no Gen 4 card prints one; GSC's Gen 4 grinds give the same valve lift as the same Gen 3 " +
+            "grinds, so Gen 3's is used). Picking an engine sets its ratio, and the line under the engine says where " +
+            "it came from. Type over it with one you have measured. It only changes cams whose maker prints lobe " +
+            "lift; a cam that prints valve lift is drawn at that lift.</p>" +
             "<p><b>Positions are crank degrees from park, and positive retards.</b> That is Ford's own " +
             "convention, from its published production cam timing. It is worth knowing because two other " +
             "conventions are in circulation: a cam card that writes advance as a positive number, and a " +

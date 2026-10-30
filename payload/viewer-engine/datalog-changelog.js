@@ -19,6 +19,13 @@
 
   var RELEASES = [
     {
+      version: '1.0.19', date: '2026-10-30', items: [
+        { kind: 'change', text: 'On alldatalogs.com the menu bar at the top of a log stays open, as it does in the Windows app, instead of hiding until you hover the strip.' },
+        { kind: 'fix', text: 'Cam timing: the follower ratio now follows the engine. 2018-on Coyotes use 1.89, the figure on GSC’s Gen 3 cam cards, instead of 2.01 for every generation.' },
+        { kind: 'new', text: 'Cam timing: a light grey dashed line marks TDC on the valve-lift graph, and the crank-angle axis always labels TDC.' },
+      ],
+    },
+    {
       version: '1.0.18', date: '2026-10-30', items: [
         { kind: 'new', text: 'Cam timing is in the Windows app, for Pro: under Analyze while a log is open, the same as on alldatalogs.com.' },
         { kind: 'fix', text: 'Cam timing opened from a log takes its own column on the right and the log narrows to fit beside it, instead of covering the right-hand end of the graphs. Close it and the log gets the full width back.' },
